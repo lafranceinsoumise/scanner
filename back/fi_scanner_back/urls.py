@@ -16,9 +16,9 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
-from registrations import views
+from registrations.views import CodeView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^api/(?P<code>[0-9]+\.[0-9a-zA-Z-_=]*)/', views.view_code, name='view_code')
+    url(r'^api/(?P<code>[0-9]+\.[0-9a-zA-Z-_=]*)/', CodeView.as_view(), name='view_code')
 ]
