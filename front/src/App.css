@@ -1,0 +1,39 @@
+body {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+#root {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#root > #home {
+  flex: auto;
+  display: flex;
+}
+
+#root > #scanner {
+  flex: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  justify-content: flex-end;
+}
+
+#root > #scanner > #preview {
+  position: fixed;
+  left: 0px;
+  right: 0px;
+  top: 0px;
+  min-width: 100%;
+  min-height: 100%;
+  z-index: -1000;
+}
+
+#root > #scanner > #changeButton {
+  flex: 0 0 auto;
+
+}
