@@ -16,8 +16,10 @@ def gen_ticket(registration):
     context['numero'] = registration.pk
     context['full_name'] = ' '.join(p for p in [registration.first_name, registration.last_name] if p)
     context['gender'] = registration.get_gender_display()
-    context['role'] = registration.get_type_display()
-    context['email'] = registration.contact_email
+    context['type'] = registration.get_type_display()
+    context['contact_email'] = registration.contact_email
+    context['table'] = registration.table
+    context['entrance'] = registration.entrance
 
     img = registration.qrcode
     img_data = BytesIO()

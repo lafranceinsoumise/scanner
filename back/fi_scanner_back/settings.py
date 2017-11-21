@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+from collections import Counter
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -122,3 +124,21 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+zones = {
+    '1-A': 33,
+    '1-B': 27,
+    '2-A': 27,
+    '2-B': 22,
+    '3-A': 30,
+    '3-B': 26,
+}
+
+
+TABLE_INFORMATION = Counter({
+    **{'{}-{:02d}'.format(z, i): 9 for z, n in zones.items() for i in range(1, n+1)},
+    **{'4-A-{:02d}'.format(i): 1 for i in range(1, 9+1)}
+})
+
+TABLE_SET = set(TABLE_INFORMATION) | {'4-B-{:02d}'.format(i) for i in range(1, 4+1)}

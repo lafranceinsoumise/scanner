@@ -1,6 +1,7 @@
 from django.db import models
 
 from .actions.codes import gen_qrcode
+from .actions.tables import TableValidator
 
 
 class Registration(models.Model):
@@ -37,7 +38,7 @@ class Registration(models.Model):
     uuid = models.UUIDField('Identifiant sur la plateforme', blank=True, null=True)
     ticket_sent = models.BooleanField('Ticker envoyé', default=False)
 
-    table = models.CharField('Numéro de table', blank=True)
+    table = models.CharField('Numéro de table', blank=True, max_length=15, validators=[TableValidator()])
 
     @property
     def entrance(self):
@@ -45,7 +46,7 @@ class Registration(models.Model):
             zone = self.table[0]
 
             if zone == '4':
-                zone = '3'
+                zone = '2'
 
             return 'N°{}'.format(zone)
         return ''
