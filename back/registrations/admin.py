@@ -7,8 +7,9 @@ from .models import Registration
 from .actions import codes
 
 class RegistrationAdmin(admin.ModelAdmin):
-    readonly_fields = ('qrcode_display',)
-    list_filter = ('type',)
+    readonly_fields = ('numero', 'qrcode_display',)
+    list_filter = ('type', 'gender')
+    list_display = ('full_name', 'gender', 'type')
 
     def get_urls(self):
         urls = super().get_urls()
@@ -22,6 +23,9 @@ class RegistrationAdmin(admin.ModelAdmin):
         img.save(response, "PNG")
 
         return response
+
+    def full_name(self, instance):
+        return instance.first_name + ' ' + instance.last_name
 
     def qrcode_display(self, instance):
         if instance.code:
