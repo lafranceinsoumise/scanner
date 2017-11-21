@@ -28,8 +28,8 @@ class RegistrationAdmin(admin.ModelAdmin):
         return instance.first_name + ' ' + instance.last_name
 
     def qrcode_display(self, instance):
-        if instance.code:
-            return '<img src="%s"/>' % reverse('admin:registrations_registration_qrcode', args=[instance.code])
+        if instance.numero:
+            return '<img src="%s"/>' % reverse('admin:registrations_registration_qrcode', args=[instance.numero])
         else:
             return '-'
 
