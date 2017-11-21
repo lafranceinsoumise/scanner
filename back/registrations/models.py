@@ -13,8 +13,8 @@ class Registration(models.Model):
         (TYPE_PARTICIPANT, 'Participant⋅e'),
         (TYPE_VOLONTAIRE, 'Volontaire'),
         (TYPE_VOLONTAIRE_REFERENT, 'Volontaire référent⋅e'),
-        (TYPE_VILLAGE, 'village'),
-        (TYPE_ACCUEIL_SO, 'so')
+        (TYPE_VILLAGE, 'Village'),
+        (TYPE_ACCUEIL_SO, 'Accueil et SO')
     )
 
     GENDER_MALE = 'M'
