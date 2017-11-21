@@ -20,13 +20,14 @@ class Registration(models.Model):
         (GENDER_OTHER, 'Autre / Non défini'),
     )
 
-    numero = models.IntegerField(primary_key=True)
-    type = models.CharField(max_length=255, choices=TYPE_CHOICES, blank=True)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
-    uuid = models.UUIDField(blank=True, null=True)
-    ticket_sent = models.BooleanField(default=False)
+    numero = models.IntegerField('Numéro', primary_key=True)
+    type = models.CharField('Type', max_length=255, choices=TYPE_CHOICES, blank=True)
+    contact_email = models.EmailField('Email de contact')
+    first_name = models.CharField('Prénom', max_length=255)
+    last_name = models.CharField('Royer', max_length=255)
+    gender = models.CharField('Genre', max_length=1, choices=GENDER_CHOICES)
+    uuid = models.UUIDField('Identifiant sur la plateforme', blank=True, null=True)
+    ticket_sent = models.BooleanField('Ticker envoyé', default=False)
 
 
 class RegistrationMeta(models.Model):
@@ -45,6 +46,6 @@ class Event(models.Model):
         (TYPE_CANCEL, 'Annulation après le scan')
     )
 
-    type = models.CharField(max_length=255, choices=TYPE_CHOICES)
+    type = models.CharField('Type', max_length=255, choices=TYPE_CHOICES)
     registration = models.ForeignKey('Registration', related_name='events')
-    time = models.DateTimeField(auto_now_add=True)
+    time = models.DateTimeField('Date et heure', auto_now_add=True)

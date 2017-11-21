@@ -3,13 +3,23 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import reverse
 
-from .models import Registration
+from .models import Registration, Event
 from .actions import codes
+
+
+class EventInline(admin.TabularInline):
+    model = Event
+    readonly_fields = ['type', 'time']
+    extra = 0
+
 
 class RegistrationAdmin(admin.ModelAdmin):
     readonly_fields = ('numero', 'qrcode_display',)
     list_filter = ('type', 'gender')
     list_display = ('full_name', 'gender', 'type')
+    inlines = [
+        EventInline,
+    ]
 
     def get_urls(self):
         urls = super().get_urls()
