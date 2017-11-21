@@ -15,7 +15,7 @@ def gen_ticket(registration):
     context = {p.property: p.value for p in registration.metas.all()}
 
     context['numero'] = registration.pk
-    context['full_name'] = ' '.join(p for p in [registration.first_name, registration.last_name] if p)
+    context['full_name'] = registration.full_name
     context['gender'] = registration.get_gender_display()
     context['type'] = registration.get_type_display()
     context['contact_email'] = registration.contact_email
