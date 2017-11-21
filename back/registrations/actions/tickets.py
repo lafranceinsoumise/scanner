@@ -23,6 +23,8 @@ def gen_ticket(registration):
     context['entrance'] = registration.entrance
 
     if 'transport_type' in context and context['transport_type'] == 'car':
+        if context['bus_origin'] not in settings.BUS_INFORMATION:
+            context['bus_origin'] = settings.BUS_ALIASES[context['bus_origin']]
         context.update(settings.BUS_INFORMATION[context['bus_origin']])
 
     img = registration.qrcode

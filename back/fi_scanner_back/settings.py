@@ -129,7 +129,11 @@ STATIC_URL = '/static/'
 
 with open(os.path.join(BASE_DIR, 'fi_scanner_back', 'cars.csv')) as f:
     r = csv.DictReader(f)
-    BUS_INFORMATION = {c['bus_origin']: c for c in list(r)}
+    BUS_INFORMATION = {c['bus_origin']: c for c in r}
+
+with open(os.path.join(BASE_DIR, 'fi_scanner_back', 'car_normalisation.csv')) as f:
+    r = csv.DictReader(f)
+    BUS_ALIASES = {c['alias']: c['canonique'] for c in r}
 
 
 zones = {
