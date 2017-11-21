@@ -8,22 +8,22 @@ from .actions import codes
 
 class RegistrationTestCase(TestCase):
     def test_can_create_registration(self):
-        Registration.objects.create(code=1, first_name="First", last_name="Last", gender='F')
+        Registration.objects.create(numero=1, first_name="First", last_name="Last", gender='F')
 
     def test_can_create_registration_meta(self):
-        registration = Registration.objects.create(code=1, first_name="First", last_name="Last")
+        registration = Registration.objects.create(numero=1, first_name="First", last_name="Last")
         RegistrationMeta.objects.create(property="bus", value="Clermont", registration=registration)
 
 
 class ValidationTestCase(TestCase):
     def test_can_create_validation_event(self):
-        registration = Registration.objects.create(code=1, first_name="First", last_name="Last")
+        registration = Registration.objects.create(numero=1, first_name="First", last_name="Last")
         Event.objects.create(registration=registration, type='scan')
 
 
 class ViewTestCase(TestCase):
     def setUp(self):
-        self.registration = Registration.objects.create(code=1, first_name="First", last_name="Last")
+        self.registration = Registration.objects.create(numero=1, first_name="First", last_name="Last")
         RegistrationMeta.objects.create(property="bus", value="Lille", registration=self.registration)
         Event.objects.create(registration=self.registration, type='scan')
 

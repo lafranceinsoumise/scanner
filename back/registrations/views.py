@@ -13,7 +13,7 @@ class CodeView(View):
         except codes.InvalidCodeException:
             raise Http404()
 
-        return get_object_or_404(Registration, code=object_id)
+        return get_object_or_404(Registration, numero=object_id)
 
     def get(self, request, code):
         self.code = code
