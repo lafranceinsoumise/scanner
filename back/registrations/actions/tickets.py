@@ -22,7 +22,7 @@ def gen_ticket(registration):
     context['table'] = registration.table
     context['entrance'] = registration.entrance
 
-    if 'transport_type' in context and context['transport_type'] == 'bus':
+    if 'transport_type' in context and context['transport_type'] == 'car':
         context.update(settings.BUS_INFORMATION[context['bus_origin']])
 
     img = registration.qrcode
