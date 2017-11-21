@@ -9,7 +9,7 @@ from registrations.utils import code_is_correct
 
 class RegistrationTestCase(TestCase):
     def test_can_create_registration(self):
-        Registration.objects.create(code=1, first_name="First", last_name="Last")
+        Registration.objects.create(code=1, first_name="First", last_name="Last", gender)
 
     def test_can_create_registration_meta(self):
         registration = Registration.objects.create(code=1, first_name="First", last_name="Last")

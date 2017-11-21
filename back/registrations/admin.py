@@ -13,6 +13,7 @@ from registrations.models import Registration
 
 class RegistrationAdmin(admin.ModelAdmin):
     readonly_fields = ('qrcode_display',)
+    list_filter = ('type',)
 
     def get_urls(self):
         urls = super().get_urls()
@@ -38,5 +39,6 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     qrcode_display.short_description = 'QRCode'
     qrcode_display.allow_tags = True
+
 
 admin.site.register(Registration, RegistrationAdmin)
