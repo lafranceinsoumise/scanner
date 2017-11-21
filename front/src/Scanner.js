@@ -28,11 +28,11 @@ class Scanner extends Component {
     this.scanner.addListener('scan', async (content) => {
       navigator.vibrate(200);
       this.setState({loading: true});
-      await this.scanner.stop();
 
       let response;
       try {
         response = await fetch(config.host + '/api/' + content + '/');
+        await this.scanner.stop();
 
         if (response.ok) {
           this.successfulScan(await response.json(), content);
@@ -56,9 +56,13 @@ class Scanner extends Component {
     return (
       <div id="scanner">
         <video id="preview"></video>
-        {this.state.loading ? <p>'Chargement...'</p> : ''}
+        {this.state.loading ? (
+          <div className="container">
+            <div className="alert alert-info">'Chargement...'</div>
+          </div>
+        ) : ''}
         <button id="changeButton" className="btn btn-success" onClick={this.changeCamera.bind(this)}>Changer la camera</button>
-        <button id="changeButton" className="btn btn-danger" onClick={this.clickBack}>Retour</button>
+        <button id="changeButton" className="btn btn-danger" onClick={this.clickBack}>Pause</button>
       </div>
     );
   }

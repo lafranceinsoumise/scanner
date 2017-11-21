@@ -12,6 +12,12 @@ const TYPE_LABELS = {
   so: 'Accueil et SO',
 }
 
+const EVENT_LABELS = {
+  entrance: 'Entrée validée',
+  scan: 'Code scanné',
+  cancel: 'Scan annulé'
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -66,7 +72,7 @@ class App extends Component {
             <p><b>Genre&nbsp;:</b> {registration.gender}</p>
             <p><b>Historique&nbsp;:</b></p>
             <ul>{registration.events.map((event) => (
-                <li key={event.time}>{event.type} le {new Date(event.time).toLocaleString()}</li>
+                <li key={event.time}>{EVENT_LABELS[event.type]} le {new Date(event.time).toLocaleString()}</li>
             ))}</ul>
             {registration.events.find(event => event.type === 'entrance') ? (
               <div className="alert alert-danger">
@@ -86,7 +92,7 @@ class App extends Component {
       default:
         return (
           <div id="home">
-            <button className="btn btn-primary btn-block" onClick={this.startScanning.bind(this)}>Scanner</button>
+            <button className="btn btn-success btn-block" onClick={this.startScanning.bind(this)}>Scanner</button>
           </div>
         )
     }

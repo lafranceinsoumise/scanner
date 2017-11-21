@@ -8,7 +8,6 @@ body {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
 }
 
 #root > #home {
@@ -19,6 +18,7 @@ body {
 #root > .registration-invite,
 #root > .registration-invite > h1,
 #root > .registration-invite > h3 {
+  flex-grow: 1;
   background-color: #272F6C;
   color: #fff;
 }
@@ -26,6 +26,7 @@ body {
 #root > .registration-volontaire,
 #root > .registration-volontaire > h1,
 #root > .registration-volontaire > h3 {
+  flex-grow: 1;
   background-color: #61C674;
   color: #fff;
 }
@@ -33,6 +34,7 @@ body {
 #root > .registration-volontaire-referent,
 #root > .registration-volontaire-referent > h1,
 #root > .registration-volontaire-referent > h3 {
+  flex-grow: 1;
   background-color: #1C4E29;
   color: #fff;
 }
@@ -40,6 +42,7 @@ body {
 #root > .registration-village,
 #root > .registration-village > h1,
 #root > .registration-village > h3 {
+  flex-grow: 1;
   background-color: #19B4C8;
   color: #fff;
 }
