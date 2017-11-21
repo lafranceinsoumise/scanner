@@ -20,7 +20,7 @@ class Registration(models.Model):
         (GENDER_OTHER, 'Autre / Non défini'),
     )
 
-    code = models.IntegerField(primary_key=True)
+    numero = models.IntegerField(primary_key=True)
     type = models.CharField(max_length=255, choices=TYPE_CHOICES, blank=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)

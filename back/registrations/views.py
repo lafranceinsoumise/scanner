@@ -20,9 +20,11 @@ class CodeView(View):
         registration = self.get_object()
 
         return JsonResponse({
-            'code': registration.code,
+            'numero': registration.numero,
             'first_name': registration.first_name,
             'last_name': registration.last_name,
+            'gender': registration.gender,
+            'type': registration.type,
             'meta': dict([(meta.property, meta.value) for meta in registration.metas.all()]),
             'events': [{'time': event.time, 'type': event.type} for event in registration.events.all()]
         })
