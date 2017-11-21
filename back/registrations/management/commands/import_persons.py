@@ -5,6 +5,7 @@ import csv
 import tqdm
 
 from registrations.models import Registration, RegistrationMeta
+from registrations.actions.tables import get_random_table
 
 
 class Command(BaseCommand):
@@ -12,8 +13,12 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('input', type=argparse.FileType(mode='r', encoding='utf-8'))
+        parser.add_argument(
+            '-a', '--assign-table',
+            action='store_true', dest='assign_table'
+        )
 
-    def handle(self, *args, input, **options):
+    def handle(self, *args, input, assign_table, **options):
         import csv
 
         r = csv.DictReader(input)
@@ -35,12 +40,18 @@ class Command(BaseCommand):
 
         # find columns that are model fields
         model_field_names = {field.name for field in Registration._meta.get_fields()}
-        common_fields = (model_field_names & set(r.fieldnames)) - {'numero'}
-        meta_fields = set(r.fieldnames) - common_fields
+        common_fields = (model_field_names & set(r.fieldnames))- {'numero'}
+        meta_fields = set(r.fieldnames) - common_fields - {'numero'}
 
         # apply validators from field_names
         for field_name in common_fields:
             field = Registration._meta.get_field(field_name)
+
+            if field.null:
+                for line in lines:
+                    if not line[field_name]:
+                        line[field_name] = None
+
             for validator in field.validators:
                 try:
                     for i, line in enumerate(lines):
@@ -50,11 +61,14 @@ class Command(BaseCommand):
 
         # everything should be ok
         for line in tqdm.tqdm(lines, desc='Importing'):
-            print('Handling')
-            registration = Registration.objects.update_or_create(
+            registration, status = Registration.objects.update_or_create(
                 numero=line['numero'],
                 defaults={field_name: line[field_name] for field_name in common_fields}
             )
+
+            if not registration.table and assign_table:
+                registration.table = get_random_table()
+                registration.save()
 
             for field_name in meta_fields:
                 RegistrationMeta.objects.update_or_create(
@@ -62,3 +76,5 @@ class Command(BaseCommand):
                     property=field_name,
                     defaults={'value': line[field_name]}
                 )
+
+            registration.metas.exclude(property__in=meta_fields).delete()
