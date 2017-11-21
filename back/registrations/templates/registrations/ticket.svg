@@ -931,7 +931,7 @@
          y="127.93124"
          id="tspan4862-0-5">En son absence, l'accès à la Convention n'est pas garanti.</tspan></text>
   </g>
-  <!-- {% elif transport_type == "bus" %} -->
+  <!-- {% elif transport_type == "car" %} -->
   <g
      inkscape:groupmode="layer"
      id="car"
@@ -1224,7 +1224,7 @@
          y="127.93124"
          id="tspan4862">En son absence, l'accès à la Convention n'est pas garanti.</tspan></text>
   </g>
-  <!-- {% elif transport_type == "car" %} -->
+  <!-- {% elif transport_type == "voiture" %} -->
   <g
      inkscape:groupmode="layer"
      id="voiture"
