@@ -15,10 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.views.decorators.csrf import csrf_exempt
 
 from registrations.views import CodeView
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^api/(?P<code>[0-9]+\.[0-9a-zA-Z-_=]*)/', CodeView.as_view(), name='view_code')
+    url(r'^api/(?P<code>[0-9]+\.[0-9a-zA-Z-_=]*)/', csrf_exempt(CodeView.as_view()), name='view_code')
 ]

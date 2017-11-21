@@ -8,11 +8,47 @@ body {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 #root > #home {
-  flex: auto;
   display: flex;
+  flex-grow: 1;
+}
+
+#root > .registration-invite,
+#root > .registration-invite > h1,
+#root > .registration-invite > h3 {
+  background-color: #272F6C;
+  color: #fff;
+}
+
+#root > .registration-volontaire,
+#root > .registration-volontaire > h1,
+#root > .registration-volontaire > h3 {
+  background-color: #61C674;
+  color: #fff;
+}
+
+#root > .registration-volontaire-referent,
+#root > .registration-volontaire-referent > h1,
+#root > .registration-volontaire-referent > h3 {
+  background-color: #1C4E29;
+  color: #fff;
+}
+
+#root > .registration-village,
+#root > .registration-village > h1,
+#root > .registration-village > h3 {
+  background-color: #19B4C8;
+  color: #fff;
+}
+
+#root > .registration-so,
+#root > .registration-so > h1,
+#root > .registration-so > h3 {
+  background-color: #D73F24;
+  color: #fff;
 }
 
 #root > #scanner {

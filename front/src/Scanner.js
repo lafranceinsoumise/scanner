@@ -7,41 +7,48 @@ class Scanner extends Component {
   constructor(props) {
     super(props);
     this.clickBack = props.clickBack;
+    this.successfulScan = props.successfulScan;
     this.state = {}
+
+    this.activeCamera = 0;
   }
 
   async componentDidMount() {
-    this.scanner = new Instascan.Scanner({
+    this.scanner = this.scanner || new Instascan.Scanner({
       video: document.getElementById('preview'),
       mirror: false
     });
-
     this.cameras = await Instascan.Camera.getCameras();
     if (this.cameras.length > 0) {
-      this.camera = 0;
-      this.scanner.start(this.cameras[0]);
+      await this.scanner.start(this.cameras[this.activeCamera]);
     } else {
       console.error('No cameras found.');
     }
-    this.scanner.addListener('scan', async (content) => {
-      this.setState({loading: true});
 
+    this.scanner.addListener('scan', async (content) => {
+      navigator.vibrate(200);
+      this.setState({loading: true});
+      await this.scanner.stop();
+
+      let response;
       try {
-        let response = await fetch(config.host + '/api/' + content);
+        response = await fetch(config.host + '/api/' + content + '/');
 
         if (response.ok) {
-          alert(await response.text());
+          this.successfulScan(await response.json(), content);
         }
       } catch (e) {
-        alert(e);
-      } finally {
-        this.setState({lading: false});
+        this.error();
       }
     });
   }
 
+  error() {
+    this.setState({loading: false});
+  }
+
   changeCamera() {
-    this.camera++;
+    this.activeCamera++;
     this.scanner.start(this.cameras[this.camera % this.cameras.length]);
   }
 
