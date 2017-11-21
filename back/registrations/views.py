@@ -9,7 +9,7 @@ from .actions import codes
 class CodeView(View):
     def get_object(self):
         try:
-            object_id = codes.get_idea_from_code(self.code)
+            object_id = codes.get_id_from_code(self.code)
         except codes.InvalidCodeException:
             raise Http404()
 

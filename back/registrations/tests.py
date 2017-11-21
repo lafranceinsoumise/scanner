@@ -73,8 +73,8 @@ class SignatureTestCase(TestCase):
 
         for code in wrong_codes:
             with self.assertRaises(codes.InvalidCodeException):
-                codes.get_idea_from_code(code)
+                codes.get_id_from_code(code)
 
     @override_settings(SIGNATURE_KEY=b'prout')
     def test_get_id(self):
-        self.assertEqual(codes.get_idea_from_code('1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='), 1)
+        self.assertEqual(codes.get_id_from_code('1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='), 1)

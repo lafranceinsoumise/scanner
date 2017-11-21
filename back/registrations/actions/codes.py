@@ -38,7 +38,7 @@ def check_signature(msg, signature):
     return hmac.compare_digest(signature, correct_signature)
 
 
-def get_idea_from_code(code):
+def get_id_from_code(code):
     """Verify code is correct, and return the identifier if it is. Raise InvalidCodeException if it is not
 
     The argument is the candidate code as a string. It returns an integer identifier in case of success.

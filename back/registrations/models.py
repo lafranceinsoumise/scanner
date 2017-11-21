@@ -1,5 +1,7 @@
 from django.db import models
 
+from .actions.codes import gen_qrcode
+
 
 class Registration(models.Model):
     TYPE_INVITE = 'invite'
@@ -30,16 +32,38 @@ class Registration(models.Model):
     type = models.CharField('Type', max_length=255, choices=TYPE_CHOICES, blank=True)
     contact_email = models.EmailField('Email de contact')
     first_name = models.CharField('Prénom', max_length=255)
-    last_name = models.CharField('Royer', max_length=255)
+    last_name = models.CharField('Nom de famille', max_length=255)
     gender = models.CharField('Genre', max_length=1, choices=GENDER_CHOICES)
     uuid = models.UUIDField('Identifiant sur la plateforme', blank=True, null=True)
     ticket_sent = models.BooleanField('Ticker envoyé', default=False)
+
+    table = models.CharField('Numéro de table', blank=True)
+
+    @property
+    def entrance(self):
+        if self.table:
+            zone = self.table[0]
+
+            if zone == '4':
+                zone = '3'
+
+            return 'N°{}'.format(zone)
+        return ''
+
+    @property
+    def qrcode(self):
+        return gen_qrcode(self.pk)
 
 
 class RegistrationMeta(models.Model):
     property = models.CharField(max_length=255)
     value = models.TextField()
     registration = models.ForeignKey('Registration', related_name='metas')
+
+    class Meta:
+        indexes = (
+            models.Index(['registration', 'property'], name='registration_property_index'),
+        )
 
 
 class Event(models.Model):
