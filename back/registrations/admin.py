@@ -1,15 +1,10 @@
-import hashlib
-import hmac
-from base64 import urlsafe_b64encode
-
-import qrcode as qrcode
-from django.conf import settings
 from django.conf.urls import url
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import reverse
 
-from registrations.models import Registration
+from .models import Registration
+from .actions import codes
 
 class RegistrationAdmin(admin.ModelAdmin):
     readonly_fields = ('qrcode_display',)
@@ -22,20 +17,17 @@ class RegistrationAdmin(admin.ModelAdmin):
         ] + urls
 
     def qrcode_view(self, request, object_id):
-        signature = urlsafe_b64encode(hmac.new(
-            key=settings.SIGNATURE_KEY,
-            msg=str(object_id).encode('utf-8'),
-            digestmod=hashlib.sha1
-        ).digest())
-
-        img = qrcode.make(str(object_id) + '.' + signature.decode('utf-8'))
+        img = codes.gen_qrcode(object_id)
         response = HttpResponse(content_type='image/png')
         img.save(response, "PNG")
 
         return response
 
     def qrcode_display(self, instance):
-        return '<img src="%s"/>' % reverse('admin:registrations_registration_qrcode', args=[instance.code])
+        if instance.code:
+            return '<img src="%s"/>' % reverse('admin:registrations_registration_qrcode', args=[instance.code])
+        else:
+            return '-'
 
     qrcode_display.short_description = 'QRCode'
     qrcode_display.allow_tags = True

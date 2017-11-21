@@ -1,11 +1,10 @@
 from datetime import datetime
 
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from registrations.models import Registration, RegistrationMeta, Event
-from registrations.utils import code_is_correct
-
+from .actions import codes
 
 class RegistrationTestCase(TestCase):
     def test_can_create_registration(self):
@@ -60,6 +59,20 @@ class ViewTestCase(TestCase):
 
 
 class SignatureTestCase(TestCase):
-    def test_signature(self):
-        self.assertIs(code_is_correct('1.prou'), False)
-        self.assertIs(code_is_correct('1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='), True)
+    def test_raise_on_wrong_codes(self):
+        wrong_codes = [
+            "jzdaz_dhuidza",  # no point
+            "oizefjie.ize.daz",  # several points
+            "jio.jifezf",  # identifier is not an integer
+            "1343.jiodzé&",  # signature is not base64
+            "1234.abcde",  # signature has incorrect base64 padding
+            "1234.Y2VjaQ==",  # incorrect signature
+        ]
+
+        for code in wrong_codes:
+            with self.assertRaises(codes.InvalidCodeException):
+                codes.get_idea_from_code(code)
+
+    @override_settings(SIGNATURE_KEY=b'prout')
+    def test_get_id(self):
+        self.assertEqual(codes.get_idea_from_code('1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='), 1)

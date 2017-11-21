@@ -1,13 +1,23 @@
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404
 from django.views import View
 
-from registrations.models import Registration, Event
+from .models import Registration, Event
+from .actions import codes
 
 
 class CodeView(View):
-    def get(self, request, code=None):
-        registration = get_object_or_404(Registration, code=code.split('.')[0])
+    def get_object(self):
+        try:
+            object_id = codes.get_idea_from_code(self.code)
+        except codes.InvalidCodeException:
+            raise Http404()
+
+        return get_object_or_404(Registration, code=object_id)
+
+    def get(self, request, code):
+        self.code = code
+        registration = self.get_object()
 
         return JsonResponse({
             'code': registration.code,
@@ -17,11 +27,13 @@ class CodeView(View):
             'events': [{'time': event.time, 'type': event.type} for event in registration.events.all()]
         })
 
-    def post(self, request, code=None):
+    def post(self, request, code):
+        self.code = code
+
         if (request.POST.get('type', None) not in [choice[0] for choice in Event.TYPE_CHOICES]):
             return HttpResponseBadRequest()
 
-        registration = get_object_or_404(Registration, code=code.split('.')[0])
+        registration = self.get_object()
         Event.objects.create(registration=registration, type=request.POST['type'])
 
         return HttpResponse('OK')
