@@ -1,4 +1,5 @@
 from django.template.loader import get_template
+from django.conf import settings
 import base64
 from io import BytesIO
 import subprocess
@@ -21,6 +22,9 @@ def gen_ticket(registration):
     context['table'] = registration.table
     context['entrance'] = registration.entrance
 
+    if 'transport_type' in context and context['transport_type'] == 'bus':
+        context.update(settings.BUS_INFORMATION[context['bus_origin']])
+
     img = registration.qrcode
     img_data = BytesIO()
     img.save(img_data, 'PNG')
@@ -32,7 +36,8 @@ def gen_ticket(registration):
     inkscape = subprocess.Popen(
         ['inkscape', '-f', '/dev/stdin', '--export-area-page', '--without-gui', '--export-pdf', '/dev/stdout'],
         stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
 
     try:

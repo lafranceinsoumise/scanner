@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+import csv
 
 from collections import Counter
 
@@ -124,6 +125,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+with open(os.path.join(BASE_DIR, 'fi_scanner_back', 'cars.csv')) as f:
+    r = csv.DictReader(f)
+    BUS_INFORMATION = {c['bus_origin']: c for c in list(r)}
 
 
 zones = {
