@@ -5,10 +5,16 @@ class Registration(models.Model):
     TYPE_INVITE = 'invite'
     TYPE_PARTICIPANT = 'participant'
     TYPE_VOLONTAIRE = 'volontaire'
+    TYPE_VOLONTAIRE_REFERENT = 'volontaire_referent'
+    TYPE_VILLAGE = 'village'
+    TYPE_ACCUEIL_SO = 'so'
     TYPE_CHOICES = (
-        (TYPE_INVITE, 'Invité'),
-        (TYPE_PARTICIPANT, 'Participant'),
+        (TYPE_INVITE, 'Invité⋅e'),
+        (TYPE_PARTICIPANT, 'Participant⋅e'),
         (TYPE_VOLONTAIRE, 'Volontaire'),
+        (TYPE_VOLONTAIRE_REFERENT, 'Volontaire référent⋅e'),
+        (TYPE_VILLAGE, 'village'),
+        (TYPE_ACCUEIL_SO, 'so')
     )
 
     GENDER_MALE = 'M'
