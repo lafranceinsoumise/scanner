@@ -35,7 +35,7 @@ class Registration(models.Model):
     full_name = models.CharField('Nom complet', max_length=255)
     gender = models.CharField('Genre', max_length=1, choices=GENDER_CHOICES)
     uuid = models.UUIDField('Identifiant sur la plateforme', blank=True, null=True)
-    ticket_sent = models.BooleanField('Ticker envoyé', default=False)
+    ticket_sent = models.BooleanField('Ticket envoyé', default=False)
 
     table = models.CharField('Numéro de table', blank=True, max_length=15, validators=[TableValidator()])
 

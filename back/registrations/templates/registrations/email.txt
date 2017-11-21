@@ -1,0 +1,13 @@
+Bonjour {{ full_name }},
+
+Vous trouverez ci-joint votre ticket pour la Convention.
+
+Vous devez impérativement l'imprimer : sa présentation sera
+obligatoire pour la montée dans le bus (le cas échéant) et
+l'accès à la Convention.
+
+Amitiés insoumises,
+L'équipe de la Convention
+
+
+Cet email a été envoyé à {{ email }}
