@@ -19,6 +19,8 @@ class Scanner extends Component {
         mirror: false
       });
 
+      this.cameras = await window.Instascan.Camera.getCameras();
+
       this.scanner.addListener('scan', async (content) => {
         navigator.vibrate(200);
         this.setState({loading: true});
@@ -36,7 +38,6 @@ class Scanner extends Component {
       });
     }
 
-    this.cameras = await window.Instascan.Camera.getCameras();
     if (this.cameras.length > 0) {
       await this.scanner.start(this.cameras[this.activeCamera % this.cameras.length]);
     } else {
