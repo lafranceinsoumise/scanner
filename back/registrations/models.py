@@ -33,7 +33,7 @@ class Registration(models.Model):
     type = models.CharField('Type', max_length=255, choices=TYPE_CHOICES, blank=True)
     contact_email = models.EmailField('Email de contact')
     full_name = models.CharField('Nom complet', max_length=255)
-    gender = models.CharField('Genre', max_length=1, choices=GENDER_CHOICES)
+    gender = models.CharField('Genre', max_length=1, choices=GENDER_CHOICES, blank=True)
     uuid = models.UUIDField('Identifiant sur la plateforme', blank=True, null=True)
     ticket_sent = models.BooleanField('Ticket envoyé', default=False)
 
