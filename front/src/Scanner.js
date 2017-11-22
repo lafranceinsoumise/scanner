@@ -13,33 +13,39 @@ class Scanner extends Component {
   }
 
   async componentDidMount() {
-    this.scanner = this.scanner || new window.Instascan.Scanner({
-      video: document.getElementById('preview'),
-      mirror: false
-    });
+    if (!this.scanner) {
+      this.scanner = new window.Instascan.Scanner({
+        video: document.getElementById('preview'),
+        mirror: false
+      });
+
+      this.scanner.addListener('scan', async (content) => {
+        navigator.vibrate(200);
+        this.setState({loading: true});
+
+        let response;
+        try {
+          response = await fetch(config.host + '/api/' + content + '/');
+
+          if (response.ok) {
+            this.successfulScan(await response.json(), content);
+          }
+        } catch (e) {
+          this.error();
+        }
+      });
+    }
+
     this.cameras = await window.Instascan.Camera.getCameras();
     if (this.cameras.length > 0) {
       await this.scanner.start(this.cameras[this.activeCamera % this.cameras.length]);
     } else {
       console.error('No cameras found.');
     }
+  }
 
-    this.scanner.addListener('scan', async (content) => {
-      navigator.vibrate(200);
-      this.setState({loading: true});
-
-      let response;
-      try {
-        response = await fetch(config.host + '/api/' + content + '/');
-        await this.scanner.stop();
-
-        if (response.ok) {
-          this.successfulScan(await response.json(), content);
-        }
-      } catch (e) {
-        this.error();
-      }
-    });
+  async componentWillUnmount () {
+      await this.scanner.stop();
   }
 
   error() {
