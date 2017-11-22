@@ -37,10 +37,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.201128"
-     inkscape:cx="460.35806"
+     inkscape:cx="383.60968"
      inkscape:cy="662.179"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="voiture"
      showgrid="false"
      inkscape:window-width="1855"
      inkscape:window-height="1056"
@@ -936,7 +936,7 @@
          sodipodi:role="line"
          x="79.431541"
          y="123.6979"
-         id="tspan4910-6">Convention.</tspan><tspan
+         id="tspan4910-6">Convention, ainsi qu'une pièce d'identité avec photo.</tspan><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.23333311px;font-family:'Roboto Slab';-inkscape-font-specification:'Roboto Slab, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke-width:0.26458332"
          sodipodi:role="line"
          x="79.431541"
@@ -1218,23 +1218,28 @@
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.23333311px;line-height:1;font-family:'Roboto Slab';-inkscape-font-specification:'Roboto Slab, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;opacity:0.97000002;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        x="79.431541"
-       y="119.46457"
+       y="117.87706"
        id="text5021-0"><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.23333311px;font-family:'Roboto Slab';-inkscape-font-specification:'Roboto Slab, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke-width:0.26458332"
          sodipodi:role="line"
          id="tspan5035-0"
          x="79.431541"
-         y="119.46457">Ce billet doit impérativement être présenté à la montée dans</tspan><tspan
+         y="117.87706">Ce billet doit impérativement être présenté à la montée dans</tspan><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.23333311px;font-family:'Roboto Slab';-inkscape-font-specification:'Roboto Slab, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke-width:0.26458332"
          sodipodi:role="line"
          x="79.431541"
-         y="123.6979"
-         id="tspan4860">le bus et à l'entrée de la Convention.</tspan><tspan
+         y="122.11039"
+         id="tspan4860">le bus et à l'entrée de la Convention, ainsi qu'une pièce</tspan><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.23333311px;font-family:'Roboto Slab';-inkscape-font-specification:'Roboto Slab, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke-width:0.26458332"
          sodipodi:role="line"
          x="79.431541"
-         y="127.93124"
-         id="tspan4862">En son absence, l'accès à la Convention n'est pas garanti.</tspan></text>
+         y="126.34373"
+         id="tspan4862">d'identité avec photo. En son absence, l'accès à la Convention</tspan><tspan
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.23333311px;font-family:'Roboto Slab';-inkscape-font-specification:'Roboto Slab, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke-width:0.26458332"
+         sodipodi:role="line"
+         x="79.431541"
+         y="130.57706"
+         id="tspan4750">n'est pas garanti.</tspan></text>
   </g>
   <!-- {% elif transport_type == "voiture" %} -->
   <g
@@ -1385,7 +1390,7 @@
          sodipodi:role="line"
          x="79.431541"
          y="123.6979"
-         id="tspan4910">Convention.</tspan><tspan
+         id="tspan4910">Convention, ainsi qu'une pièce d'identité avec photo.</tspan><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.23333311px;font-family:'Roboto Slab';-inkscape-font-specification:'Roboto Slab, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke-width:0.26458332"
          sodipodi:role="line"
          x="79.431541"
