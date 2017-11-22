@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Instascan from 'instascan';
 
 import config from './config';
 
@@ -14,11 +13,11 @@ class Scanner extends Component {
   }
 
   async componentDidMount() {
-    this.scanner = this.scanner || new Instascan.Scanner({
+    this.scanner = this.scanner || new window.Instascan.Scanner({
       video: document.getElementById('preview'),
       mirror: false
     });
-    this.cameras = await Instascan.Camera.getCameras();
+    this.cameras = await window.Instascan.Camera.getCameras();
     if (this.cameras.length > 0) {
       await this.scanner.start(this.cameras[this.activeCamera]);
     } else {
