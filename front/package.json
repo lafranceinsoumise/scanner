@@ -2,6 +2,7 @@
   "name": "scanner",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://scanner.franceinsoumise.org/scan/",
   "dependencies": {
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
