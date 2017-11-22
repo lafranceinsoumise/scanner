@@ -30,7 +30,7 @@ SIGNATURE_KEY = os.environb.get(b'SIGNATURE_KEY', b'prout')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 
 # Application definition
