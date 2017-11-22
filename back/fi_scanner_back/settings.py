@@ -187,5 +187,8 @@ TABLE_INFORMATION = Counter({
 for t in ['4-A-02', '4-A-06', '4-A-09', '4-B-02', '4-B-04']:
     TABLE_INFORMATION[t] -= 1
 
+for zone, limit in zones.items():
+    for i in range(1, limit+1, 2):
+        TABLE_INFORMATION['{}-{:02d}'.format(zone, i)] += 1
 
 TABLE_SET = set(TABLE_INFORMATION) | {'4-B-01'}
