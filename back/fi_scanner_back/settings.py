@@ -158,6 +158,25 @@ zones = {
     '3-B': 26,
 }
 
+if not DEBUG:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'terminal': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['terminal'],
+                'level': 'WARNING',
+                'propagate': True,
+            },
+        },
+    }
+
 TABLE_INFORMATION = Counter({
     **{'{}-{:02d}'.format(z, i): 9 for z, n in zones.items() for i in range(1, n+1)},
     **{'4-A-{:02d}'.format(i): 9 for i in range(1, 9+1)},
