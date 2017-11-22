@@ -80,10 +80,11 @@ class Command(BaseCommand):
                 registration.save()
 
             for field_name in meta_fields:
-                RegistrationMeta.objects.update_or_create(
-                    registration=registration,
-                    property=field_name,
-                    defaults={'value': line[field_name]}
-                )
+                if line['field_name']:
+                    RegistrationMeta.objects.update_or_create(
+                        registration=registration,
+                        property=field_name,
+                        defaults={'value': line[field_name]}
+                    )
 
-            registration.metas.exclude(property__in=meta_fields).delete()
+            registration.metas.exclude(property__in=[f for f in meta_fields if line[f]]).delete()
