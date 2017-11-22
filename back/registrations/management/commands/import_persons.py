@@ -5,7 +5,7 @@ import csv
 import tqdm
 
 from registrations.models import Registration, RegistrationMeta
-from registrations.actions.tables import get_random_table
+from registrations.actions.tables import get_random_tables
 
 
 class Command(BaseCommand):
@@ -28,6 +28,9 @@ class Command(BaseCommand):
 
         if 'ticket_sent' in r.fieldnames:
             raise CommandError('Ticket sent field is not allowed')
+
+        if assign_table and 'table' in r.fieldnames:
+            raise CommandError('Table column in csv file: cannot assign !')
 
         # read everything so that we import only if full file is valid
         lines = list(r)
@@ -60,6 +63,8 @@ class Command(BaseCommand):
                     raise CommandError('Incorrect value in column %s on line %d' % (field_name, i+1))
 
         # everything should be ok
+        tables = get_random_tables()
+
         for line in tqdm.tqdm(lines, desc='Importing'):
             registration, status = Registration.objects.update_or_create(
                 numero=line['numero'],
@@ -67,7 +72,7 @@ class Command(BaseCommand):
             )
 
             if not registration.table and assign_table:
-                registration.table = get_random_table()
+                registration.table = tables.pop()
                 registration.save()
 
             for field_name in meta_fields:

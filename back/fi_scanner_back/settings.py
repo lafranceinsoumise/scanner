@@ -158,10 +158,15 @@ zones = {
     '3-B': 26,
 }
 
-
 TABLE_INFORMATION = Counter({
     **{'{}-{:02d}'.format(z, i): 9 for z, n in zones.items() for i in range(1, n+1)},
-    **{'4-A-{:02d}'.format(i): 1 for i in range(1, 9+1)}
+    **{'4-A-{:02d}'.format(i): 9 for i in range(1, 9+1)},
+    **{'4-B-{:02d}'.format(i): 9 for i in range(2, 4+1)}
 })
 
-TABLE_SET = set(TABLE_INFORMATION) | {'4-B-{:02d}'.format(i) for i in range(1, 4+1)}
+# one SO for these tables
+for t in ['4-A-02', '4-A-06', '4-A-09', '4-B-02', '4-B-04']:
+    TABLE_INFORMATION[t] -= 1
+
+
+TABLE_SET = set(TABLE_INFORMATION) | {'4-B-01'}
