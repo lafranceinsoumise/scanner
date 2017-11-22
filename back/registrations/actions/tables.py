@@ -8,17 +8,19 @@ from django.core.exceptions import ValidationError
 
 
 def get_random_tables():
-    from ..models import Registration
-    current = Counter(
-        {d['table']: d['c'] for d in Registration.objects.values('table').annotate(c=Count('table'))}
-    )
-
-    left = settings.TABLE_INFORMATION - current
+    left = settings.TABLE_INFORMATION - get_table_occupation()
 
     tables = list(left.elements())
     random.shuffle(tables)
 
     return tables
+
+def get_table_occupation():
+    from ..models import Registration
+    return Counter(
+        {d['table']: d['c'] for d in Registration.objects.values('table').annotate(c=Count('table'))}
+    )
+
 
 @deconstructible
 class TableValidator(object):
