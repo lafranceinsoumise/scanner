@@ -66,7 +66,7 @@ class App extends Component {
         let registration = this.state.registration;
         return (
           <div id="registration" className={"container registration-" + registration.type}>
-            <h1 className="text-center">{`${registration.first_name} ${registration.last_name}`}</h1>
+            <h1 className="text-center">{registration.full_name}</h1>
             <h3>Rôle&nbsp;: {TYPE_LABELS[registration.type]}</h3>
             <h3>#{registration.numero}</h3>
             <p><b>Genre&nbsp;:</b> {registration.gender}</p>
