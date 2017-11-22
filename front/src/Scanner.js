@@ -48,7 +48,7 @@ class Scanner extends Component {
 
   changeCamera() {
     this.activeCamera++;
-    this.scanner.start(this.cameras[this.camera % this.cameras.length]);
+    this.scanner.start(this.cameras[this.activeCamera % this.cameras.length]);
   }
 
   render() {
