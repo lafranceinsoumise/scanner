@@ -80,7 +80,7 @@ class Command(BaseCommand):
                 registration.save()
 
             for field_name in meta_fields:
-                if line['field_name']:
+                if line[field_name]:
                     RegistrationMeta.objects.update_or_create(
                         registration=registration,
                         property=field_name,
