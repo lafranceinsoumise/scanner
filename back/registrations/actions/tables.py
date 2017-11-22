@@ -14,7 +14,6 @@ def get_random_tables():
     )
 
     left = settings.TABLE_INFORMATION - current
-    total_seats = sum(left.values())
 
     tables = list(left.elements())
     random.shuffle(tables)

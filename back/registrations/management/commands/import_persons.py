@@ -58,7 +58,11 @@ class Command(BaseCommand):
             for validator in field.validators:
                 try:
                     for i, line in enumerate(lines):
-                        validator(line[field_name])
+                        if line[field_name]:
+                            validator(line[field_name])
+                        else:
+                            if not field.blank:
+                                raise CommandError('Empty value in column %s on line %d' % (field_name, i+1))
                 except ValidationError:
                     raise CommandError('Incorrect value in column %s on line %d' % (field_name, i+1))
 
