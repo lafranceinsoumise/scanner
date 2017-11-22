@@ -1,5 +1,6 @@
 from django.core import mail
 from django.utils.text import slugify
+from django.conf import settings
 from django.template.loader import get_template
 
 from .tickets import gen_ticket
@@ -15,7 +16,7 @@ def send_email(registration, connection=None):
 
     email = mail.EmailMultiAlternatives(
         subject='Votre ticket pour la Convention',
-        from_email='nepasrepondre@lafranceinsoumise.fr',
+        from_email=settings.EMAIL_FROM,
         to=[registration.contact_email],
         body=body,
         connection=connection,

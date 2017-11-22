@@ -139,6 +139,7 @@ EMAIL_BACKEND = email_config['EMAIL_BACKEND']
 EMAIL_USE_TLS = email_config['EMAIL_USE_TLS']
 EMAIL_USE_SSL = email_config['EMAIL_USE_SSL']
 
+EMAIL_FROM = os.environ.get('EMAIL_FROM', 'tickets@lafranceinsoumise.fr')
 
 with open(os.path.join(BASE_DIR, 'fi_scanner_back', 'cars.csv')) as f:
     r = csv.DictReader(f)
