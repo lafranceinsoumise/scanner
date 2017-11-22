@@ -1,12 +1,13 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ValidationError
 import re
 import argparse
 from functools import reduce
 from operator import or_
 import tqdm
+from smtplib import SMTPServerDisconnected, SMTPRecipientsRefused
 
 from django.db.models import Q
+from django.core.mail import get_connection
 from registrations.models import Registration
 from registrations.actions.emails import send_email
 
@@ -37,5 +38,23 @@ class Command(BaseCommand):
         if check_sent_status:
             query = query & Q(ticket_sent=False)
 
-        for elem in tqdm.tqdm(Registration.objects.filter(query)):
-            send_email(elem)
+        connection = get_connection()
+
+        refused = []
+
+        for elem in tqdm.tqdm(Registration.objects.filter(query), desc='Sending tickets'):
+            while True:
+                try:
+                    send_email(elem, connection=connection)
+                except SMTPServerDisconnected:
+                    connection = get_connection()
+                    continue
+                except SMTPRecipientsRefused:
+                    refused.append(elem)
+                    break
+                break
+
+        connection.close()
+
+        for elem in refused:
+            self.stdout.write('Could not send to {} ({})'.format(elem.contact_email, elem.numero))

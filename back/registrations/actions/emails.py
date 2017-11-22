@@ -5,7 +5,7 @@ from django.template.loader import get_template
 from .tickets import gen_ticket
 
 
-def send_email(registration):
+def send_email(registration, connection=None):
     context = {'email': registration.contact_email, 'full_name': registration.full_name}
 
     body = get_template('registrations/email.txt').render(context)
@@ -17,7 +17,8 @@ def send_email(registration):
         subject='Votre ticket pour la Convention',
         from_email='nepasrepondre@lafranceinsoumise.fr',
         to=[registration.contact_email],
-        body=body
+        body=body,
+        connection=connection,
     )
 
     email.attach_alternative(html, "text/html")
