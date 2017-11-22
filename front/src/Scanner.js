@@ -19,7 +19,7 @@ class Scanner extends Component {
     });
     this.cameras = await window.Instascan.Camera.getCameras();
     if (this.cameras.length > 0) {
-      await this.scanner.start(this.cameras[this.activeCamera]);
+      await this.scanner.start(this.cameras[this.activeCamera % this.cameras.length]);
     } else {
       console.error('No cameras found.');
     }
