@@ -22,8 +22,7 @@ class CodeView(View):
 
         return JsonResponse({
             'numero': registration.numero,
-            'first_name': registration.first_name,
-            'last_name': registration.last_name,
+            'full_name': registration.full_name,
             'gender': registration.gender,
             'type': registration.type,
             'meta': dict([(meta.property, meta.value) for meta in registration.metas.all()]),
