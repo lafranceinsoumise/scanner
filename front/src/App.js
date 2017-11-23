@@ -115,7 +115,7 @@ class App extends Component {
         );
       case 'scan':
         return (
-          <Scanner clickBack={this.wait.bind(this)} successfulScan={this.successfulScan.bind(this)}/>
+          <Scanner clickBack={this.wait.bind(this)} scan={this.scan.bind(this)}/>
         );
       case 'wait':
       default:
