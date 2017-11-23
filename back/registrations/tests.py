@@ -35,6 +35,7 @@ class ViewTestCase(TestCase):
         json = response.json()
 
         self.assertEqual(json['events'][0]['type'], 'scan')
+        self.assertEqual(json['events'][1]['person'], 'Guillaume Royer')
         del json['events']
         self.assertEqual(json, {
             'numero': 1,
@@ -47,7 +48,6 @@ class ViewTestCase(TestCase):
         })
 
         self.assertEqual(self.registration.events.count(), 2)
-        self.assertEqual(self.registration.events.all()[1].person, 'Guillaume Royer')
 
     def test_can_post_info(self):
         response = self.client.post(reverse('view_code', kwargs={'code': '1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='}) + '?person=Guillaume%20Royer', data={

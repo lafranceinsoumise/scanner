@@ -30,7 +30,7 @@ class CodeView(View):
             'gender': registration.gender,
             'type': registration.type,
             'meta': dict([(meta.property, meta.value) for meta in registration.metas.all()]),
-            'events': [{'time': event.time, 'type': event.type} for event in registration.events.all()]
+            'events': [{'time': event.time, 'type': event.type, 'person': event.person} for event in registration.events.all()]
         })
 
     def post(self, request, code):
