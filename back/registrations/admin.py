@@ -8,6 +8,44 @@ from .models import Registration, Event, RegistrationMeta
 from .actions import codes, tickets
 
 
+class EventFilter(admin.SimpleListFilter):
+    # Human-readable title which will be displayed in the
+    # right admin sidebar just above the filter options.
+    title = 'Ticket'
+
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'ticket'
+
+    def lookups(self, request, model_admin):
+        """
+        Returns a list of tuples. The first element in each
+        tuple is the coded value for the option that will
+        appear in the URL query. The second element is the
+        human-readable name for the option that will appear
+        in the right sidebar.
+        """
+        return (
+            ('scanned', 'Scanné'),
+            ('validated', 'Validé'),
+            ('cancelled', 'Annulé'),
+        )
+
+    def queryset(self, request, queryset):
+        """
+        Returns the filtered queryset based on the value
+        provided in the query string and retrievable via
+        `self.value()`.
+        """
+        # Compare the requested value (either '80s' or '90s')
+        # to decide how to filter the queryset.
+        if self.value() == 'scanned':
+            return queryset.filter(events__type=Event.TYPE_SCAN)
+        if self.value() == 'validated':
+            return queryset.filter(events__type=Event.TYPE_ENTRANCE)
+        if self.value() == 'cancelled':
+            return queryset.filter(events__type=Event.TYPE_CANCEL)
+
+
 class MetaInline(admin.TabularInline):
     model = RegistrationMeta
     fields = ('property', 'value')
@@ -21,7 +59,7 @@ class EventInline(admin.TabularInline):
 
 class RegistrationAdmin(admin.ModelAdmin):
     readonly_fields = ('numero', 'qrcode_display', 'ticket_link')
-    list_filter = ('type', 'gender', 'ticket_status')
+    list_filter = ('type', 'gender', 'ticket_status', EventFilter)
     list_display = ('numero', 'full_name', 'gender', 'type', 'ticket_status')
     search_fields = ('full_name', 'numero')
 
