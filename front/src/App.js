@@ -52,14 +52,11 @@ class App extends Component {
   async scan(content) {
     navigator.vibrate(200);
     let response;
-    try {
-      response = await fetch(`${config.host}/api/${content}/?person=${encodeURIComponent(this.state.scanningPerson)}`);
 
-      if (response.ok) {
-        this.successfulScan(await response.json(), content);
-      }
-    } catch (e) {
-      this.error();
+    response = await fetch(`${config.host}/api/${content}/?person=${encodeURIComponent(this.state.scanningPerson)}`);
+
+    if (response.ok) {
+      this.successfulScan(await response.json(), content);
     }
   }
 

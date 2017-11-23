@@ -21,7 +21,11 @@ class Scanner extends Component {
 
       this.scanner.addListener('scan', async (content) => {
         this.setState({loading: true});
-        this.scan(content);
+        try {
+          await this.scan(content);
+        } catch (err) {
+          this.error();
+        }
       });
     }
 
@@ -38,7 +42,10 @@ class Scanner extends Component {
   }
 
   error() {
-    this.setState({loading: false});
+    this.setState({loading: false, error: 'Impossible de lire le billet.'});
+    setTimeout(() => {
+      this.setState({error: false});
+    }, 3000);
   }
 
   changeCamera() {
@@ -53,6 +60,11 @@ class Scanner extends Component {
         {this.state.loading ? (
           <div className="container">
             <div className="alert alert-info">'Chargement...'</div>
+          </div>
+        ) : ''}
+        {this.state.error ? (
+          <div className="container">
+            <div className="alert alert-danger">{this.state.error}</div>
           </div>
         ) : ''}
         <button id="changeButton" className="btn btn-success" onClick={this.changeCamera.bind(this)}>Changer la camera</button>
