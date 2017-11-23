@@ -18,6 +18,11 @@ const EVENT_LABELS = {
   cancel: 'Scan annulé'
 }
 
+const GENDER_LABELS = {
+  H: 'Homme',
+  F: 'Femme',
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -69,7 +74,9 @@ class App extends Component {
             <h1 className="text-center">{registration.full_name}</h1>
             <h3>Rôle&nbsp;: {TYPE_LABELS[registration.type]}</h3>
             <h3>#{registration.numero}</h3>
-            <p><b>Genre&nbsp;:</b> {registration.gender}</p>
+            {['M', 'F'].includes(GENDER_LABELS[registration.gender]) ? (
+              <p><b>Genre&nbsp;:</b> {registration.gender}</p>
+            ) : ''}
             <p><b>Historique&nbsp;:</b></p>
             <ul>{registration.events.map((event) => (
                 <li key={event.time}>{EVENT_LABELS[event.type]} le {new Date(event.time).toLocaleString()}</li>
