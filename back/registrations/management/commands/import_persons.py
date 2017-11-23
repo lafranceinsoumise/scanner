@@ -75,6 +75,7 @@ def modify_if_changed(properties, common_fields, meta_fields, assign_table, tabl
             field_changed = has_attr_changed(metas[f], 'value', properties[f])
             changed = changed or field_changed
             if field_changed:
+                metas[f].save()
                 log_file and log_file.write('Updated meta: {} ({})\n'.format(f, registration.numero))
 
         if changed:
