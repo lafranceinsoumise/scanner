@@ -12,10 +12,15 @@ def send_email(registration, connection=None):
     body = get_template('registrations/email.txt').render(context)
     html = get_template('registrations/email.html').render(context)
 
+    if registration.ticket_status == registration.TICKET_MODIFIED:
+        subject = "Modification de votre ticket pour la convention"
+    else:
+        subject = "Votre ticket pour la Convention"
+
     ticket = gen_ticket(registration)
 
     email = mail.EmailMultiAlternatives(
-        subject='Votre ticket pour la Convention',
+        subject=subject,
         from_email=settings.EMAIL_FROM,
         to=[registration.contact_email],
         body=body,
@@ -31,6 +36,6 @@ def send_email(registration, connection=None):
 
     email.send()
 
-    if not registration.ticket_sent:
-        registration.ticket_sent = True
+    if not registration.ticket_status != registration.TICKET_SENT:
+        registration.ticket_status = registration.TICKET_SENT
         registration.save()

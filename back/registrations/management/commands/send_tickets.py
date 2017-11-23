@@ -36,7 +36,7 @@ class Command(BaseCommand):
         query = reduce(or_, ranges)
 
         if check_sent_status:
-            query = query & Q(ticket_sent=False)
+            query = query & Q(ticket_up_to_date=False)
 
         connection = get_connection()
 

@@ -29,13 +29,24 @@ class Registration(models.Model):
         (GENDER_OTHER, 'Autre / Non défini'),
     )
 
+    TICKET_NOT_SENT = 'N'
+    TICKET_MODIFIED = 'M'
+    TICKET_SENT = 'S'
+    TICKET_CHOICES = (
+        (TICKET_NOT_SENT, "Ticket non envoyé"),
+        (TICKET_MODIFIED, "Ticket modifié depuis l'envoi"),
+        (TICKET_SENT, "Ticket à jour envoyé")
+    )
+
     numero = models.IntegerField('Numéro', primary_key=True)
     type = models.CharField('Type', max_length=255, choices=TYPE_CHOICES, blank=True)
     contact_email = models.EmailField('Email de contact')
     full_name = models.CharField('Nom complet', max_length=255)
     gender = models.CharField('Genre', max_length=1, choices=GENDER_CHOICES, blank=True)
     uuid = models.UUIDField('Identifiant sur la plateforme', blank=True, null=True)
-    ticket_sent = models.BooleanField('Ticket envoyé', default=False)
+    ticket_status = models.CharField(
+        "Statut du ticket", choices=TICKET_CHOICES, default=TICKET_NOT_SENT, max_length=1, blank=False
+    )
 
     table = models.CharField('Numéro de table', blank=True, max_length=15, validators=[TableValidator()])
 

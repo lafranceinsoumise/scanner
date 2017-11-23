@@ -1,11 +1,73 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ValidationError
+from django.db import transaction
 import argparse
-import csv
 import tqdm
+import csv
 
 from registrations.models import Registration, RegistrationMeta
 from registrations.actions.tables import get_random_tables
+
+
+def has_attr_changed(obj, attr, value):
+    old_value = getattr(obj, attr)
+
+    if value == old_value:
+        return False
+    else:
+        setattr(obj, attr, value)
+        return True
+
+
+def modify_if_changed(properties, common_fields, meta_fields, assign_table, tables):
+    # do not use get_or_create ==> we do not want to create empty registration in case something goes wrong
+    try:
+        registration = Registration.objects.prefetch_related('metas').get(numero=properties['numero'])
+        metas = {m.property: m for m in registration.metas.all()}
+        changed = False
+    except Registration.DoesNotExist:
+        registration = Registration(numero=properties['numero'])
+        metas = {}
+        changed = True
+
+    for f in common_fields:
+        changed = changed or has_attr_changed(registration, f, properties[f])
+
+    if assign_table and not registration.table:
+        if not tables:
+            raise CommandError('No more tables to assign !')
+        registration.table = tables.pop()
+        changed = True
+
+    # let's keep only non empty meta properties
+    meta_fields = {f for f in meta_fields if properties[f]}
+    existing_metas = set(metas)
+
+    # new metas: non empty value that are not in metas dict
+    new_metas = meta_fields - existing_metas
+
+    # updated metas: non empty values that are in both meta_fields and metas
+    updated_metas = meta_fields & existing_metas
+
+    # deleted metas: missing fields and empty fields
+    deleted_metas = existing_metas - meta_fields
+
+    with transaction.atomic():
+        if new_metas or deleted_metas:
+            changed = True
+
+            for f in new_metas:
+                RegistrationMeta.objects.create(registration=registration, property=f, value=properties[f])
+
+            registration.metas.filter(property__in=deleted_metas).delete()
+
+        for f in updated_metas:
+            changed = changed or has_attr_changed(metas[f], 'value', properties[f])
+
+        if changed:
+            if registration.ticket_status == registration.TICKET_SENT:
+                registration.ticket_status = registration.TICKET_MODIFIED
+            registration.save()
 
 
 class Command(BaseCommand):
@@ -19,15 +81,13 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, input, assign_table, **options):
-        import csv
-
         r = csv.DictReader(input)
 
         if any(f not in r.fieldnames for f in ['numero', 'type']):
             raise CommandError('CSV file must have at least columns numero and type')
 
-        if 'ticket_sent' in r.fieldnames:
-            raise CommandError('Ticket sent field is not allowed')
+        if 'ticket_status' in r.fieldnames:
+            raise CommandError('Ticket status field is not allowed')
 
         if assign_table and 'table' in r.fieldnames:
             raise CommandError('Table column in csv file: cannot assign !')
@@ -70,21 +130,4 @@ class Command(BaseCommand):
         tables = get_random_tables()
 
         for line in tqdm.tqdm(lines, desc='Importing'):
-            registration, status = Registration.objects.update_or_create(
-                numero=line['numero'],
-                defaults={field_name: line[field_name] for field_name in common_fields}
-            )
-
-            if not registration.table and assign_table:
-                registration.table = tables.pop()
-                registration.save()
-
-            for field_name in meta_fields:
-                if line[field_name]:
-                    RegistrationMeta.objects.update_or_create(
-                        registration=registration,
-                        property=field_name,
-                        defaults={'value': line[field_name]}
-                    )
-
-            registration.metas.exclude(property__in=[f for f in meta_fields if line[f]]).delete()
+            modify_if_changed(line, common_fields, meta_fields, assign_table, tables)
