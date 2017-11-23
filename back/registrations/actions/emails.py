@@ -36,6 +36,6 @@ def send_email(registration, connection=None):
 
     email.send()
 
-    if not registration.ticket_status != registration.TICKET_SENT:
+    if registration.ticket_status != registration.TICKET_SENT:
         registration.ticket_status = registration.TICKET_SENT
         registration.save()
