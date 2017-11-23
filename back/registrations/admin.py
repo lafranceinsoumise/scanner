@@ -22,8 +22,8 @@ class EventInline(admin.TabularInline):
 class RegistrationAdmin(admin.ModelAdmin):
     readonly_fields = ('numero', 'qrcode_display', 'ticket_link')
     list_filter = ('type', 'gender')
-    list_display = ('full_name', 'gender', 'type')
-    search_fields = ('full_name',)
+    list_display = ('numero', 'full_name', 'gender', 'type')
+    search_fields = ('full_name', 'numero')
 
     inlines = (
         MetaInline,
