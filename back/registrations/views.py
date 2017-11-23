@@ -22,7 +22,7 @@ class CodeView(View):
 
         self.code = code
         registration = self.get_object()
-        Event.objects.create(registration=registration, person=request.GET.get('person'))
+        Event.objects.create(registration=registration, type='scan', person=request.GET.get('person'))
 
         return JsonResponse({
             'numero': registration.numero,
