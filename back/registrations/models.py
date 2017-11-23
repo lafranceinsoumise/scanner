@@ -90,3 +90,4 @@ class Event(models.Model):
     type = models.CharField('Type', max_length=255, choices=TYPE_CHOICES)
     registration = models.ForeignKey('Registration', related_name='events')
     time = models.DateTimeField('Date et heure', auto_now_add=True)
+    person = models.CharField('Personne ayant scanné', max_length=255)

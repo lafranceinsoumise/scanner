@@ -25,8 +25,13 @@ class ViewTestCase(TestCase):
         RegistrationMeta.objects.create(property="bus", value="Lille", registration=self.registration)
         Event.objects.create(registration=self.registration, type='scan')
 
-    def test_get_info(self):
+    def test_author_is_required(self):
         response = self.client.get(reverse('view_code', kwargs={'code': '1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='}))
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_get_info(self):
+        response = self.client.get(reverse('view_code', kwargs={'code': '1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='}) + '?person=Guillaume%20Royer')
         json = response.json()
 
         self.assertEqual(json['events'][0]['type'], 'scan')
@@ -42,17 +47,19 @@ class ViewTestCase(TestCase):
         })
 
         self.assertEqual(self.registration.events.count(), 2)
+        self.assertEqual(self.registration.events.all()[1].person, 'Guillaume Royer')
 
     def test_can_post_info(self):
-        response = self.client.post(reverse('view_code', kwargs={'code': '1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='}), data={
+        response = self.client.post(reverse('view_code', kwargs={'code': '1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='}) + '?person=Guillaume%20Royer', data={
             'type': 'entrance'
         })
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.registration.events.all()[1].type, 'entrance')
+        self.assertEqual(self.registration.events.all()[1].person, 'Guillaume Royer')
 
     def test_cannot_post_nawak(self):
-        response = self.client.post(reverse('view_code', kwargs={'code': '1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='}), data={
+        response = self.client.post(reverse('view_code', kwargs={'code': '1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='}) + '?person=Guillaume%20Royer', data={
             'type': 'prout'
         })
 

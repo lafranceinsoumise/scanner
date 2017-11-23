@@ -1,3 +1,4 @@
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404
 from django.views import View
@@ -16,9 +17,12 @@ class CodeView(View):
         return get_object_or_404(Registration, numero=object_id)
 
     def get(self, request, code):
+        if request.GET.get('person') is None or len(request.GET.get('person')) > 255:
+            raise PermissionDenied()
+
         self.code = code
         registration = self.get_object()
-        Event.objects.create(registration=registration, type='scan')
+        Event.objects.create(registration=registration, person=request.GET.get('person'))
 
         return JsonResponse({
             'numero': registration.numero,
@@ -30,12 +34,15 @@ class CodeView(View):
         })
 
     def post(self, request, code):
+        if request.GET.get('person') is None or len(request.GET.get('person')) > 255:
+            raise PermissionDenied()
+
         self.code = code
 
         if (request.POST.get('type', None) not in [choice[0] for choice in Event.TYPE_CHOICES]):
             return HttpResponseBadRequest()
 
         registration = self.get_object()
-        Event.objects.create(registration=registration, type=request.POST['type'])
+        Event.objects.create(registration=registration, type=request.POST['type'], person=request.GET.get('person'))
 
         return HttpResponse('OK')

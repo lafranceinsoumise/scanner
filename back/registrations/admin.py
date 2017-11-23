@@ -53,7 +53,7 @@ class MetaInline(admin.TabularInline):
 
 class EventInline(admin.TabularInline):
     model = Event
-    readonly_fields = ['type', 'time']
+    readonly_fields = ['type', 'time', 'person']
     extra = 0
 
 
