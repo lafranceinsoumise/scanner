@@ -179,7 +179,7 @@ if not DEBUG:
     }
 
 TABLE_INFORMATION = Counter({
-    **{'{}-{:02d}'.format(z, i): 9 for z, n in zones.items() for i in range(1, n+1)},
+    **{'{}-{:02d}'.format(z, i): 10 for z, n in zones.items() for i in range(1, n+1)},
     **{'4-A-{:02d}'.format(i): 9 for i in range(1, 9+1)},
     **{'4-B-{:02d}'.format(i): 9 for i in range(2, 4+1)}
 })
@@ -187,9 +187,5 @@ TABLE_INFORMATION = Counter({
 # one SO for these tables
 for t in ['4-A-02', '4-A-06', '4-A-09', '4-B-02', '4-B-04']:
     TABLE_INFORMATION[t] -= 1
-
-for zone, limit in zones.items():
-    for i in range(1, limit+1, 2):
-        TABLE_INFORMATION['{}-{:02d}'.format(zone, i)] += 1
 
 TABLE_SET = set(TABLE_INFORMATION) | {'4-B-01'}
