@@ -98,7 +98,7 @@ class App extends Component {
             ) : ''}
             {registration.events.length > 1 && <p><b>Historique&nbsp;:</b></p>}
             <ul>{registration.events.slice(0, -1).map((event) => (
-                <li key={event.time}>{EVENT_LABELS[event.type]} le {new Date(event.time).toLocaleString()}</li>
+                <li key={event.time}>{EVENT_LABELS[event.type]} le {new Date(event.time).toLocaleString()} par {event.person}</li>
             ))}</ul>
             {registration.events.find(event => event.type === 'entrance') ? (
               <div className="alert alert-danger">
