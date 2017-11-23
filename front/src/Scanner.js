@@ -9,7 +9,7 @@ class Scanner extends Component {
     this.successfulScan = props.successfulScan;
     this.state = {}
 
-    this.activeCamera = 0;
+    this.activeCamera = localStorage.getItem('preferedCamera') || 0;
   }
 
   async componentDidMount() {
@@ -46,6 +46,7 @@ class Scanner extends Component {
   }
 
   async componentWillUnmount () {
+      localStorage.setItem('preferedCamera', this.activeCamera % this.cameras.length)
       await this.scanner.stop();
   }
 
