@@ -99,8 +99,8 @@ class App extends Component {
             {['M', 'F'].includes(GENDER_LABELS[registration.gender]) ? (
               <p><b>Genre&nbsp;:</b> {registration.gender}</p>
             ) : ''}
-            <p><b>Historique&nbsp;:</b></p>
-            <ul>{registration.events.map((event) => (
+            {registration.events.length > 1 && <p><b>Historique&nbsp;:</b></p>}
+            <ul>{registration.events.slice(0, -1).map((event) => (
                 <li key={event.time}>{EVENT_LABELS[event.type]} le {new Date(event.time).toLocaleString()}</li>
             ))}</ul>
             {registration.events.find(event => event.type === 'entrance') ? (
