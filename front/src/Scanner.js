@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
 
-import config from './config';
-
 class Scanner extends Component {
   constructor(props) {
     super(props);
     this.clickBack = props.clickBack;
-    this.successfulScan = props.successfulScan;
+    this.scan = props.scan;
     this.state = {}
 
     this.activeCamera = localStorage.getItem('preferedCamera') || 0;
@@ -22,19 +20,8 @@ class Scanner extends Component {
       this.cameras = await window.Instascan.Camera.getCameras();
 
       this.scanner.addListener('scan', async (content) => {
-        navigator.vibrate(200);
         this.setState({loading: true});
-
-        let response;
-        try {
-          response = await fetch(config.host + '/api/' + content + '/');
-
-          if (response.ok) {
-            this.successfulScan(await response.json(), content);
-          }
-        } catch (e) {
-          this.error();
-        }
+        this.scan(content);
       });
     }
 

@@ -29,6 +29,12 @@ class App extends Component {
     this.state = {action: 'wait'};
   }
 
+  // Start and stop scanning
+
+  personFieldChange(event) {
+    this.setState({scanningPerson: event.target.value});
+  }
+
   startScanning() {
     this.setState({action: 'scan'});
   }
@@ -37,15 +43,31 @@ class App extends Component {
     this.setState({action: 'wait'});
   }
 
+  // Take action with scanners
+
   successfulScan(registration, code) {
     this.setState({action: 'displayRegistration', registration, code});
+  }
+
+  async scan(content) {
+    navigator.vibrate(200);
+    let response;
+    try {
+      response = await fetch(`${config.host}/api/${content}/?person=${encodeURIComponent(this.state.scanningPerson)}`);
+
+      if (response.ok) {
+        this.successfulScan(await response.json(), content);
+      }
+    } catch (e) {
+      this.error();
+    }
   }
 
   async validateScan() {
     let form = new FormData();
     form.append('type', 'entrance');
 
-    await fetch(config.host + '/api/' + this.state.code + '/', {
+    await fetch(`${config.host}/api/${this.state.code}/?person=${encodeURIComponent(this.state.scanningPerson)}`, {
       method: 'POST',
       body: form,
     });
@@ -57,7 +79,7 @@ class App extends Component {
     let form = new FormData();
     form.append('type', 'cancel');
 
-    await fetch(config.host + '/api/' + this.state.code + '/', {
+    await fetch(`${config.host}/api/${this.state.code}/?person=${encodeURIComponent(this.state.scanningPerson)}`, {
       method: 'POST',
       body: form,
     });
@@ -99,7 +121,17 @@ class App extends Component {
       default:
         return (
           <div id="home">
-            <button className="btn btn-success btn-block" onClick={this.startScanning.bind(this)}>Scanner</button>
+            <div class="container">
+              <p>Entrez vos noms et prénoms pour démarrer.</p>
+              <form>
+                <div class="form-group">
+                  <input className="form-control" type="text" value={this.state.scanningPerson} onChange={this.personFieldChange.bind(this)} />
+                </div>
+              </form>
+              {this.state.scanningPerson && this.state.scanningPerson.length > 5 ? (
+                <button className="btn btn-success btn-block" onClick={this.startScanning.bind(this)}>Scanner</button>
+              ): ''}
+            </div>
           </div>
         )
     }
