@@ -39,11 +39,11 @@ class EventFilter(admin.SimpleListFilter):
         # Compare the requested value (either '80s' or '90s')
         # to decide how to filter the queryset.
         if self.value() == 'scanned':
-            return queryset.filter(events__type=Event.TYPE_SCAN)
+            return queryset.filter(events__type=Event.TYPE_SCAN).distinct()
         if self.value() == 'validated':
-            return queryset.filter(events__type=Event.TYPE_ENTRANCE)
+            return queryset.filter(events__type=Event.TYPE_ENTRANCE).distinct()
         if self.value() == 'cancelled':
-            return queryset.filter(events__type=Event.TYPE_CANCEL)
+            return queryset.filter(events__type=Event.TYPE_CANCEL).distinct()
 
 
 class MetaInline(admin.TabularInline):
