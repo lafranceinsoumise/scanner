@@ -13,13 +13,14 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.urls import path
 from django.contrib import admin
 from django.views.decorators.csrf import csrf_exempt
 
 from registrations.views import CodeView
 
+
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
-    url(r'^api/(?P<code>[0-9]+\.[0-9a-zA-Z-_=]*)/', csrf_exempt(CodeView.as_view()), name='view_code')
+    path('admin/', admin.site.urls),
+    path('api/<code>/', csrf_exempt(CodeView.as_view()), name='view_code'),
 ]
