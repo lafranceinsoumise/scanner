@@ -11,10 +11,12 @@ dj-email-url = "==0.0.*"
 Django = "==1.11.*"
 django-cors-headers = "==2.*"
 olefile = "==0.44"
-Pillow = "==4.3.*"
+pillow = "==4.3.*"
 pytz = "*"
 qrcode = "==5.*"
 tqdm = "*"
+prometheus-client = "*"
 
 
 [dev-packages]
+
