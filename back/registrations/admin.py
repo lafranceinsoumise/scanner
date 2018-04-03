@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 
-from .models import Registration, Event, RegistrationMeta
+from .models import Registration, Event, RegistrationMeta, TicketEvent, TicketCategory
 from .actions import codes, tickets
 
 
@@ -59,8 +59,8 @@ class EventInline(admin.TabularInline):
 
 class RegistrationAdmin(admin.ModelAdmin):
     readonly_fields = ('numero', 'qrcode_display', 'ticket_link')
-    list_filter = ('type', 'gender', 'ticket_status', EventFilter)
-    list_display = ('numero', 'full_name', 'gender', 'type', 'ticket_status', 'table')
+    list_filter = ('category__name', 'gender', 'ticket_status', EventFilter, 'table')
+    list_display = ('numero', 'full_name', 'gender', 'ticket_status', 'table')
     search_fields = ('full_name', 'numero')
 
     inlines = (
@@ -110,4 +110,15 @@ class RegistrationAdmin(admin.ModelAdmin):
         return response
 
 
+class TicketEventAdmin(admin.ModelAdmin):
+    model = TicketEvent
+    list_display = ('name',)
+
+
+class TicketCategoryAdmin(admin.ModelAdmin):
+    model = TicketCategory
+    list_display = ('name', 'event', 'color', 'background_color')
+
 admin.site.register(Registration, RegistrationAdmin)
+admin.site.register(TicketCategory, TicketCategoryAdmin)
+admin.site.register(TicketEvent, TicketEventAdmin)

@@ -1,27 +1,41 @@
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
-from registrations.models import Registration, RegistrationMeta, Event
+from registrations.models import Registration, RegistrationMeta, Event, TicketEvent, TicketCategory
+
 from .actions import codes
 
 class RegistrationTestCase(TestCase):
+    def setUp(self):
+        self.event = TicketEvent.objects.create(name="Événement", send_tickets_until=timezone.now())
+        self.category = TicketCategory.objects.create(name="Catégorie", color="white", background_color="blue", event=self.event)
+
     def test_can_create_registration(self):
-        Registration.objects.create(numero=1, full_name="Full Name", gender='F')
+        Registration.objects.create(numero=1, full_name="Full Name", gender='F', event=self.event, category=self.category)
 
     def test_can_create_registration_meta(self):
-        registration = Registration.objects.create(numero=1, full_name="Full Name", gender='F')
+        registration = Registration.objects.create(numero=1, full_name="Full Name", gender='F', event=self.event, category=self.category)
         RegistrationMeta.objects.create(property="bus", value="Clermont", registration=registration)
 
 
 class ValidationTestCase(TestCase):
+    def setUp(self):
+        self.event = TicketEvent.objects.create(name="Événement", send_tickets_until=timezone.now())
+        self.category = TicketCategory.objects.create(name="Catégorie", color="white", background_color="blue",
+                                                      event=self.event)
+
     def test_can_create_validation_event(self):
-        registration = Registration.objects.create(numero=1, full_name="Full Name")
+        registration = Registration.objects.create(numero=1, full_name="Full Name", event=self.event, category=self.category)
         Event.objects.create(registration=registration, type='scan')
 
 
 class ViewTestCase(TestCase):
     def setUp(self):
-        self.registration = Registration.objects.create(numero=1, full_name="Full Name")
+        self.event = TicketEvent.objects.create(name="Événement", send_tickets_until=timezone.now())
+        self.category = TicketCategory.objects.create(name="Catégorie", color="white", background_color="blue",
+                                                      event=self.event)
+        self.registration = Registration.objects.create(numero=1, full_name="Full Name", event=self.event, category=self.category)
         RegistrationMeta.objects.create(property="bus", value="Lille", registration=self.registration)
         Event.objects.create(registration=self.registration, type='scan')
 
@@ -41,7 +55,7 @@ class ViewTestCase(TestCase):
             'numero': 1,
             'gender': '',
             'full_name': 'Full Name',
-            'type': '',
+            'type': 'Catégorie',
             'meta': {
                 'bus': 'Lille'
             }

@@ -4,6 +4,24 @@ from .actions.codes import gen_qrcode
 from .actions.tables import TableValidator
 
 
+class TicketEvent(models.Model):
+    name = models.TextField("Nom de l'événement", max_length=255)
+    send_tickets_until = models.DateTimeField("Envoyé les tickets jusqu'à la date")
+
+    def __str__(self):
+        return self.name
+
+
+class TicketCategory(models.Model):
+    name = models.TextField("Nom de la catégorie", max_length=255)
+    color = models.TextField("Couleur", max_length=255)
+    background_color = models.TextField("Couleur de fond", max_length=255)
+    event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+
 class Registration(models.Model):
     TYPE_INVITE = 'invite'
     TYPE_PARTICIPANT = 'participant'
@@ -38,8 +56,9 @@ class Registration(models.Model):
         (TICKET_SENT, "Ticket à jour envoyé")
     )
 
+    event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
     numero = models.IntegerField('Numéro', primary_key=True)
-    type = models.CharField('Type', max_length=255, choices=TYPE_CHOICES, blank=True)
+    category = models.ForeignKey(TicketCategory, on_delete=models.CASCADE)
     contact_email = models.EmailField('Email de contact')
     full_name = models.CharField('Nom complet', max_length=255)
     gender = models.CharField('Genre', max_length=1, choices=GENDER_CHOICES, blank=True)

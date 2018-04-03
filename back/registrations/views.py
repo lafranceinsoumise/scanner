@@ -28,7 +28,7 @@ class CodeView(View):
             'numero': registration.numero,
             'full_name': registration.full_name,
             'gender': registration.gender,
-            'type': registration.type,
+            'type': registration.category.name,
             'meta': dict([(meta.property, meta.value) for meta in registration.metas.all()]),
             'events': [{'time': event.time, 'type': event.type, 'person': event.person} for event in registration.events.all()]
         })
