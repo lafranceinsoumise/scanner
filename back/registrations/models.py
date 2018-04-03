@@ -5,7 +5,7 @@ from .actions.tables import TableValidator
 
 
 class TicketEvent(models.Model):
-    name = models.TextField("Nom de l'événement", max_length=255)
+    name = models.CharField("Nom de l'événement", max_length=255)
     send_tickets_until = models.DateTimeField("Envoyé les tickets jusqu'à la date")
 
     def __str__(self):
@@ -13,9 +13,9 @@ class TicketEvent(models.Model):
 
 
 class TicketCategory(models.Model):
-    name = models.TextField("Nom de la catégorie", max_length=255)
-    color = models.TextField("Couleur", max_length=255)
-    background_color = models.TextField("Couleur de fond", max_length=255)
+    name = models.CharField("Nom de la catégorie", max_length=255)
+    color = models.CharField("Couleur", max_length=255)
+    background_color = models.CharField("Couleur de fond", max_length=255)
     event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
 
     def __str__(self):
