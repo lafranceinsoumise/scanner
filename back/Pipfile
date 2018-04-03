@@ -1,0 +1,20 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[packages]
+
+dj-email-url = "==0.0.*"
+Django = "==1.11.*"
+django-cors-headers = "==2.*"
+olefile = "==0.44"
+Pillow = "==4.3.*"
+pytz = "*"
+qrcode = "==5.*"
+tqdm = "*"
+
+
+[dev-packages]
