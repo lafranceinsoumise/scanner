@@ -65,6 +65,9 @@ class Registration(models.Model):
     def qrcode(self):
         return gen_qrcode(self.pk)
 
+    def __str__(self):
+        return '{} - {} ({})'.format(self.numero, self.full_name, self.get_type_display())
+
 
 class RegistrationMeta(models.Model):
     property = models.CharField(max_length=255)
