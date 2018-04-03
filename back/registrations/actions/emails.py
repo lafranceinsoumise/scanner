@@ -3,7 +3,12 @@ from django.utils.text import slugify
 from django.conf import settings
 from django.template.loader import get_template
 
+from prometheus_client import Counter
+
 from .tickets import gen_ticket
+
+
+email_sent_counter = Counter('scanner_email_sent', 'Number of emails sent')
 
 
 def send_email(registration, connection=None):
@@ -39,3 +44,5 @@ def send_email(registration, connection=None):
     if registration.ticket_status != registration.TICKET_SENT:
         registration.ticket_status = registration.TICKET_SENT
         registration.save()
+
+    email_sent_counter.inc()

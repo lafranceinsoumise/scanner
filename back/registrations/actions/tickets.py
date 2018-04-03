@@ -1,8 +1,12 @@
 from django.template.loader import get_template
 from django.conf import settings
+from prometheus_client import Counter
 import base64
 from io import BytesIO
 import subprocess
+
+
+ticket_generation_counter = Counter('scanner_tickets_generation', 'Number of ticket generation', ['result'])
 
 
 class TicketGenerationException(Exception):
@@ -50,9 +54,12 @@ def gen_ticket(registration):
     except subprocess.TimeoutExpired:
         inkscape.kill()
         inkscape.communicate()
+        ticket_generation_counter.labels('timeout').inc()
         raise TicketGenerationException('Timeout')
 
     if inkscape.returncode:
+        ticket_generation_counter.labels('inkscape_error').inc()
         raise TicketGenerationException('Return code: %d' % inkscape.returncode)
 
+    ticket_generation_counter.labels('success').inc()
     return output
