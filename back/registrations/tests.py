@@ -52,7 +52,7 @@ class ViewTestCase(TestCase):
         self.assertEqual(json['events'][1]['person'], 'Guillaume Royer')
         del json['events']
         self.assertEqual(json, {
-            'numero': 1,
+            'numero': '1',
             'gender': '',
             'full_name': 'Full Name',
             'type': 'Catégorie',

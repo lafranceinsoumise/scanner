@@ -6,7 +6,7 @@ import argparse
 import tqdm
 import csv
 
-from registrations.models import Registration, RegistrationMeta
+from registrations.models import Registration, RegistrationMeta, TicketEvent, TicketCategory
 from registrations.actions.tables import get_random_tables
 
 
@@ -20,14 +20,14 @@ def has_attr_changed(obj, attr, value):
         return True
 
 
-def modify_if_changed(properties, common_fields, meta_fields, assign_table, tables, log_file):
+def modify_if_changed(event_id, category, properties, common_fields, meta_fields, log_file):
     # do not use get_or_create ==> we do not want to create empty registration in case something goes wrong
     try:
-        registration = Registration.objects.prefetch_related('metas').get(numero=properties['numero'])
+        registration = Registration.objects.prefetch_related('metas').get(event__id=event_id, numero=properties['numero'])
         metas = {m.property: m for m in registration.metas.all()}
         changed = False
     except Registration.DoesNotExist:
-        registration = Registration(numero=properties['numero'])
+        registration = Registration(event_id=event_id, numero=properties['numero'], category=category)
         metas = {}
         changed = True
         log_file and log_file.write('New registration: {}\n'.format(registration.numero))
@@ -39,13 +39,6 @@ def modify_if_changed(properties, common_fields, meta_fields, assign_table, tabl
         changed = changed or field_changed
         if field_changed and log_file:
             log_file.write('Field changed: {} ({})\n'.format(f, registration.numero))
-
-    if assign_table and not registration.table:
-        if not tables:
-            raise CommandError('No more tables to assign !')
-        registration.table = tables.pop()
-        changed = True
-        log_file and log_file.write('Assigned table: {} ({})\n'.format(registration.table, registration.numero))
 
     # let's keep only non empty meta properties
     meta_fields = {f for f in meta_fields if properties[f]}
@@ -61,10 +54,14 @@ def modify_if_changed(properties, common_fields, meta_fields, assign_table, tabl
     deleted_metas = existing_metas - meta_fields
 
     with transaction.atomic():
+        if changed:
+            if registration.ticket_status == registration.TICKET_SENT:
+                registration.ticket_status = registration.TICKET_MODIFIED
+            registration.save()
+
         if new_metas:
-            changed = True
             for f in new_metas:
-                RegistrationMeta.objects.create(registration=registration, property=f, value=properties[f])
+                RegistrationMeta.objects.create(registration_id=registration.id, property=f, value=properties[f])
             log_file and log_file.write('New metas: {} ({})\n'.format(', '.join(new_metas), registration.numero))
 
         if deleted_metas:
@@ -78,49 +75,40 @@ def modify_if_changed(properties, common_fields, meta_fields, assign_table, tabl
                 metas[f].save()
                 log_file and log_file.write('Updated meta: {} ({})\n'.format(f, registration.numero))
 
-        if changed:
-            if registration.ticket_status == registration.TICKET_SENT:
-                registration.ticket_status = registration.TICKET_MODIFIED
-            registration.save()
-            log_file and log_file.write('Committing\n\n')
+
+        log_file and log_file.write('Committing\n\n')
 
 
 class Command(BaseCommand):
     help = "Import people from a CSV"
 
     def add_arguments(self, parser):
+        parser.add_argument('event_id', type=int)
         parser.add_argument('input', type=argparse.FileType(mode='r', encoding='utf-8'))
-        parser.add_argument(
-            '-a', '--assign-table',
-            action='store_true', dest='assign_table'
-        )
         parser.add_argument('-l', '--log-to', type=argparse.FileType(mode='a', encoding='utf-8'), dest='log_file')
 
-    def handle(self, *args, input, assign_table, log_file=None, **options):
+    def handle(self, *args, input, event_id, log_file=None, **options):
+        try:
+            TicketEvent.objects.get(id=event_id)
+        except TicketEvent.DoesNotExist:
+            raise CommandError('Event does not exist')
+
         r = csv.DictReader(input)
 
-        if any(f not in r.fieldnames for f in ['numero', 'type']):
-            raise CommandError('CSV file must have at least columns numero and type')
+        if any(f not in r.fieldnames for f in ['numero', 'category']):
+            raise CommandError('CSV file must have at least columns numero and category')
 
         if 'ticket_status' in r.fieldnames:
             raise CommandError('Ticket status field is not allowed')
-
-        if assign_table and 'table' in r.fieldnames:
-            raise CommandError('Table column in csv file: cannot assign !')
 
         # read everything so that we import only if full file is valid
         lines = list(r)
         input.close()
 
-        # check numero is good
-        for i, line in enumerate(lines):
-            if not line['numero'].isdigit():
-                raise CommandError('numero field must be an integer on line {}'.format(i+1))
-
         # find columns that are model fields
         model_field_names = {field.name for field in Registration._meta.get_fields()}
-        common_fields = (model_field_names & set(r.fieldnames))- {'numero'}
-        meta_fields = set(r.fieldnames) - common_fields - {'numero'}
+        common_fields = (model_field_names & set(r.fieldnames))- {'numero', 'event', 'category'}
+        meta_fields = set(r.fieldnames) - common_fields - {'numero', 'event', 'category'}
 
         # apply validators from field_names
         for field_name in common_fields:
@@ -142,8 +130,10 @@ class Command(BaseCommand):
                 except ValidationError:
                     raise CommandError('Incorrect value in column %s on line %d' % (field_name, i+1))
 
-        # everything should be ok
-        tables = get_random_tables()
+        try:
+            category = TicketCategory.objects.get(event__id=event_id, name=line['category'])
+        except:
+            raise CommandError('Category does not exist on line %d' % i+1)
 
         for line in tqdm.tqdm(lines, desc='Importing'):
-            modify_if_changed(line, common_fields, meta_fields, assign_table, tables, log_file)
+            modify_if_changed(event_id, category, line, common_fields, meta_fields, log_file)

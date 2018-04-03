@@ -1,12 +1,12 @@
 from django.db import models
 
 from .actions.codes import gen_qrcode
-from .actions.tables import TableValidator
-
 
 class TicketEvent(models.Model):
     name = models.CharField("Nom de l'événement", max_length=255)
     send_tickets_until = models.DateTimeField("Envoyé les tickets jusqu'à la date")
+    ticket_template = models.FileField("Template du ticket", blank=True)
+    mosaico_url = models.URLField("URL du mail sur Mosaico", blank=True)
 
     def __str__(self):
         return self.name
@@ -19,25 +19,13 @@ class TicketCategory(models.Model):
     event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name
+        return f'{self.name} ({self.event.name})'
+
+    class Meta:
+        unique_together = (('event', 'name'),)
 
 
 class Registration(models.Model):
-    TYPE_INVITE = 'invite'
-    TYPE_PARTICIPANT = 'participant'
-    TYPE_VOLONTAIRE = 'volontaire'
-    TYPE_VOLONTAIRE_REFERENT = 'volontaire_referent'
-    TYPE_VILLAGE = 'village'
-    TYPE_ACCUEIL_SO = 'so'
-    TYPE_CHOICES = (
-        (TYPE_INVITE, 'Invité⋅e'),
-        (TYPE_PARTICIPANT, 'Participant⋅e'),
-        (TYPE_VOLONTAIRE, 'Volontaire'),
-        (TYPE_VOLONTAIRE_REFERENT, 'Volontaire référent⋅e'),
-        (TYPE_VILLAGE, 'Village'),
-        (TYPE_ACCUEIL_SO, 'Accueil et SO')
-    )
-
     GENDER_MALE = 'M'
     GENDER_FEMALE = 'F'
     GENDER_OTHER = 'O'
@@ -56,8 +44,9 @@ class Registration(models.Model):
         (TICKET_SENT, "Ticket à jour envoyé")
     )
 
+    id = models.AutoField(primary_key=True)
     event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
-    numero = models.IntegerField('Numéro', primary_key=True)
+    numero = models.CharField('Numéro d\'inscription', max_length=255, null=True)
     category = models.ForeignKey(TicketCategory, on_delete=models.CASCADE)
     contact_email = models.EmailField('Email de contact')
     full_name = models.CharField('Nom complet', max_length=255)
@@ -67,25 +56,15 @@ class Registration(models.Model):
         "Statut du ticket", choices=TICKET_CHOICES, default=TICKET_NOT_SENT, max_length=1, blank=False
     )
 
-    table = models.CharField('Numéro de table', blank=True, max_length=15, validators=[TableValidator()])
-
-    @property
-    def entrance(self):
-        if self.table:
-            zone = self.table[0]
-
-            if zone == '4':
-                zone = '2'
-
-            return 'N°{}'.format(zone)
-        return ''
-
     @property
     def qrcode(self):
         return gen_qrcode(self.pk)
 
     def __str__(self):
-        return '{} - {} ({})'.format(self.numero, self.full_name, self.get_type_display())
+        return '{} - {} ({})'.format(self.numero, self.full_name, self.category.name)
+
+    class Meta:
+        unique_together = (('event', 'numero'),)
 
 
 class RegistrationMeta(models.Model):

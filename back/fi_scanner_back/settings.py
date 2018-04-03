@@ -128,6 +128,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.environ.get('STATIC_ROOT')
 
+# Private files
+MEDIA_ROOT = os.environ.get('MEDIA_ROOT', 'media')
+
 email_config = dj_email_url.parse(os.environ.get('SMTP_URL', 'smtp://localhost:1025/'))
 
 EMAIL_FILE_PATH = email_config['EMAIL_FILE_PATH']
@@ -140,24 +143,6 @@ EMAIL_USE_TLS = email_config['EMAIL_USE_TLS']
 EMAIL_USE_SSL = email_config['EMAIL_USE_SSL']
 
 EMAIL_FROM = os.environ.get('EMAIL_FROM', 'tickets@lafranceinsoumise.fr')
-
-with open(os.path.join(BASE_DIR, 'fi_scanner_back', 'cars.csv')) as f:
-    r = csv.DictReader(f)
-    BUS_INFORMATION = {c['bus_origin']: c for c in r}
-
-with open(os.path.join(BASE_DIR, 'fi_scanner_back', 'car_normalisation.csv')) as f:
-    r = csv.DictReader(f)
-    BUS_ALIASES = {c['alias']: c['canonique'] for c in r}
-
-
-zones = {
-    '1-A': 33,
-    '1-B': 27,
-    '2-A': 27,
-    '2-B': 22,
-    '3-A': 30,
-    '3-B': 26,
-}
 
 if not DEBUG:
     LOGGING = {
@@ -177,15 +162,3 @@ if not DEBUG:
             },
         },
     }
-
-TABLE_INFORMATION = Counter({
-    **{'{}-{:02d}'.format(z, i): 10 for z, n in zones.items() for i in range(1, n+1)},
-    **{'4-A-{:02d}'.format(i): 9 for i in range(1, 9+1)},
-    **{'4-B-{:02d}'.format(i): 9 for i in range(2, 4+1)}
-})
-
-# one SO for these tables
-for t in ['4-A-02', '4-A-06', '4-A-09', '4-B-02', '4-B-04']:
-    TABLE_INFORMATION[t] -= 1
-
-TABLE_SET = set(TABLE_INFORMATION) | {'4-B-01'}

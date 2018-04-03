@@ -1,6 +1,5 @@
-from django.template.loader import get_template
-from django.conf import settings
 from prometheus_client import Counter
+from django.template.backends.django import DjangoTemplates
 import base64
 from io import BytesIO
 import subprocess
@@ -14,22 +13,15 @@ class TicketGenerationException(Exception):
 
 
 def gen_ticket(registration):
-    template = get_template('registrations/ticket.svg')
+    template = DjangoTemplates.from_string(registration.event.template.open())
 
-    context = {p.property: p.value for p in registration.metas.all()}
+    context = {'meta_' + p.property: p.value for p in registration.metas.all()}
 
     context['numero'] = registration.pk
     context['full_name'] = registration.full_name
     context['gender'] = registration.get_gender_display()
-    context['type'] = registration.get_type_display()
+    context['category'] = registration.category.name
     context['contact_email'] = registration.contact_email
-    context['table'] = registration.table
-    context['entrance'] = registration.entrance
-
-    if 'transport_type' in context and context['transport_type'] == 'car':
-        if context['bus_origin'] not in settings.BUS_INFORMATION:
-            context['bus_origin'] = settings.BUS_ALIASES[context['bus_origin']]
-        context.update(settings.BUS_INFORMATION[context['bus_origin']])
 
     img = registration.qrcode
     img_data = BytesIO()
