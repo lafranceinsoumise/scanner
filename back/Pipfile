@@ -8,7 +8,7 @@ name = "pypi"
 [packages]
 
 dj-email-url = "==0.0.*"
-Django = "==1.11.*"
+Django = "==2.0.*"
 django-cors-headers = "==2.*"
 olefile = "==0.44"
 pillow = "==4.3.*"

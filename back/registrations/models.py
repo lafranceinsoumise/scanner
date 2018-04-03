@@ -72,11 +72,11 @@ class Registration(models.Model):
 class RegistrationMeta(models.Model):
     property = models.CharField(max_length=255)
     value = models.TextField()
-    registration = models.ForeignKey('Registration', related_name='metas')
+    registration = models.ForeignKey('Registration', related_name='metas', on_delete=models.CASCADE)
 
     class Meta:
         indexes = (
-            models.Index(['registration', 'property'], name='registration_property_index'),
+            models.Index(fields=['registration', 'property'], name='registration_property_index'),
         )
 
 
@@ -91,6 +91,6 @@ class Event(models.Model):
     )
 
     type = models.CharField('Type', max_length=255, choices=TYPE_CHOICES)
-    registration = models.ForeignKey('Registration', related_name='events')
+    registration = models.ForeignKey('Registration', related_name='events', on_delete=models.PROTECT)
     time = models.DateTimeField('Date et heure', auto_now_add=True)
     person = models.CharField('Personne ayant scanné', max_length=255)
