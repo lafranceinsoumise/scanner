@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 
-from .models import Registration, Event, RegistrationMeta, TicketEvent, TicketCategory
+from .models import Registration, ScannerAction, RegistrationMeta, TicketEvent, TicketCategory
 from .actions import codes, tickets
 
 
@@ -39,11 +39,11 @@ class EventFilter(admin.SimpleListFilter):
         # Compare the requested value (either '80s' or '90s')
         # to decide how to filter the queryset.
         if self.value() == 'scanned':
-            return queryset.filter(events__type=Event.TYPE_SCAN).distinct()
+            return queryset.filter(events__type=ScannerAction.TYPE_SCAN).distinct()
         if self.value() == 'validated':
-            return queryset.filter(events__type=Event.TYPE_ENTRANCE).distinct()
+            return queryset.filter(events__type=ScannerAction.TYPE_ENTRANCE).distinct()
         if self.value() == 'cancelled':
-            return queryset.filter(events__type=Event.TYPE_CANCEL).distinct()
+            return queryset.filter(events__type=ScannerAction.TYPE_CANCEL).distinct()
 
 
 class MetaInline(admin.TabularInline):
@@ -52,7 +52,7 @@ class MetaInline(admin.TabularInline):
 
 
 class EventInline(admin.TabularInline):
-    model = Event
+    model = ScannerAction
     readonly_fields = ['type', 'time', 'person']
     extra = 0
 

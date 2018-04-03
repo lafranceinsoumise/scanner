@@ -99,7 +99,7 @@ class RegistrationMeta(models.Model):
         )
 
 
-class Event(models.Model):
+class ScannerAction(models.Model):
     TYPE_SCAN = 'scan'
     TYPE_ENTRANCE = 'entrance'
     TYPE_CANCEL = 'cancel'

@@ -3,7 +3,7 @@ from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, Http
 from django.shortcuts import get_object_or_404
 from django.views import View
 
-from .models import Registration, Event
+from .models import Registration, ScannerAction
 from .actions import codes
 
 
@@ -22,7 +22,7 @@ class CodeView(View):
 
         self.code = code
         registration = self.get_object()
-        Event.objects.create(registration=registration, type='scan', person=request.GET.get('person'))
+        ScannerAction.objects.create(registration=registration, type='scan', person=request.GET.get('person'))
 
         return JsonResponse({
             'numero': registration.numero,
@@ -39,10 +39,10 @@ class CodeView(View):
 
         self.code = code
 
-        if (request.POST.get('type', None) not in [choice[0] for choice in Event.TYPE_CHOICES]):
+        if (request.POST.get('type', None) not in [choice[0] for choice in ScannerAction.TYPE_CHOICES]):
             return HttpResponseBadRequest()
 
         registration = self.get_object()
-        Event.objects.create(registration=registration, type=request.POST['type'], person=request.GET.get('person'))
+        ScannerAction.objects.create(registration=registration, type=request.POST['type'], person=request.GET.get('person'))
 
         return HttpResponse('OK')

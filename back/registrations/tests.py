@@ -2,7 +2,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from registrations.models import Registration, RegistrationMeta, Event, TicketEvent, TicketCategory
+from registrations.models import Registration, RegistrationMeta, ScannerAction, TicketEvent, TicketCategory
 
 from .actions import codes
 
@@ -27,7 +27,7 @@ class ValidationTestCase(TestCase):
 
     def test_can_create_validation_event(self):
         registration = Registration.objects.create(numero=1, full_name="Full Name", event=self.event, category=self.category)
-        Event.objects.create(registration=registration, type='scan')
+        ScannerAction.objects.create(registration=registration, type='scan')
 
 
 class ViewTestCase(TestCase):
@@ -37,7 +37,7 @@ class ViewTestCase(TestCase):
                                                       event=self.event)
         self.registration = Registration.objects.create(numero=1, full_name="Full Name", event=self.event, category=self.category)
         RegistrationMeta.objects.create(property="bus", value="Lille", registration=self.registration)
-        Event.objects.create(registration=self.registration, type='scan')
+        ScannerAction.objects.create(registration=self.registration, type='scan')
 
     def test_author_is_required(self):
         response = self.client.get(reverse('view_code', kwargs={'code': '1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk='}))
