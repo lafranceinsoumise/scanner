@@ -4,7 +4,6 @@ import base64
 from io import BytesIO
 import subprocess
 
-
 ticket_generation_counter = Counter('scanner_tickets_generation', 'Number of ticket generation', ['result'])
 
 
@@ -12,25 +11,30 @@ class TicketGenerationException(Exception):
     pass
 
 
-def gen_ticket(registration):
+def gen_ticket_svg(registration):
     django_engine = engines['django']
     template = django_engine.from_string(registration.event.ticket_template.open().read().decode())
 
-    context = {'meta_' + p.property: p.value for p in registration.metas.all()}
-
-    context['numero'] = registration.pk
-    context['full_name'] = registration.full_name
-    context['gender'] = registration.get_gender_display()
-    context['category'] = registration.category.name
-    context['contact_email'] = registration.contact_email
+    context = {
+        'numero': registration.pk,
+        'full_name': registration.full_name,
+        'gender': registration.get_gender_display(),
+        'category': registration.category.name,
+        'contact_email': registration.contact_email
+    }
+    context.update({p.property: p.value for p in registration.metas.all()})
 
     img = registration.qrcode
     img_data = BytesIO()
     img.save(img_data, 'PNG')
 
-    context['qrcode_data'] = base64.b64encode(img_data.getvalue())
+    context['qrcode_data'] = base64.b64encode(img_data.getvalue()).decode('ascii')
 
-    res = template.render(context)
+    return template.render(context)
+
+
+def gen_ticket(registration):
+    svg = gen_ticket_svg(registration)
 
     inkscape = subprocess.Popen(
         ['inkscape', '-f', '/dev/stdin', '--export-area-page', '--without-gui', '--export-pdf', '/dev/stdout'],
@@ -41,7 +45,7 @@ def gen_ticket(registration):
 
     try:
         output, error = inkscape.communicate(
-            input=res.encode('utf8'),
+            input=svg.encode('utf8'),
             timeout=5
         )
     except subprocess.TimeoutExpired:
