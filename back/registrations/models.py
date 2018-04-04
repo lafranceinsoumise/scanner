@@ -1,11 +1,17 @@
+from time import strftime
+
 from django.db import models
+from django.utils.text import slugify
 
 from .actions.codes import gen_qrcode
 
 class TicketEvent(models.Model):
+    def get_template_filename(instance, filename):
+        return strftime(f'templates/{slugify(instance.name)}/%Y-%m-%d-%H-%M.svg')
+
     name = models.CharField("Nom de l'événement", max_length=255)
     send_tickets_until = models.DateTimeField("Envoyé les tickets jusqu'à la date")
-    ticket_template = models.FileField("Template du ticket", blank=True)
+    ticket_template = models.FileField("Template du ticket", upload_to=get_template_filename, blank=True)
     mosaico_url = models.URLField("URL du mail sur Mosaico", blank=True)
 
     def __str__(self):
