@@ -29,16 +29,16 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('event_id', type=int)
-        parser.add_argument('registration_codes', nargs='*', type=number_ranges, dest='conditions')
+        parser.add_argument('registrations', nargs='*', type=number_ranges)
         parser.add_argument('-i', '--ignore-sent-status', action='store_false', dest='check_sent_status')
 
-    def handle(self, *args, event_id, conditions, check_sent_status, **options):
+    def handle(self, *args, event_id, registrations, check_sent_status, **options):
         try:
             TicketEvent.objects.get(id=event_id)
         except TicketEvent.DoesNotExist:
             raise CommandError('Event does not exist')
 
-        query = reduce(or_, conditions, Q())
+        query = reduce(or_, registrations, Q())
 
         if check_sent_status:
             query = query & ~Q(ticket_status=Registration.TICKET_SENT)
