@@ -30,7 +30,7 @@ def gen_signed_message(object_id):
 def gen_qrcode(object_id):
     full_msg = gen_signed_message(object_id)
 
-    return qrcode.make(full_msg)
+    return qrcode.make(full_msg, border=0)
 
 
 def check_signature(msg, signature):
