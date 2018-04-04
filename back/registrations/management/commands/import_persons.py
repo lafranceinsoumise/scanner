@@ -1,13 +1,14 @@
-from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ValidationError
-from django.db import transaction
 import uuid
 import argparse
 import tqdm
 import csv
+import sys
+
+from django.core.management.base import BaseCommand, CommandError
+from django.core.exceptions import ValidationError
+from django.db import transaction
 
 from registrations.models import Registration, RegistrationMeta, TicketEvent, TicketCategory
-from registrations.actions.tables import get_random_tables
 
 
 def has_attr_changed(obj, attr, value):
@@ -84,7 +85,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('event_id', type=int)
-        parser.add_argument('input', type=argparse.FileType(mode='r', encoding='utf-8'))
+        parser.add_argument('input', type=argparse.FileType(mode='r', encoding='utf-8'), default=sys.stdin, nargs='?')
         parser.add_argument('-l', '--log-to', type=argparse.FileType(mode='a', encoding='utf-8'), dest='log_file')
 
     def handle(self, *args, input, event_id, log_file=None, **options):
