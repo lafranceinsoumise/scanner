@@ -3,7 +3,6 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-import registrations.actions.tables
 
 
 class Migration(migrations.Migration):
@@ -16,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='registration',
             name='table',
-            field=models.CharField(blank=True, max_length=15, validators=[registrations.actions.tables.TableValidator()], verbose_name='Numéro de table'),
+            field=models.CharField(blank=True, max_length=15, verbose_name='Numéro de table'),
         ),
     ]

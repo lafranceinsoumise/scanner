@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
+from django.utils.html import format_html
 
 from .models import Registration, ScannerAction, RegistrationMeta, TicketEvent, TicketCategory
 from .actions import codes, tickets
@@ -80,19 +81,17 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     def qrcode_display(self, instance):
         if instance.numero:
-            return '<img src="%s"/>' % reverse('admin:registrations_registration_qrcode', args=[instance.numero])
+            return format_html('<img src="{}"/>', reverse('admin:registrations_registration_qrcode', args=[instance.numero]))
         else:
             return '-'
     qrcode_display.short_description = 'QRCode'
-    qrcode_display.allow_tags = True
 
     def ticket_link(self, instance):
         if instance._state.adding:
             return '-'
 
-        return '<a href="%s">Voir le ticket</a>' % reverse('admin:registrations_registration_ticket', args=[instance.numero])
+        return format_html('<a href="{}">Voir le ticket</a>', reverse('admin:registrations_registration_ticket', args=[instance.numero]))
     ticket_link.short_description = 'Ticket'
-    ticket_link.allow_tags = True
 
     def qrcode_view(self, request, object_id):
         img = codes.gen_qrcode(object_id)

@@ -3,7 +3,6 @@ import requests
 from django.core import mail
 from django.utils.text import slugify
 from django.conf import settings
-from django.template.loader import get_template
 
 from prometheus_client import Counter
 
@@ -16,16 +15,17 @@ email_sent_counter = Counter('scanner_email_sent', 'Number of emails sent')
 
 
 def send_email(registration, connection=None):
-    html_message = requests(registration.event.mosaico_url, params={
+    html_message = requests.get(registration.event.mosaico_url, params={
         'FULL_NAME': registration.full_name,
+        'EMAIL': registration.contact_email,
         **{'META_' + p.property.upper(): p.value for p in registration.metas.all()},
-    })
+    }).content.decode()
     text_message = _h.handle(html_message)
 
     if registration.ticket_status == registration.TICKET_MODIFIED:
         subject = registration.event.name + " : modification de votre ticket"
     else:
-        subject = registration.event_name + " : votre ticket"
+        subject = registration.event.name + " : votre ticket"
 
     ticket = gen_ticket(registration)
 

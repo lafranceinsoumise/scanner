@@ -1,5 +1,5 @@
 from prometheus_client import Counter
-from django.template.backends.django import DjangoTemplates
+from django.template import engines
 import base64
 from io import BytesIO
 import subprocess
@@ -13,7 +13,8 @@ class TicketGenerationException(Exception):
 
 
 def gen_ticket(registration):
-    template = DjangoTemplates.from_string(registration.event.template.open())
+    django_engine = engines['django']
+    template = django_engine.from_string(registration.event.ticket_template.open().read().decode())
 
     context = {'meta_' + p.property: p.value for p in registration.metas.all()}
 
