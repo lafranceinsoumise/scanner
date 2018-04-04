@@ -144,22 +144,29 @@ EMAIL_USE_SSL = email_config['EMAIL_USE_SSL']
 
 EMAIL_FROM = os.environ.get('EMAIL_FROM', 'tickets@lafranceinsoumise.fr')
 
+LOG_DISABLE_JOURNALD = os.environ.get('LOG_DISABLE_JOURNALD', '').lower() in ['y', 'yes', 'true']
 if not DEBUG:
     LOGGING = {
         'version': 1,
         'disable_existing_loggers': False,
         'handlers': {
-            'terminal': {
+            'journald': {
                 'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-            },
+                'class': 'systemd.journal.JournaldLogHandler' if not LOG_DISABLE_JOURNALD else 'logging.StreamHandler',
+            }
         },
         'loggers': {
-            'django': {
-                'handlers': ['terminal'],
-                'level': 'WARNING',
-                'propagate': True,
+            'django.template': {
+                'handlers': ['journald'],
+                'level': 'INFO',
+                'propagate': False,
             },
+            'django': {
+                'handlers': ['journald'],
+                'level': 'DEBUG',
+                'propagate': True
+            },
+
         },
     }
 

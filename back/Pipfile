@@ -18,6 +18,7 @@ tqdm = "*"
 prometheus-client = "*"
 "html2text" = "*"
 requests = "*"
+systemd = "*"
 
 
 [dev-packages]
