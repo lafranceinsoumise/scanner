@@ -50,7 +50,6 @@ class Registration(models.Model):
         (TICKET_SENT, "Ticket à jour envoyé")
     )
 
-    id = models.AutoField(primary_key=True)
     event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
     numero = models.CharField('Numéro d\'inscription', max_length=255, null=True)
     category = models.ForeignKey(TicketCategory, on_delete=models.CASCADE)
