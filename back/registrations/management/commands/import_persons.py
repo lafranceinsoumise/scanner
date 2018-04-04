@@ -28,10 +28,14 @@ def modify_if_changed(event_id, category, properties, common_fields, meta_fields
         metas = {m.property: m for m in registration.metas.all()}
         changed = False
     except Registration.DoesNotExist:
-        registration = Registration(event_id=event_id, numero=properties['numero'], category=category)
+        registration = Registration(event_id=event_id, numero=properties['numero'])
         metas = {}
         changed = True
         log_file and log_file.write('New registration: {}\n'.format(registration.numero))
+
+    if registration.category_id != category.id:
+        registration.category_id = category.id
+        changed = True
 
     for f in common_fields:
         if f == 'uuid':
@@ -54,30 +58,30 @@ def modify_if_changed(event_id, category, properties, common_fields, meta_fields
     # deleted metas: missing fields and empty fields
     deleted_metas = existing_metas - meta_fields
 
-    with transaction.atomic():
-        if changed:
-            if registration.ticket_status == registration.TICKET_SENT:
-                registration.ticket_status = registration.TICKET_MODIFIED
-            registration.save()
+    if changed or new_metas or deleted_metas or updated_metas:
+        with transaction.atomic():
+            if changed:
+                if registration.ticket_status == registration.TICKET_SENT:
+                    registration.ticket_status = registration.TICKET_MODIFIED
+                registration.save()
 
-        if new_metas:
-            for f in new_metas:
-                RegistrationMeta.objects.create(registration_id=registration.id, property=f, value=properties[f])
-            log_file and log_file.write('New metas: {} ({})\n'.format(', '.join(new_metas), registration.numero))
+            if new_metas:
+                for f in new_metas:
+                    RegistrationMeta.objects.create(registration_id=registration.id, property=f, value=properties[f])
+                log_file and log_file.write('New metas: {} ({})\n'.format(', '.join(new_metas), registration.numero))
 
-        if deleted_metas:
-            registration.metas.filter(property__in=deleted_metas).delete()
-            log_file and log_file.write('Deleted metas: {} ({})\n'.format(', '.join(deleted_metas), registration.numero))
+            if deleted_metas:
+                registration.metas.filter(property__in=deleted_metas).delete()
+                log_file and log_file.write('Deleted metas: {} ({})\n'.format(', '.join(deleted_metas), registration.numero))
 
-        for f in updated_metas:
-            field_changed = has_attr_changed(metas[f], 'value', properties[f])
-            changed = changed or field_changed
-            if field_changed:
-                metas[f].save()
-                log_file and log_file.write('Updated meta: {} ({})\n'.format(f, registration.numero))
+            for f in updated_metas:
+                field_changed = has_attr_changed(metas[f], 'value', properties[f])
+                changed = changed or field_changed
+                if field_changed:
+                    metas[f].save()
+                    log_file and log_file.write('Updated meta: {} ({})\n'.format(f, registration.numero))
 
-
-        log_file and log_file.write('Committing\n\n')
+            log_file and log_file.write('Committing\n\n')
 
 
 class Command(BaseCommand):
@@ -131,10 +135,12 @@ class Command(BaseCommand):
                 except ValidationError:
                     raise CommandError('Incorrect value in column %s on line %d' % (field_name, i+1))
 
-        try:
-            category = TicketCategory.objects.get(event__id=event_id, name=line['category'])
-        except:
-            raise CommandError('Category does not exist on line %d' % i+1)
+        categories = {}
+        for category in {line['category'] for line in lines}:
+            try:
+                categories[category] = TicketCategory.objects.get(event__id=event_id, name=category)
+            except:
+                raise CommandError('Category %s does not exist on line %d' % category)
 
         for line in tqdm.tqdm(lines, desc='Importing'):
-            modify_if_changed(event_id, category, line, common_fields, meta_fields, log_file)
+            modify_if_changed(event_id, categories[line['category']], line, common_fields, meta_fields, log_file)
