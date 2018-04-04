@@ -162,3 +162,6 @@ if not DEBUG:
             },
         },
     }
+
+PROMETHEUS_USER = os.environ.get('PROMETHEUS_USER', 'prometheus')
+PROMETHEUS_PASSWORD = os.environ.get('PROMETHEUS_PASSWORD', 'password')
