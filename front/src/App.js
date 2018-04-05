@@ -11,6 +11,7 @@ const EVENT_LABELS = {
 
 const GENDER_LABELS = {
   H: 'Homme',
+  M: 'Homme',
   F: 'Femme',
 };
 
