@@ -5,7 +5,7 @@ class Scanner extends Component {
     super(props);
     this.clickBack = props.clickBack;
     this.scan = props.scan;
-    this.state = {}
+    this.state = {};
 
     this.activeCamera = localStorage.getItem('preferedCamera') || 0;
   }
@@ -24,8 +24,14 @@ class Scanner extends Component {
         try {
           await this.scan(content);
         } catch (err) {
-          this.error();
+          if (err.message === 'Not Found') {
+            return this.error('Billet inconnu.');
+          }
+
+          return this.error();
         }
+
+        this.setState({loading: false});
       });
     }
 
@@ -41,8 +47,8 @@ class Scanner extends Component {
       await this.scanner.stop();
   }
 
-  error() {
-    this.setState({loading: false, error: 'Impossible de lire le billet.'});
+  error(message) {
+    this.setState({loading: false, error: message || 'Impossible de lire le billet.'});
     setTimeout(() => {
       this.setState({error: false});
     }, 3000);

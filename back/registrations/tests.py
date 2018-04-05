@@ -55,7 +55,11 @@ class ViewTestCase(TestCase):
             'numero': '1',
             'gender': '',
             'full_name': 'Full Name',
-            'type': 'Catégorie',
+            'category': {
+                'name': 'Catégorie',
+                'color': 'white',
+                'background-color': 'blue'
+            },
             'meta': {
                 'bus': 'Lille'
             }

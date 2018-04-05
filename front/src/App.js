@@ -3,25 +3,16 @@ import Scanner from './Scanner';
 import './App.css';
 import config from './config';
 
-const TYPE_LABELS = {
-  invite: 'Invité⋅e',
-  participant: 'Participant⋅e',
-  volontaire: 'Volontaire',
-  volontaire_referent: 'Volontaire référent⋅e',
-  village: 'Village',
-  so: 'Accueil et SO',
-}
-
 const EVENT_LABELS = {
   entrance: 'Entrée validée',
   scan: 'Code scanné',
   cancel: 'Scan annulé'
-}
+};
 
 const GENDER_LABELS = {
   H: 'Homme',
   F: 'Femme',
-}
+};
 
 class App extends Component {
   constructor(props) {
@@ -56,7 +47,11 @@ class App extends Component {
     response = await fetch(`${config.host}/api/${content}/?person=${encodeURIComponent(this.state.scanningPerson)}`);
 
     if (response.ok) {
-      this.successfulScan(await response.json(), content);
+      return this.successfulScan(await response.json(), content);
+    }
+
+    if (response.status === 404) {
+      throw new Error('Not Found');
     }
   }
 
@@ -88,10 +83,15 @@ class App extends Component {
     switch (this.state.action) {
       case 'displayRegistration':
         let registration = this.state.registration;
+        let style={
+          'color': registration.category.color,
+          'background-color': registration.category['background-color'],
+        };
+
         return (
-          <div id="registration" className={"container registration-" + registration.type}>
+          <div id="registration" className="container" style={style}>
             <h1 className="text-center">{registration.full_name}</h1>
-            <h3>Rôle&nbsp;: {TYPE_LABELS[registration.type]}</h3>
+            <h3>Catégorie&nbsp;: {registration.category.name}</h3>
             <h3>#{registration.numero}</h3>
             {['M', 'F'].includes(GENDER_LABELS[registration.gender]) ? (
               <p><b>Genre&nbsp;:</b> {registration.gender}</p>

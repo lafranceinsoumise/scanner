@@ -27,7 +27,11 @@ class CodeView(View):
             'numero': registration.numero,
             'full_name': registration.full_name,
             'gender': registration.gender,
-            'type': registration.category.name,
+            'category': {
+                'name': registration.category.name,
+                'color': registration.category.color,
+                'background-color': registration.category.background_color
+            },
             'meta': dict([(meta.property, meta.value) for meta in registration.metas.all()]),
             'events': [{'time': event.time, 'type': event.type, 'person': event.person} for event in registration.events.all()]
         })
