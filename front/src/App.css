@@ -17,6 +17,10 @@ body {
   justify-content: center;
 }
 
+#root > #registration {
+  flex-grow: 1;
+}
+
 #root > .registration > h1,
 #root > .registration > h2,
 #root > .registration > h3,
