@@ -89,7 +89,7 @@ class App extends Component {
         };
 
         return (
-          <div id="registration" className="container" style={style}>
+          <div id="registration" className="container registration" style={style}>
             <h1 className="text-center">{registration.full_name}</h1>
             <h3>Catégorie&nbsp;: {registration.category.name}</h3>
             <h3>#{registration.numero}</h3>
