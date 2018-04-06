@@ -68,10 +68,12 @@ def modify_if_changed(event_id, category, properties, common_fields, meta_fields
             if new_metas:
                 for f in new_metas:
                     RegistrationMeta.objects.create(registration_id=registration.id, property=f, value=properties[f])
+                changed = True
                 log_file and log_file.write('New metas: {} ({})\n'.format(', '.join(new_metas), registration.numero))
 
             if deleted_metas:
                 registration.metas.filter(property__in=deleted_metas).delete()
+                changed = True
                 log_file and log_file.write('Deleted metas: {} ({})\n'.format(', '.join(deleted_metas), registration.numero))
 
             for f in updated_metas:
