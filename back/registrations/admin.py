@@ -81,7 +81,7 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     def qrcode_display(self, instance):
         if instance.numero:
-            return format_html('<img src="{}"/>', reverse('admin:registrations_registration_qrcode', args=[instance.numero]))
+            return format_html('<img src="{}"/>', reverse('admin:registrations_registration_qrcode', args=[instance.pk]))
         else:
             return '-'
     qrcode_display.short_description = 'QRCode'
@@ -90,7 +90,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         if instance._state.adding:
             return '-'
 
-        return format_html('<a href="{}">Voir le ticket</a>', reverse('admin:registrations_registration_ticket', args=[instance.numero]))
+        return format_html('<a href="{}">Voir le ticket</a>', reverse('admin:registrations_registration_ticket', args=[instance.pk]))
     ticket_link.short_description = 'Ticket'
 
     def qrcode_view(self, request, object_id):
@@ -101,7 +101,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         return response
 
     def ticket_view(self, request, object_id):
-        registration = get_object_or_404(Registration, numero=object_id)
+        registration = get_object_or_404(Registration, pk=object_id)
         ticket = tickets.gen_ticket(registration)
         response = HttpResponse(ticket, content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="ticket_{}.pdf"'.format(registration.pk)
