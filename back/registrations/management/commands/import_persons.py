@@ -81,6 +81,10 @@ def modify_if_changed(event_id, category, properties, common_fields, meta_fields
                     metas[f].save()
                     log_file and log_file.write('Updated meta: {} ({})\n'.format(f, registration.numero))
 
+            if changed:
+                if registration.ticket_status == registration.TICKET_SENT:
+                    registration.ticket_status = registration.TICKET_MODIFIED
+                registration.save()
             log_file and log_file.write('Committing\n\n')
 
 
