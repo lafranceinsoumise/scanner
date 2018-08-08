@@ -23,9 +23,9 @@ def send_email(registration, connection=None):
     text_message = _h.handle(html_message)
 
     if registration.ticket_status == registration.TICKET_MODIFIED:
-        subject = registration.event.name + " : modification de votre ticket"
+        subject = registration.event.name + " : modification du ticket de" + registration.full_name
     else:
-        subject = registration.event.name + " : votre ticket"
+        subject = registration.event.name + " : ticket de " + registration.full_name
 
     ticket = gen_ticket(registration)
 
