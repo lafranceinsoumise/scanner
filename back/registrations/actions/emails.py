@@ -29,22 +29,23 @@ def send_email(registration, connection=None):
 
     ticket = gen_ticket(registration)
 
-    email = mail.EmailMultiAlternatives(
-        subject=subject,
-        from_email=settings.EMAIL_FROM,
-        to=registration.contact_emails,
-        body=text_message,
-        connection=connection,
-    )
+    for contact_email in registration.contact_emails:
+        email = mail.EmailMultiAlternatives(
+            subject=subject,
+            from_email=settings.EMAIL_FROM,
+            to=[contact_email],
+            body=text_message,
+            connection=connection,
+        )
 
-    email.attach_alternative(html_message, "text/html")
-    email.attach(
-        filename='ticket_{}.pdf'.format(slugify(registration.full_name)),
-        content=ticket,
-        mimetype='application/pdf'
-    )
+        email.attach_alternative(html_message, "text/html")
+        email.attach(
+            filename='ticket_{}.pdf'.format(slugify(registration.full_name)),
+            content=ticket,
+            mimetype='application/pdf'
+        )
 
-    email.send()
+        email.send()
 
     if registration.ticket_status != registration.TICKET_SENT:
         registration.ticket_status = registration.TICKET_SENT
