@@ -15,13 +15,6 @@ email_sent_counter = Counter('scanner_email_sent', 'Number of emails sent')
 
 
 def send_email(registration, connection=None):
-    html_message = requests.get(registration.event.mosaico_url, params={
-        'FULL_NAME': registration.full_name,
-        'EMAIL': registration.contact_email,
-        **{'META_' + p.property.upper(): p.value for p in registration.metas.all()},
-    }).content.decode()
-    text_message = _h.handle(html_message)
-
     if registration.ticket_status == registration.TICKET_MODIFIED:
         subject = registration.event.name + " : modification du ticket de " + registration.full_name
     else:
@@ -30,6 +23,13 @@ def send_email(registration, connection=None):
     ticket = gen_ticket(registration)
 
     for contact_email in registration.contact_emails:
+        html_message = requests.get(registration.event.mosaico_url, params={
+            'FULL_NAME': registration.full_name,
+            'EMAIL': contact_email,
+            **{'META_' + p.property.upper(): p.value for p in registration.metas.all()},
+        }).content.decode()
+        text_message = _h.handle(html_message)
+
         email = mail.EmailMultiAlternatives(
             subject=subject,
             from_email=settings.EMAIL_FROM,
