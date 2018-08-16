@@ -22,7 +22,7 @@ def has_attr_changed(obj, attr, value):
         return True
 
 
-def modify_if_changed(event_id, category, properties, common_fields, meta_fields, log_file):
+def modify_if_changed(event_id, category, properties, common_fields, meta_fields, log_file, update_status, limit_fields):
     # do not use get_or_create ==> we do not want to create empty registration in case something goes wrong
     try:
         registration = Registration.objects.prefetch_related('metas').get(event__id=event_id, numero=properties['numero'])
@@ -59,10 +59,15 @@ def modify_if_changed(event_id, category, properties, common_fields, meta_fields
     # deleted metas: missing fields and empty fields
     deleted_metas = existing_metas - meta_fields
 
+    if limit_fields != []:
+        new_metas = new_metas & set(limit_fields)
+        updated_metas = updated_metas & set(limit_fields)
+        deleted_metas = deleted_metas & set(limit_fields)
+
     if changed or new_metas or deleted_metas or updated_metas:
         with transaction.atomic():
             if changed:
-                if registration.ticket_status == registration.TICKET_SENT:
+                if update_status and registration.ticket_status == registration.TICKET_SENT:
                     registration.ticket_status = registration.TICKET_MODIFIED
                 registration.save()
 
@@ -85,7 +90,7 @@ def modify_if_changed(event_id, category, properties, common_fields, meta_fields
                     log_file and log_file.write('Updated meta: {} ({})\n'.format(f, registration.numero))
 
             if changed:
-                if registration.ticket_status == registration.TICKET_SENT:
+                if update_status and registration.ticket_status == registration.TICKET_SENT:
                     registration.ticket_status = registration.TICKET_MODIFIED
                 registration.save()
             log_file and log_file.write('Committing\n\n')
@@ -99,8 +104,10 @@ class Command(BaseCommand):
         parser.add_argument('input', type=argparse.FileType(mode='r', encoding='utf-8'), default=sys.stdin, nargs='?')
         parser.add_argument('-l', '--log-to', type=argparse.FileType(mode='a', encoding='utf-8'), dest='log_file')
         parser.add_argument('-n', '--create-only', action='store_true', dest='create_only')
+        parser.add_argument('-k', '--keep-status', action='store_false', dest='update_status')
+        parser.add_argument('-f', '--fields', action='append', dest='limit_fields', default=[])
 
-    def handle(self, *args, input, event_id, log_file=None, create_only, **options):
+    def handle(self, *args, input, event_id, log_file=None, create_only, update_status, limit_fields, **options):
         try:
             TicketEvent.objects.get(id=event_id)
         except TicketEvent.DoesNotExist:
@@ -125,6 +132,10 @@ class Command(BaseCommand):
         model_field_names = {'full_name', 'gender', 'uuid', 'contact_email', 'contact_emails'}
         common_fields = (model_field_names & set(r.fieldnames))- {'numero', 'event', 'category'}
         meta_fields = set(r.fieldnames) - common_fields - {'numero', 'event', 'category'}
+
+        if limit_fields != []:
+            common_fields = common_fields & set(limit_fields)
+            meta_fields = meta_fields & set(limit_fields)
 
         if create_only:
             lines = filter(lambda line: Registration.objects.filter(event_id=event_id, numero=line['numero']).exists(),
@@ -171,4 +182,5 @@ class Command(BaseCommand):
                 raise CommandError('Category %s does not exist on line %d' % category)
 
         for line in tqdm.tqdm(lines, desc='Importing'):
-            modify_if_changed(event_id, categories[line['category']], line, common_fields, meta_fields, log_file)
+            modify_if_changed(event_id, categories[line['category']], line, common_fields, meta_fields, log_file,
+                              update_status, limit_fields)
