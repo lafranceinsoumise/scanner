@@ -5,7 +5,8 @@ import csv
 import sys
 
 from django.core.management.base import BaseCommand, CommandError
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ValidationError, FieldDoesNotExist
+from django.core.validators import validate_email
 from django.db import transaction
 
 from registrations.models import Registration, RegistrationMeta, TicketEvent, TicketCategory
@@ -112,34 +113,44 @@ class Command(BaseCommand):
         if 'ticket_status' in r.fieldnames:
             raise CommandError('Ticket status field is not allowed')
 
+        if 'contact_email' in r.fieldnames and 'contact_emails' in r.fieldnames:
+            raise CommandError('contact_email and contact_emails fields are in conflit')
+
         # read everything so that we import only if full file is valid
         lines = list(r)
         input.close()
 
         # find columns that are model fields
-        model_field_names = {field.name for field in Registration._meta.get_fields()}
+        model_field_names = {'full_name', 'gender', 'uuid', 'contact_email', 'contact_emails'}
         common_fields = (model_field_names & set(r.fieldnames))- {'numero', 'event', 'category'}
         meta_fields = set(r.fieldnames) - common_fields - {'numero', 'event', 'category'}
 
         # apply validators from field_names
         for field_name in common_fields:
-            field = Registration._meta.get_field(field_name)
+            try:
+                field = Registration._meta.get_field(field_name)
+            except FieldDoesNotExist:
+                field = None
 
-            if field.null:
+            if field and field.null:
                 for line in lines:
                     if not line[field_name]:
                         line[field_name] = None
 
-            for validator in field.validators:
-                try:
-                    for i, line in enumerate(lines):
-                        if line[field_name]:
+            if field_name == 'contact_emails':
+                for line in lines:
+                    line['contact_emails'] = line['contact_emails'].split(',')
+
+            try:
+                for i, line in enumerate(lines):
+                    if line[field_name] and field:
+                        for validator in field.validators:
                             validator(line[field_name])
-                        else:
-                            if not field.blank:
-                                raise CommandError('Empty value in column %s on line %d' % (field_name, i+1))
-                except ValidationError:
-                    raise CommandError('Incorrect value in column %s on line %d' % (field_name, i+1))
+                    else:
+                        if not line[field_name] and (not field or not field.blank):
+                            raise CommandError('Empty value in column %s on line %d' % (field_name, i+1))
+            except ValidationError:
+                raise CommandError('Incorrect value in column %s on line %d' % (field_name, i+1))
 
         categories = {}
         for category in {line['category'] for line in lines}:

@@ -32,7 +32,7 @@ def send_email(registration, connection=None):
     email = mail.EmailMultiAlternatives(
         subject=subject,
         from_email=settings.EMAIL_FROM,
-        to=[registration.contact_email],
+        to=registration.contact_emails,
         body=text_message,
         connection=connection,
     )

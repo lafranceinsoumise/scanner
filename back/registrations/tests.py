@@ -18,6 +18,15 @@ class RegistrationTestCase(TestCase):
         registration = Registration.objects.create(numero=1, full_name="Full Name", gender='F', event=self.event, category=self.category)
         RegistrationMeta.objects.create(property="bus", value="Clermont", registration=registration)
 
+    def test_emails(self):
+        registration = Registration.objects.create(numero=1, full_name="Full Name", gender='F', event=self.event, category=self.category)
+        registration.contact_email = "user@example.com"
+
+        self.assertEqual(registration.contact_emails, ["user@example.com"])
+
+        registration.contact_emails = ["user@example.com", "copy@example.com"]
+        self.assertEqual(registration.contact_email, "user@example.com")
+
 
 class ValidationTestCase(TestCase):
     def setUp(self):

@@ -53,13 +53,39 @@ class Registration(models.Model):
     event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
     numero = models.CharField('Numéro d\'inscription', max_length=255, null=True)
     category = models.ForeignKey(TicketCategory, on_delete=models.CASCADE)
-    contact_email = models.EmailField('Email de contact')
+    _contact_emails = models.TextField('Emails de contact')
     full_name = models.CharField('Nom complet', max_length=255)
     gender = models.CharField('Genre', max_length=1, choices=GENDER_CHOICES, blank=True)
     uuid = models.UUIDField('Identifiant sur la plateforme', blank=True, null=True)
     ticket_status = models.CharField(
         "Statut du ticket", choices=TICKET_CHOICES, default=TICKET_NOT_SENT, max_length=1, blank=False
     )
+
+    @property
+    def contact_email(self):
+        return self.contact_emails[0]
+
+    @contact_email.setter
+    def contact_email(self, value):
+        contact_emails = self.contact_emails
+
+        if contact_emails == ['']:
+            self.contact_emails = [value]
+            return
+
+        if value in contact_emails:
+            contact_emails.pop(contact_emails.index(value))
+
+        contact_emails.insert(0, value)
+        self.contact_emails = contact_emails
+
+    @property
+    def contact_emails(self):
+        return self._contact_emails.split(',')
+
+    @contact_emails.setter
+    def contact_emails(self, value):
+        self._contact_emails = ','.join(value)
 
     @property
     def qrcode(self):
