@@ -98,8 +98,9 @@ class Command(BaseCommand):
         parser.add_argument('event_id', type=int)
         parser.add_argument('input', type=argparse.FileType(mode='r', encoding='utf-8'), default=sys.stdin, nargs='?')
         parser.add_argument('-l', '--log-to', type=argparse.FileType(mode='a', encoding='utf-8'), dest='log_file')
+        parser.add_argument('-n', '--create-only', action='store_true', dest='create_only')
 
-    def handle(self, *args, input, event_id, log_file=None, **options):
+    def handle(self, *args, input, event_id, log_file=None, create_only, **options):
         try:
             TicketEvent.objects.get(id=event_id)
         except TicketEvent.DoesNotExist:
@@ -125,6 +126,10 @@ class Command(BaseCommand):
         common_fields = (model_field_names & set(r.fieldnames))- {'numero', 'event', 'category'}
         meta_fields = set(r.fieldnames) - common_fields - {'numero', 'event', 'category'}
 
+        if create_only:
+            lines = filter(lambda line: Registration.objects.filter(event_id=event_id, numero=line['numero']).exists(),
+                           lines)
+
         # apply validators from field_names
         for field_name in common_fields:
             try:
@@ -143,9 +148,15 @@ class Command(BaseCommand):
 
             try:
                 for i, line in enumerate(lines):
-                    if line[field_name] and field:
-                        for validator in field.validators:
-                            validator(line[field_name])
+                    if line[field_name]:
+                        if field:
+                            for validator in field.validators:
+                                validator(line[field_name])
+                        if field_name == 'contact_email':
+                            validate_email(line[field_name])
+                        if field_name == 'contact_emails':
+                            for contact_email in line[field_name]:
+                                validate_email(contact_email)
                     else:
                         if not line[field_name] and (not field or not field.blank):
                             raise CommandError('Empty value in column %s on line %d' % (field_name, i+1))
