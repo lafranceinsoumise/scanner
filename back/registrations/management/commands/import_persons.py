@@ -138,7 +138,7 @@ class Command(BaseCommand):
             meta_fields = meta_fields & set(limit_fields)
 
         if create_only:
-            lines = list(line for line in lines if Registration.objects.filter(event_id=event_id, numero=line['numero']).exists())
+            lines = list(line for line in lines if not Registration.objects.filter(event_id=event_id, numero=line['numero']).exists())
 
         # apply validators from field_names
         for field_name in common_fields:
