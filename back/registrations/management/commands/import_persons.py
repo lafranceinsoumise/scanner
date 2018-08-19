@@ -138,8 +138,7 @@ class Command(BaseCommand):
             meta_fields = meta_fields & set(limit_fields)
 
         if create_only:
-            lines = filter(lambda line: Registration.objects.filter(event_id=event_id, numero=line['numero']).exists(),
-                           lines)
+            lines = list(line for line in lines if Registration.objects.filter(event_id=event_id, numero=line['numero']).exists())
 
         # apply validators from field_names
         for field_name in common_fields:
@@ -172,7 +171,7 @@ class Command(BaseCommand):
                         if not line[field_name] and (not field or not field.blank):
                             raise CommandError('Empty value in column %s on line %d' % (field_name, i+1))
             except ValidationError:
-                raise CommandError('Incorrect value in column %s on line %d' % (field_name, i+1))
+                raise CommandError('Incorrect value %s in column %s on line %d' % (line[field_name], field_name, i+1))
 
         categories = {}
         for category in {line['category'] for line in lines}:
