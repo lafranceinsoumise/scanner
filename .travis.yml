@@ -1,6 +1,10 @@
 language: python
 python:
   - "3.6"
+addons:
+  apt:
+    packages:
+      - libsystemd-dev
 dist: xenial
 sudo: required
 cache:
