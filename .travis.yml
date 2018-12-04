@@ -9,14 +9,11 @@ cache:
 
 before_install:
   - pip install -U pipenv
+  - cd back
 
 install:
-  - npm i && npm run build
   - pipenv install --dev --deploy
 
-
-before_script:
-  - cd back
 script:
   - black --check .
   - python manage.py test -v 2
