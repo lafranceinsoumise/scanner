@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
+    "rest_framework",
+    "rest_framework.authtoken",
     "registrations",
 ]
 
@@ -169,3 +171,12 @@ if not DEBUG:
 
 PROMETHEUS_USER = os.environ.get("PROMETHEUS_USER", "prometheus")
 PROMETHEUS_PASSWORD = os.environ.get("PROMETHEUS_PASSWORD", "password")
+
+# DRF
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.DjangoModelPermissions"],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+    ],
+}

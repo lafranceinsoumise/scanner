@@ -113,11 +113,7 @@ class RegistrationMeta(models.Model):
     )
 
     class Meta:
-        indexes = (
-            models.Index(
-                fields=["registration", "property"], name="registration_property_index"
-            ),
-        )
+        unique_together = ("registration", "property")
 
 
 class ScannerAction(models.Model):
