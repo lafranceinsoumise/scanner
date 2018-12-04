@@ -8,7 +8,7 @@ from .actions.scans import scan_code, mark_registration, InvalidCodeException
 
 class CodeView(View):
     def get_person(self):
-        person = self.request.GET.get('person')
+        person = self.request.GET.get("person")
 
         if person is None or len(person) > 255:
             raise PermissionDenied()
@@ -23,22 +23,29 @@ class CodeView(View):
         except InvalidCodeException:
             raise Http404
 
-        return JsonResponse({
-            'numero': registration.numero,
-            'full_name': registration.full_name,
-            'gender': registration.gender,
-            'category': {
-                'name': registration.category.name,
-                'color': registration.category.color,
-                'background-color': registration.category.background_color
-            },
-            'meta': dict([(meta.property, meta.value) for meta in registration.metas.all()]),
-            'events': [{'time': event.time, 'type': event.type, 'person': event.person} for event in registration.events.all()]
-        })
+        return JsonResponse(
+            {
+                "numero": registration.numero,
+                "full_name": registration.full_name,
+                "gender": registration.gender,
+                "category": {
+                    "name": registration.category.name,
+                    "color": registration.category.color,
+                    "background-color": registration.category.background_color,
+                },
+                "meta": dict(
+                    [(meta.property, meta.value) for meta in registration.metas.all()]
+                ),
+                "events": [
+                    {"time": event.time, "type": event.type, "person": event.person}
+                    for event in registration.events.all()
+                ],
+            }
+        )
 
     def post(self, request, code):
         person = self.get_person()
-        type = self.request.POST.get('type')
+        type = self.request.POST.get("type")
 
         if type not in [ScannerAction.TYPE_ENTRANCE, ScannerAction.TYPE_CANCEL]:
             return HttpResponseBadRequest()
@@ -48,4 +55,4 @@ class CodeView(View):
         except InvalidCodeException:
             return Http404
 
-        return HttpResponse('OK')
+        return HttpResponse("OK")

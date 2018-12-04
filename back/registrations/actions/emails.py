@@ -11,23 +11,33 @@ from .tickets import gen_ticket
 _h = html2text.HTML2Text()
 _h.ignore_images = True
 
-email_sent_counter = Counter('scanner_email_sent', 'Number of emails sent')
+email_sent_counter = Counter("scanner_email_sent", "Number of emails sent")
 
 
 def send_email(registration, connection=None):
     if registration.ticket_status == registration.TICKET_MODIFIED:
-        subject = registration.event.name + " : modification du ticket de " + registration.full_name
+        subject = (
+            registration.event.name
+            + " : modification du ticket de "
+            + registration.full_name
+        )
     else:
         subject = registration.event.name + " : ticket de " + registration.full_name
 
     ticket = gen_ticket(registration)
 
     for contact_email in registration.contact_emails:
-        html_message = requests.get(registration.event.mosaico_url, params={
-            'FULL_NAME': registration.full_name,
-            'EMAIL': contact_email,
-            **{'META_' + p.property.upper(): p.value for p in registration.metas.all()},
-        }).content.decode()
+        html_message = requests.get(
+            registration.event.mosaico_url,
+            params={
+                "FULL_NAME": registration.full_name,
+                "EMAIL": contact_email,
+                **{
+                    "META_" + p.property.upper(): p.value
+                    for p in registration.metas.all()
+                },
+            },
+        ).content.decode()
         text_message = _h.handle(html_message)
 
         email = mail.EmailMultiAlternatives(
@@ -40,9 +50,9 @@ def send_email(registration, connection=None):
 
         email.attach_alternative(html_message, "text/html")
         email.attach(
-            filename='ticket_{}.pdf'.format(slugify(registration.full_name)),
+            filename="ticket_{}.pdf".format(slugify(registration.full_name)),
             content=ticket,
-            mimetype='application/pdf'
+            mimetype="application/pdf",
         )
 
         email.send()

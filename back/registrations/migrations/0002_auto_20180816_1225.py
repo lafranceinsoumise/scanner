@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ('registrations', '0001_initial'),
-    ]
+    dependencies = [("registrations", "0001_initial")]
 
     operations = [
         migrations.AlterField(
-            model_name='registration',
-            name='contact_email',
-            field=models.TextField(verbose_name='Emails de contact'),
-        ),
+            model_name="registration",
+            name="contact_email",
+            field=models.TextField(verbose_name="Emails de contact"),
+        )
     ]

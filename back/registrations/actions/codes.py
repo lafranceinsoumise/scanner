@@ -12,19 +12,15 @@ class InvalidCodeException(Exception):
 
 
 def gen_signature(msg):
-    return hmac.new(
-        key=settings.SIGNATURE_KEY,
-        msg=msg,
-        digestmod=sha1
-    ).digest()
+    return hmac.new(key=settings.SIGNATURE_KEY, msg=msg, digestmod=sha1).digest()
 
 
 def gen_signed_message(object_id):
-    msg = str(object_id).encode('utf8')
+    msg = str(object_id).encode("utf8")
 
     signature = gen_signature(msg)
 
-    return msg + b'.' + urlsafe_b64encode(signature)
+    return msg + b"." + urlsafe_b64encode(signature)
 
 
 def gen_qrcode(object_id):
@@ -45,21 +41,21 @@ def get_id_from_code(code):
     """
 
     try:
-        identifier, base64_signature = code.split('.')
+        identifier, base64_signature = code.split(".")
     except ValueError:
-        raise InvalidCodeException('There should be exactly one separator period point')
+        raise InvalidCodeException("There should be exactly one separator period point")
 
     try:
         object_id = int(identifier)
     except ValueError:
-        raise InvalidCodeException('The identifier should be an integer')
+        raise InvalidCodeException("The identifier should be an integer")
 
     try:
         signature = urlsafe_b64decode(base64_signature)
     except (binascii.Error, ValueError):
-        raise InvalidCodeException('Incorrect base64 signature')
+        raise InvalidCodeException("Incorrect base64 signature")
 
-    if not check_signature(identifier.encode('ascii'), signature):
-        raise InvalidCodeException('Incorrect signature')
+    if not check_signature(identifier.encode("ascii"), signature):
+        raise InvalidCodeException("Incorrect signature")
 
     return object_id

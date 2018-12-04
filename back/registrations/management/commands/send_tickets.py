@@ -13,9 +13,13 @@ from registrations.actions.emails import send_email
 
 
 def number_ranges(string):
-    m = re.match(r'(\w+)(?:-(\w+))?$', string)
+    m = re.match(r"(\w+)(?:-(\w+))?$", string)
     if not m:
-        raise argparse.ArgumentTypeError("'" + string + "' is not a range of code. Expected forms like '02-5f' or '2'.")
+        raise argparse.ArgumentTypeError(
+            "'"
+            + string
+            + "' is not a range of code. Expected forms like '02-5f' or '2'."
+        )
     start = m.group(1)
 
     if m.group(2):
@@ -28,15 +32,17 @@ class Command(BaseCommand):
     help = "Send tickets to people"
 
     def add_arguments(self, parser):
-        parser.add_argument('event_id', type=int)
-        parser.add_argument('registrations', nargs='*', type=number_ranges)
-        parser.add_argument('-i', '--ignore-sent-status', action='store_false', dest='check_sent_status')
+        parser.add_argument("event_id", type=int)
+        parser.add_argument("registrations", nargs="*", type=number_ranges)
+        parser.add_argument(
+            "-i", "--ignore-sent-status", action="store_false", dest="check_sent_status"
+        )
 
     def handle(self, *args, event_id, registrations, check_sent_status, **options):
         try:
             TicketEvent.objects.get(id=event_id)
         except TicketEvent.DoesNotExist:
-            raise CommandError('Event does not exist')
+            raise CommandError("Event does not exist")
 
         query = reduce(or_, registrations, Q())
 
@@ -47,7 +53,9 @@ class Command(BaseCommand):
 
         refused = []
 
-        for elem in tqdm.tqdm(Registration.objects.filter(query), desc='Sending tickets'):
+        for elem in tqdm.tqdm(
+            Registration.objects.filter(query), desc="Sending tickets"
+        ):
             while True:
                 try:
                     send_email(elem, connection=connection)
@@ -62,4 +70,6 @@ class Command(BaseCommand):
         connection.close()
 
         for elem in refused:
-            self.stdout.write('Could not send to {} ({})'.format(elem.contact_email, elem.numero))
+            self.stdout.write(
+                "Could not send to {} ({})".format(elem.contact_email, elem.numero)
+            )

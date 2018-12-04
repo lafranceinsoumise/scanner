@@ -9,85 +9,236 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Registration',
+            name="Registration",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('numero', models.CharField(max_length=255, null=True, verbose_name="Numéro d'inscription")),
-                ('contact_email', models.EmailField(max_length=254, verbose_name='Email de contact')),
-                ('full_name', models.CharField(max_length=255, verbose_name='Nom complet')),
-                ('gender', models.CharField(blank=True, choices=[('M', 'Homme'), ('F', 'Femme'), ('O', 'Autre / Non défini')], max_length=1, verbose_name='Genre')),
-                ('uuid', models.UUIDField(blank=True, null=True, verbose_name='Identifiant sur la plateforme')),
-                ('ticket_status', models.CharField(choices=[('N', 'Ticket non envoyé'), ('M', "Ticket modifié depuis l'envoi"), ('S', 'Ticket à jour envoyé')], default='N', max_length=1, verbose_name='Statut du ticket')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "numero",
+                    models.CharField(
+                        max_length=255, null=True, verbose_name="Numéro d'inscription"
+                    ),
+                ),
+                (
+                    "contact_email",
+                    models.EmailField(max_length=254, verbose_name="Email de contact"),
+                ),
+                (
+                    "full_name",
+                    models.CharField(max_length=255, verbose_name="Nom complet"),
+                ),
+                (
+                    "gender",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("M", "Homme"),
+                            ("F", "Femme"),
+                            ("O", "Autre / Non défini"),
+                        ],
+                        max_length=1,
+                        verbose_name="Genre",
+                    ),
+                ),
+                (
+                    "uuid",
+                    models.UUIDField(
+                        blank=True,
+                        null=True,
+                        verbose_name="Identifiant sur la plateforme",
+                    ),
+                ),
+                (
+                    "ticket_status",
+                    models.CharField(
+                        choices=[
+                            ("N", "Ticket non envoyé"),
+                            ("M", "Ticket modifié depuis l'envoi"),
+                            ("S", "Ticket à jour envoyé"),
+                        ],
+                        default="N",
+                        max_length=1,
+                        verbose_name="Statut du ticket",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='RegistrationMeta',
+            name="RegistrationMeta",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('property', models.CharField(max_length=255)),
-                ('value', models.TextField()),
-                ('registration', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='metas', to='registrations.Registration')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("property", models.CharField(max_length=255)),
+                ("value", models.TextField()),
+                (
+                    "registration",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="metas",
+                        to="registrations.Registration",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ScannerAction',
+            name="ScannerAction",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('type', models.CharField(choices=[('scan', 'Scan du code'), ('entrance', 'Entrée sur le site'), ('cancel', 'Annulation après le scan')], max_length=255, verbose_name='Type')),
-                ('time', models.DateTimeField(auto_now_add=True, verbose_name='Date et heure')),
-                ('person', models.CharField(max_length=255, verbose_name='Personne ayant scanné')),
-                ('registration', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='events', to='registrations.Registration')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[
+                            ("scan", "Scan du code"),
+                            ("entrance", "Entrée sur le site"),
+                            ("cancel", "Annulation après le scan"),
+                        ],
+                        max_length=255,
+                        verbose_name="Type",
+                    ),
+                ),
+                (
+                    "time",
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Date et heure"
+                    ),
+                ),
+                (
+                    "person",
+                    models.CharField(
+                        max_length=255, verbose_name="Personne ayant scanné"
+                    ),
+                ),
+                (
+                    "registration",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="events",
+                        to="registrations.Registration",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='TicketCategory',
+            name="TicketCategory",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, verbose_name='Nom de la catégorie')),
-                ('color', models.CharField(max_length=255, verbose_name='Couleur')),
-                ('background_color', models.CharField(max_length=255, verbose_name='Couleur de fond')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        max_length=255, verbose_name="Nom de la catégorie"
+                    ),
+                ),
+                ("color", models.CharField(max_length=255, verbose_name="Couleur")),
+                (
+                    "background_color",
+                    models.CharField(max_length=255, verbose_name="Couleur de fond"),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='TicketEvent',
+            name="TicketEvent",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, verbose_name="Nom de l'événement")),
-                ('send_tickets_until', models.DateTimeField(verbose_name="Envoyé les tickets jusqu'à la date")),
-                ('ticket_template', models.FileField(blank=True, upload_to=registrations.models.TicketEvent.get_template_filename, verbose_name='Template du ticket')),
-                ('mosaico_url', models.URLField(blank=True, verbose_name='URL du mail sur Mosaico')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(max_length=255, verbose_name="Nom de l'événement"),
+                ),
+                (
+                    "send_tickets_until",
+                    models.DateTimeField(
+                        verbose_name="Envoyé les tickets jusqu'à la date"
+                    ),
+                ),
+                (
+                    "ticket_template",
+                    models.FileField(
+                        blank=True,
+                        upload_to=registrations.models.TicketEvent.get_template_filename,
+                        verbose_name="Template du ticket",
+                    ),
+                ),
+                (
+                    "mosaico_url",
+                    models.URLField(blank=True, verbose_name="URL du mail sur Mosaico"),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='ticketcategory',
-            name='event',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='registrations.TicketEvent'),
+            model_name="ticketcategory",
+            name="event",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="registrations.TicketEvent",
+            ),
         ),
         migrations.AddField(
-            model_name='registration',
-            name='category',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='registrations.TicketCategory'),
+            model_name="registration",
+            name="category",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="registrations.TicketCategory",
+            ),
         ),
         migrations.AddField(
-            model_name='registration',
-            name='event',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='registrations.TicketEvent'),
+            model_name="registration",
+            name="event",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                to="registrations.TicketEvent",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='ticketcategory',
-            unique_together={('event', 'name')},
+            name="ticketcategory", unique_together={("event", "name")}
         ),
         migrations.AddIndex(
-            model_name='registrationmeta',
-            index=models.Index(fields=['registration', 'property'], name='registration_property_index'),
+            model_name="registrationmeta",
+            index=models.Index(
+                fields=["registration", "property"], name="registration_property_index"
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='registration',
-            unique_together={('event', 'numero')},
+            name="registration", unique_together={("event", "numero")}
         ),
     ]

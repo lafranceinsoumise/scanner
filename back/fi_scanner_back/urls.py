@@ -22,7 +22,7 @@ from registrations.views import CodeView
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/<code>/', csrf_exempt(CodeView.as_view()), name='view_code'),
-    path('metrics', get_metrics)
+    path("admin/", admin.site.urls),
+    path("api/<code>/", csrf_exempt(CodeView.as_view()), name="view_code"),
+    path("metrics", get_metrics),
 ]
