@@ -1,0 +1,22 @@
+language: python
+python:
+  - "3.6"
+dist: xenial
+sudo: required
+cache:
+  - pip
+  - npm
+
+before_install:
+  - pip install -U pipenv
+
+install:
+  - npm i && npm run build
+  - pipenv install --dev --deploy
+
+
+before_script:
+  - cd back
+script:
+  - black --check .
+  - python manage.py test -v 2
