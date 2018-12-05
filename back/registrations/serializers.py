@@ -12,6 +12,7 @@ class RegistrationMetasField(serializers.DictField):
 
 class RegistrationSerializer(serializers.ModelSerializer):
     metas = RegistrationMetasField()
+    contact_email = serializers.EmailField()
 
     def create(self, validated_data):
         metas = validated_data.pop("metas")
@@ -46,6 +47,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
             "category",
             "ticket_status",
             "full_name",
+            "contact_email",
             "gender",
             "uuid",
             "metas",
