@@ -17,6 +17,7 @@ prometheus-client = "*"
 requests = "*"
 systemd = "*"
 djangorestframework = "*"
+django-filter = "*"
 
 [dev-packages]
 black = "==18.9b0"
