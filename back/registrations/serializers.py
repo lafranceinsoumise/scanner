@@ -40,6 +40,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Registration
         fields = (
+            "id",
             "event",
             "numero",
             "category",
