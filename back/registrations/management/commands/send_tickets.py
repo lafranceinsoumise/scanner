@@ -8,6 +8,8 @@ from smtplib import SMTPServerDisconnected, SMTPRecipientsRefused
 
 from django.db.models import Q
 from django.core.mail import get_connection
+from django.utils import timezone
+
 from registrations.models import Registration, TicketEvent
 from registrations.actions.emails import send_email
 
@@ -40,9 +42,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, event_id, registrations, check_sent_status, **options):
         try:
-            TicketEvent.objects.get(id=event_id)
+            ticket_event = TicketEvent.objects.get(id=event_id)
         except TicketEvent.DoesNotExist:
             raise CommandError("Event does not exist")
+
+        if ticket_event.send_tickets_until > timezone.now():
+            raise CommandError("Date for ticket sending is past")
 
         query = reduce(or_, registrations, Q())
 
