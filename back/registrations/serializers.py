@@ -15,7 +15,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
     contact_email = serializers.EmailField()
 
     def create(self, validated_data):
-        metas = validated_data.pop("metas")
+        metas = validated_data.pop("metas", {})
         registration = Registration.objects.create(**validated_data)
         for property, value in metas.items():
             RegistrationMeta.objects.create(
@@ -25,7 +25,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return registration
 
     def update(self, registration, validated_data):
-        metas = validated_data.pop("metas")
+        metas = validated_data.pop("metas", {})
         result = super().update(registration, validated_data)
 
         for property, value in metas.items():
