@@ -45,7 +45,7 @@ class App extends Component {
     navigator.vibrate(200);
     let response;
 
-    response = await fetch(`${config.host}/api/${content}/?person=${encodeURIComponent(this.state.scanningPerson)}`);
+    response = await fetch(`${config.host}/scan/${content}/?person=${encodeURIComponent(this.state.scanningPerson)}`);
 
     if (response.ok) {
       return this.successfulScan(await response.json(), content);
