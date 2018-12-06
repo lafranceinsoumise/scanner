@@ -74,15 +74,11 @@ def modify_if_changed(
     # updated metas: non empty values that are in both meta_fields and metas
     updated_metas = meta_fields & existing_metas
 
-    # deleted metas: missing fields and empty fields
-    deleted_metas = existing_metas - meta_fields
-
     if limit_fields != []:
         new_metas = new_metas & set(limit_fields)
         updated_metas = updated_metas & set(limit_fields)
-        deleted_metas = deleted_metas & set(limit_fields)
 
-    if changed or new_metas or deleted_metas or updated_metas:
+    if changed or new_metas or updated_metas:
         with transaction.atomic():
             if changed:
                 if (
@@ -101,15 +97,6 @@ def modify_if_changed(
                 log_file and log_file.write(
                     "New metas: {} ({})\n".format(
                         ", ".join(new_metas), registration.numero
-                    )
-                )
-
-            if deleted_metas:
-                registration.metas.filter(property__in=deleted_metas).delete()
-                changed = True
-                log_file and log_file.write(
-                    "Deleted metas: {} ({})\n".format(
-                        ", ".join(deleted_metas), registration.numero
                     )
                 )
 
