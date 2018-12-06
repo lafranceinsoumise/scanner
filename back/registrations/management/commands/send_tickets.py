@@ -49,6 +49,8 @@ class Command(BaseCommand):
         else:
             query = Q(numero=registrations_range_start)
 
+        query = query & Q(event=ticket_event)
+
         if check_sent_status:
             query = query & ~Q(ticket_status=Registration.TICKET_SENT)
 
