@@ -60,7 +60,7 @@ class App extends Component {
     let form = new FormData();
     form.append('type', 'entrance');
 
-    await fetch(`${config.host}/api/${this.state.code}/?person=${encodeURIComponent(this.state.scanningPerson)}`, {
+    await fetch(`${config.host}/scan/${this.state.code}/?person=${encodeURIComponent(this.state.scanningPerson)}`, {
       method: 'POST',
       body: form,
     });
@@ -72,7 +72,7 @@ class App extends Component {
     let form = new FormData();
     form.append('type', 'cancel');
 
-    await fetch(`${config.host}/api/${this.state.code}/?person=${encodeURIComponent(this.state.scanningPerson)}`, {
+    await fetch(`${config.host}/scan/${this.state.code}/?person=${encodeURIComponent(this.state.scanningPerson)}`, {
       method: 'POST',
       body: form,
     });
