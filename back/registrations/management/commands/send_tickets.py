@@ -14,33 +14,26 @@ from registrations.models import Registration, TicketEvent
 from registrations.actions.emails import send_email
 
 
-def number_ranges(string):
-    m = re.match(r"(\w+)(?:-(\w+))?$", string)
-    if not m:
-        raise argparse.ArgumentTypeError(
-            "'"
-            + string
-            + "' is not a range of code. Expected forms like '02-5f' or '2'."
-        )
-    start = m.group(1)
-
-    if m.group(2):
-        return Q(numero__gte=start) & Q(numero__lte=m.group(2))
-
-    return Q(numero=start)
-
-
 class Command(BaseCommand):
     help = "Send tickets to people"
 
     def add_arguments(self, parser):
         parser.add_argument("event_id", type=int)
-        parser.add_argument("registrations", nargs="*", type=number_ranges)
+        parser.add_argument("registrations_range_start", type=str)
+        parser.add_argument("registrations_range_end", nargs="?", type=str)
         parser.add_argument(
             "-i", "--ignore-sent-status", action="store_false", dest="check_sent_status"
         )
 
-    def handle(self, *args, event_id, registrations, check_sent_status, **options):
+    def handle(
+        self,
+        *args,
+        event_id,
+        registrations_range_start,
+        registrations_range_end=None,
+        check_sent_status,
+        **options
+    ):
         try:
             ticket_event = TicketEvent.objects.get(id=event_id)
         except TicketEvent.DoesNotExist:
@@ -49,7 +42,12 @@ class Command(BaseCommand):
         if ticket_event.send_tickets_until > timezone.now():
             raise CommandError("Date for ticket sending is past")
 
-        query = reduce(or_, registrations, Q())
+        if registrations_range_end is not None:
+            query = Q(numero__gte=registrations_range_start) & Q(
+                numero__lte=registrations_range_end
+            )
+        else:
+            query = Q(numero=registrations_range_start)
 
         if check_sent_status:
             query = query & ~Q(ticket_status=Registration.TICKET_SENT)
