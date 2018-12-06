@@ -28,7 +28,7 @@ router.register(r"registrations", viewsets.RegistrationViewSet)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("scan/<code>/", csrf_exempt(CodeView.as_view()), name="view_code"),
+    path("code/<code>/", csrf_exempt(CodeView.as_view()), name="view_code"),
     path("metrics/", get_metrics),
     path("api/", include(router.urls)),
 ]

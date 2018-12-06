@@ -45,7 +45,7 @@ class App extends Component {
     navigator.vibrate(200);
     let response;
 
-    response = await fetch(`${config.host}/scan/${content}/?person=${encodeURIComponent(this.state.scanningPerson)}`);
+    response = await fetch(`${config.host}/code/${content}/?person=${encodeURIComponent(this.state.scanningPerson)}`);
 
     if (response.ok) {
       return this.successfulScan(await response.json(), content);
@@ -60,7 +60,7 @@ class App extends Component {
     let form = new FormData();
     form.append('type', 'entrance');
 
-    await fetch(`${config.host}/scan/${this.state.code}/?person=${encodeURIComponent(this.state.scanningPerson)}`, {
+    await fetch(`${config.host}/code/${this.state.code}/?person=${encodeURIComponent(this.state.scanningPerson)}`, {
       method: 'POST',
       body: form,
     });
@@ -72,7 +72,7 @@ class App extends Component {
     let form = new FormData();
     form.append('type', 'cancel');
 
-    await fetch(`${config.host}/scan/${this.state.code}/?person=${encodeURIComponent(this.state.scanningPerson)}`, {
+    await fetch(`${config.host}/code/${this.state.code}/?person=${encodeURIComponent(this.state.scanningPerson)}`, {
       method: 'POST',
       body: form,
     });
