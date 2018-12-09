@@ -61,9 +61,9 @@ class EventInline(admin.TabularInline):
 
 
 class RegistrationAdmin(admin.ModelAdmin):
-    readonly_fields = ("numero", "qrcode_display", "ticket_link")
+    readonly_fields = ("numero", "qrcode_display", "ticket_link", "metas_list")
     list_filter = ("category__name", "gender", "ticket_status", EventFilter, "event")
-    list_display = ("numero", "full_name", "gender", "ticket_status")
+    list_display = ("numero", "full_name", "gender", "ticket_status", "metas_list")
     search_fields = ("full_name", "numero", "_contact_emails", "metas__value")
 
     inlines = (MetaInline, EventInline)
@@ -96,6 +96,11 @@ class RegistrationAdmin(admin.ModelAdmin):
             return "-"
 
     qrcode_display.short_description = "QRCode"
+
+    def metas_list(self, instance):
+        return " / ".join(
+            [f"{meta.property}: {meta.value}" for meta in instance.metas.all()]
+        )
 
     def ticket_link(self, instance):
         if instance._state.adding:
