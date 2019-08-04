@@ -39,7 +39,7 @@ class Command(BaseCommand):
         except TicketEvent.DoesNotExist:
             raise CommandError("Event does not exist")
 
-        if timezone.now() > ticket_event.send_tickets_until :
+        if timezone.now() > ticket_event.send_tickets_until:
             raise CommandError("Date for ticket sending is past")
 
         if registrations_range_end is not None:
