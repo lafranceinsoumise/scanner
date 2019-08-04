@@ -22,6 +22,9 @@ class TicketEvent(models.Model):
 
 
 class TicketCategory(models.Model):
+    import_key = models.CharField(
+        "Identifiant dans les fichiers d'import", blank=True, max_length=255
+    )
     name = models.CharField("Nom de la catégorie", max_length=255)
     color = models.CharField("Couleur", max_length=255)
     background_color = models.CharField("Couleur de fond", max_length=255)

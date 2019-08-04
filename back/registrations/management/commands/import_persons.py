@@ -8,6 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ValidationError, FieldDoesNotExist
 from django.core.validators import validate_email
 from django.db import transaction
+from django.db.models import Q
 
 from registrations.models import (
     Registration,
@@ -252,10 +253,10 @@ class Command(BaseCommand):
         categories = {}
         for category in {line["category"] for line in lines}:
             try:
-                categories[category] = TicketCategory.objects.get(
-                    event__id=event_id, name=category
-                )
-            except:
+                categories[category] = TicketCategory.objects.filter(
+                    event_id=event_id
+                ).get(Q(name=category) | Q(import_key=category))
+            except TicketCategory.DoesNotExist:
                 raise CommandError("Category %s does not exist on line %d" % category)
 
         for line in tqdm.tqdm(lines, desc="Importing"):
