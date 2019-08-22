@@ -59,7 +59,7 @@ class Registration(models.Model):
     event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
     numero = models.CharField("Numéro d'inscription", max_length=255, null=True)
     category = models.ForeignKey(TicketCategory, on_delete=models.CASCADE)
-    _contact_emails = models.TextField("Emails de contact")
+    _contact_emails = models.TextField("Emails de contact", blank=True)
     full_name = models.CharField("Nom complet", max_length=255)
     gender = models.CharField("Genre", max_length=1, choices=GENDER_CHOICES, blank=True)
     uuid = models.UUIDField("Identifiant sur la plateforme", blank=True, null=True)
