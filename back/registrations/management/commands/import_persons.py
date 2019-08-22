@@ -239,7 +239,7 @@ class Command(BaseCommand):
                             for contact_email in line[field_name]:
                                 validate_email(contact_email)
                     else:
-                        if not line[field_name] and (not field or not field.blank):
+                        if not line[field_name] and field and not field.blank:
                             raise CommandError(
                                 "Empty value in column %s on line %d"
                                 % (field_name, i + 1)

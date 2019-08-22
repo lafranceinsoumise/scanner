@@ -93,8 +93,6 @@ class Registration(models.Model):
     def contact_emails(self):
         return self._contact_emails.split(",")
 
-    contact_emails.blank = True
-
     @contact_emails.setter
     def contact_emails(self, value):
         self._contact_emails = ",".join(value)
