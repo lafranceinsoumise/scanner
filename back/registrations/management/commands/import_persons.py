@@ -218,7 +218,7 @@ class Command(BaseCommand):
             except FieldDoesNotExist:
                 field = None
 
-            if field and field.blank:
+            if field and field.null:
                 for line in lines:
                     if not line[field_name]:
                         line[field_name] = None
