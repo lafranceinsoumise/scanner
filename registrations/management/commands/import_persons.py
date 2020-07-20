@@ -10,11 +10,13 @@ from django.core.validators import validate_email
 from django.db import transaction
 from django.db.models import Q
 
+from registrations.actions.scans import mark_registration
 from registrations.models import (
     Registration,
     RegistrationMeta,
     TicketEvent,
     TicketCategory,
+    ScannerAction,
 )
 
 
@@ -117,6 +119,13 @@ def modify_if_changed(
                 ):
                     registration.ticket_status = registration.TICKET_MODIFIED
                 registration.save()
+
+            if properties.get("immediate_entrance"):
+                ScannerAction.objects.get_or_create(
+                    registration=registration,
+                    type=ScannerAction.TYPE_ENTRANCE,
+                    person="immediate_entrance",
+                )
             log_file and log_file.write("Committing\n\n")
 
 
@@ -193,6 +202,7 @@ class Command(BaseCommand):
             "numero",
             "event",
             "category",
+            "immediate_entrance",
         }
         meta_fields = (
             set(r.fieldnames) - common_fields - {"numero", "event", "category"}

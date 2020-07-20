@@ -91,7 +91,7 @@ class App extends Component {
 
         return (
           <div id="registration" className="container registration" style={style}>
-            {registration.meta.unpaid || registration.meta.status == "on-hold" ? (
+            {registration.meta.unpaid || registration.meta.status === "on-hold" ? (
               <div className="alert alert-danger">
                 Cette personne n'a pas encore payé&nbsp;! Merci d'annuler et de la renvoyer à l'accueil.
               </div>
@@ -124,10 +124,10 @@ class App extends Component {
       default:
         return (
           <div id="home">
-            <div class="container">
+            <div className="container">
               <p>Entrez vos noms et prénoms pour démarrer.</p>
               <form>
-                <div class="form-group">
+                <div className="form-group">
                   <input className="form-control" type="text" value={this.state.scanningPerson} onChange={this.personFieldChange.bind(this)} />
                 </div>
               </form>
