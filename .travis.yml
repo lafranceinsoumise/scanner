@@ -13,7 +13,6 @@ cache:
 
 before_install:
   - pip install -U pipenv
-  - cd back
 
 install:
   - pipenv install --dev --deploy
