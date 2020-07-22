@@ -21,6 +21,13 @@ class TicketEvent(models.Model):
         return self.name
 
 
+class ScanPoint(models.Model):
+    event = models.ForeignKey(
+        "TicketEvent", related_name="scan_points", on_delete=models.CASCADE
+    )
+    name = models.CharField("Point de scan", max_length=255)
+
+
 class TicketCategory(models.Model):
     import_key = models.CharField(
         "Identifiant dans les fichiers d'import", blank=True, max_length=255
