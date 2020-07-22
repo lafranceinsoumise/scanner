@@ -27,6 +27,9 @@ class ScanPoint(models.Model):
     )
     name = models.CharField("Point de scan", max_length=255)
 
+    def __str__(self):
+        return self.name
+
 
 class TicketCategory(models.Model):
     import_key = models.CharField(

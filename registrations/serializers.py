@@ -1,6 +1,23 @@
 from rest_framework import serializers
 
-from registrations.models import Registration, RegistrationMeta
+from registrations.models import Registration, RegistrationMeta, TicketEvent, ScanPoint
+
+
+class ScanPointSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ScanPoint
+        fields = (
+            "id",
+            "name",
+        )
+
+
+class EventSerializer(serializers.ModelSerializer):
+    scan_points = ScanPointSerializer(many=True)
+
+    class Meta:
+        model = TicketEvent
+        fields = ("name", "scan_points")
 
 
 class RegistrationMetasField(serializers.DictField):

@@ -1,8 +1,8 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets
 
-from registrations.models import Registration
-from registrations.serializers import RegistrationSerializer
+from registrations.models import Registration, TicketEvent
+from registrations.serializers import RegistrationSerializer, EventSerializer
 
 
 class RegistrationViewSet(viewsets.ModelViewSet):
@@ -10,3 +10,9 @@ class RegistrationViewSet(viewsets.ModelViewSet):
     serializer_class = RegistrationSerializer
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ("event", "uuid")
+
+
+class EventViewSet(viewsets.ReadOnlyModelViewSet):
+
+    queryset = TicketEvent.objects.all()
+    serializer_class = EventSerializer
