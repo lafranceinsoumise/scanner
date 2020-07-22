@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import Scanner from "./Scanner";
 import "./App.css";
 import config from "./config";
@@ -15,58 +15,56 @@ const GENDER_LABELS = {
   F: "Femme",
 };
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { action: "wait" };
-  }
+const App = (props) => {
+  const [action, setAction] = useState("wait");
+  const [lastScan, setLastScan] = useState(null);
+  const [user, setUser] = useState(null);
 
   // Start and stop scanning
 
-  personFieldChange(event) {
-    this.setState({ scanningPerson: event.target.value });
+  function personFieldChange(event) {
+    setUser(event.target.value);
   }
 
-  startScanning() {
-    this.setState({ action: "scan" });
+  function startScanning() {
+    setAction("scan");
   }
 
-  wait() {
-    this.setState({ action: "wait" });
+  function wait() {
+    setAction("wait");
   }
 
   // Take action with scanners
 
-  successfulScan(registration, code) {
-    this.setState({ action: "displayRegistration", registration, code });
+  function successfulScan(registration, code) {
+    setAction("displayRegistration");
+    setLastScan({ registration, code });
   }
 
-  async scan(content) {
+  let scan = async (content) => {
     navigator.vibrate(200);
     let response;
 
     response = await fetch(
-      `${config.host}/code/${content}/?person=${encodeURIComponent(
-        this.state.scanningPerson
-      )}`
+      `${config.host}/code/${content}/?person=${encodeURIComponent(user)}`
     );
 
     if (response.ok) {
-      return this.successfulScan(await response.json(), content);
+      return successfulScan(await response.json(), content);
     }
 
     if (response.status === 404) {
       throw new Error("Not Found");
     }
-  }
+  };
 
-  async validateScan() {
+  let validateScan = async () => {
     let form = new FormData();
     form.append("type", "entrance");
 
     await fetch(
-      `${config.host}/code/${this.state.code}/?person=${encodeURIComponent(
-        this.state.scanningPerson
+      `${config.host}/code/${lastScan.code}/?person=${encodeURIComponent(
+        user
       )}`,
       {
         method: "POST",
@@ -74,16 +72,16 @@ class App extends Component {
       }
     );
 
-    this.setState({ action: "scan" });
-  }
+    setAction("scan");
+  };
 
-  async cancelScan() {
+  let cancelScan = async () => {
     let form = new FormData();
     form.append("type", "cancel");
 
     await fetch(
-      `${config.host}/code/${this.state.code}/?person=${encodeURIComponent(
-        this.state.scanningPerson
+      `${config.host}/code/${lastScan.code}/?person=${encodeURIComponent(
+        user
       )}`,
       {
         method: "POST",
@@ -91,117 +89,99 @@ class App extends Component {
       }
     );
 
-    this.setState({ action: "scan" });
-  }
+    setAction("scan");
+  };
 
-  render() {
-    switch (this.state.action) {
-      case "displayRegistration":
-        let registration = this.state.registration;
-        let style = {
-          color: registration.category.color,
-          "background-color": registration.category["background-color"],
-        };
+  switch (action) {
+    case "displayRegistration":
+      let registration = lastScan.registration;
+      let style = {
+        color: registration.category.color,
+        "background-color": registration.category["background-color"],
+      };
 
-        return (
-          <div
-            id="registration"
-            className="container registration"
-            style={style}
-          >
-            {registration.meta.unpaid ||
-            registration.meta.status === "on-hold" ? (
-              <div className="alert alert-danger">
-                Cette personne n'a pas encore payé&nbsp;! Merci d'annuler et de
-                la renvoyer à l'accueil.
-              </div>
-            ) : (
-              ""
-            )}
-            <h1 className="text-center">{registration.full_name}</h1>
-            <h3>Catégorie&nbsp;: {registration.category.name}</h3>
-            <h3>#{registration.numero}</h3>
-            {["M", "F"].includes(GENDER_LABELS[registration.gender]) ? (
-              <p>
-                <b>Genre&nbsp;:</b> {registration.gender}
-              </p>
-            ) : (
-              ""
-            )}
-            {registration.events.length > 1 && (
-              <p>
-                <b>Historique&nbsp;:</b>
-              </p>
-            )}
-            <ul>
-              {registration.events.slice(0, -1).map((event) => (
-                <li key={event.time}>
-                  {EVENT_LABELS[event.type]} le{" "}
-                  {new Date(event.time).toLocaleString()} par {event.person}
-                </li>
-              ))}
-            </ul>
-            {registration.events.find((event) => event.type === "entrance") ? (
-              <div className="alert alert-danger">
-                Ce billet a déjà été scanné&nbsp;! Ne laissez entrer la personne
-                qu'après vérification de son identité.
-              </div>
-            ) : (
-              ""
-            )}
-            <button
-              className="btn btn-block btn-success"
-              onClick={this.validateScan.bind(this)}
-            >
-              OK
-            </button>
-            <button
-              className="btn btn-block btn-danger"
-              onClick={this.cancelScan.bind(this)}
-            >
-              Annuler
-            </button>
-          </div>
-        );
-      case "scan":
-        return (
-          <Scanner
-            clickBack={this.wait.bind(this)}
-            scan={this.scan.bind(this)}
-          />
-        );
-      case "wait":
-      default:
-        return (
-          <div id="home">
-            <div className="container">
-              <p>Entrez vos noms et prénoms pour démarrer.</p>
-              <form>
-                <div className="form-group">
-                  <input
-                    className="form-control"
-                    type="text"
-                    value={this.state.scanningPerson}
-                    onChange={this.personFieldChange.bind(this)}
-                  />
-                </div>
-              </form>
-              {this.state.scanningPerson &&
-              this.state.scanningPerson.length > 5 ? (
-                <button
-                  className="btn btn-success btn-block"
-                  onClick={this.startScanning.bind(this)}
-                >
-                  Scanner
-                </button>
-              ) : (
-                ""
-              )}
+      return (
+        <div id="registration" className="container registration" style={style}>
+          {registration.meta.unpaid ||
+          registration.meta.status === "on-hold" ? (
+            <div className="alert alert-danger">
+              Cette personne n'a pas encore payé&nbsp;! Merci d'annuler et de la
+              renvoyer à l'accueil.
             </div>
+          ) : (
+            ""
+          )}
+          <h1 className="text-center">{registration.full_name}</h1>
+          <h3>Catégorie&nbsp;: {registration.category.name}</h3>
+          <h3>#{registration.numero}</h3>
+          {["M", "F"].includes(GENDER_LABELS[registration.gender]) ? (
+            <p>
+              <b>Genre&nbsp;:</b> {registration.gender}
+            </p>
+          ) : (
+            ""
+          )}
+          {registration.events.length > 1 && (
+            <p>
+              <b>Historique&nbsp;:</b>
+            </p>
+          )}
+          <ul>
+            {registration.events.slice(0, -1).map((event) => (
+              <li key={event.time}>
+                {EVENT_LABELS[event.type]} le{" "}
+                {new Date(event.time).toLocaleString()} par {event.person}
+              </li>
+            ))}
+          </ul>
+          {registration.events.find((event) => event.type === "entrance") ? (
+            <div className="alert alert-danger">
+              Ce billet a déjà été scanné&nbsp;! Ne laissez entrer la personne
+              qu'après vérification de son identité.
+            </div>
+          ) : (
+            ""
+          )}
+          <button className="btn btn-block btn-success" onClick={validateScan}>
+            OK
+          </button>
+          <button className="btn btn-block btn-danger" onClick={cancelScan}>
+            Annuler
+          </button>
+        </div>
+      );
+    case "scan":
+      return <Scanner clickBack={wait} scan={scan} />;
+    case "wait":
+    default:
+      return (
+        <div id="home">
+          <div className="container">
+            <p>Entrez vos noms et prénoms pour démarrer.</p>
+            <form>
+              <div className="form-group">
+                <input
+                  className="form-control"
+                  type="text"
+                  value={user}
+                  onChange={personFieldChange}
+                />
+              </div>
+            </form>
+            {user && user.length > 5 ? (
+              <button
+                className="btn btn-success btn-block"
+                onClick={startScanning}
+              >
+                Scanner
+              </button>
+            ) : (
+              ""
+            )}
           </div>
-        );
-    }
+        </div>
+      );
   }
-}
+};
 
 export default App;
