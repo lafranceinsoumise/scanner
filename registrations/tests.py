@@ -101,12 +101,12 @@ class ViewTestCase(TestCase):
     def test_get_info(self):
         response = self.client.get(
             reverse("view_code", kwargs={"code": "1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk="})
-            + "?person=Guillaume%20Royer"
+            + "?person=Jill%20Royer"
         )
         json = response.json()
 
         self.assertEqual(json["events"][1]["type"], "scan")
-        self.assertEqual(json["events"][0]["person"], "Guillaume Royer")
+        self.assertEqual(json["events"][0]["person"], "Jill Royer")
         del json["events"]
         self.assertEqual(
             json,
@@ -128,18 +128,18 @@ class ViewTestCase(TestCase):
     def test_can_post_info(self):
         response = self.client.post(
             reverse("view_code", kwargs={"code": "1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk="})
-            + "?person=Guillaume%20Royer",
+            + "?person=Jill%20Royer",
             data={"type": "entrance"},
         )
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.registration.events.all()[0].type, "entrance")
-        self.assertEqual(self.registration.events.all()[0].person, "Guillaume Royer")
+        self.assertEqual(self.registration.events.all()[0].person, "Jill Royer")
 
     def test_cannot_post_nawak(self):
         response = self.client.post(
             reverse("view_code", kwargs={"code": "1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk="})
-            + "?person=Guillaume%20Royer",
+            + "?person=Jill%20Royer",
             data={"type": "prout"},
         )
 
