@@ -26,9 +26,17 @@ class ScanPoint(models.Model):
         "TicketEvent", related_name="scan_points", on_delete=models.CASCADE
     )
     name = models.CharField("Point de scan", max_length=255)
+    count = models.BooleanField("Afficher le compteur", default=False)
 
     def __str__(self):
         return self.name
+
+
+class ScanSeq(models.Model):
+    point = models.ForeignKey(
+        "ScanPoint", related_name="seqs", on_delete=models.CASCADE
+    )
+    created = models.DateTimeField("Début du créneau", auto_created=True)
 
 
 class TicketCategory(models.Model):
@@ -143,5 +151,11 @@ class ScannerAction(models.Model):
     registration = models.ForeignKey(
         "Registration", related_name="events", on_delete=models.PROTECT
     )
+    point = models.ForeignKey(
+        "ScanPoint", related_name="actions", on_delete=models.PROTECT, null=True
+    )
     time = models.DateTimeField("Date et heure", auto_now_add=True)
     person = models.CharField("Personne ayant scanné", max_length=255)
+
+    class Meta:
+        ordering = ["-pk"]

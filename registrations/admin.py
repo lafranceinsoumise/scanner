@@ -57,7 +57,7 @@ class MetaInline(admin.TabularInline):
 
 class EventInline(admin.TabularInline):
     model = ScannerAction
-    readonly_fields = ["type", "time", "person"]
+    readonly_fields = ["type", "time", "person", "point"]
     extra = 0
 
 
@@ -88,7 +88,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         return instance.first_name + " " + instance.last_name
 
     def qrcode_display(self, instance):
-        if instance.numero:
+        if instance.pk is not None:
             return format_html(
                 '<img src="{}"/>',
                 reverse("admin:registrations_registration_qrcode", args=[instance.pk]),

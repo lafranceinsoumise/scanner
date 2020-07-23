@@ -18,7 +18,7 @@ def get_registration_from_code(code):
     return registration
 
 
-def scan_code(code, operator):
+def scan_code(code, operator, point=None):
     try:
         registration = get_registration_from_code(code)
     except InvalidCodeException:
@@ -35,7 +35,7 @@ def scan_code(code, operator):
     return registration
 
 
-def mark_registration(code, type, operator):
+def mark_registration(code, type, operator, point=None):
     try:
         registration = get_registration_from_code(code)
     except InvalidCodeException:
@@ -45,6 +45,8 @@ def mark_registration(code, type, operator):
         state_change_counter.labels("missing_code").inc()
         raise InvalidCodeException
 
-    ScannerAction.objects.create(registration=registration, type=type, person=operator)
+    ScannerAction.objects.create(
+        registration=registration, type=type, person=operator, point_id=point
+    )
     state_change_counter.labels(type).inc()
     return registration
