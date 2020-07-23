@@ -1,15 +1,30 @@
 from rest_framework import serializers
 
-from registrations.models import Registration, RegistrationMeta, TicketEvent, ScanPoint
+from registrations.models import (
+    Registration,
+    RegistrationMeta,
+    TicketEvent,
+    ScanPoint,
+    ScannerAction,
+)
 
 
 class ScanPointSerializer(serializers.ModelSerializer):
+
+    count = serializers.SerializerMethodField()
+
+    def get_count(self, instance):
+        last_seq = instance.seqs.last()
+
+        qs = instance.actions.filter(type=ScannerAction.TYPE_ENTRANCE)
+        if last_seq is not None:
+            qs = qs.filter(time__gt=last_seq.created)
+
+        return qs.count()
+
     class Meta:
         model = ScanPoint
-        fields = (
-            "id",
-            "name",
-        )
+        fields = ("id", "name", "count")
 
 
 class EventSerializer(serializers.ModelSerializer):
