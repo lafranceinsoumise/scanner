@@ -35,7 +35,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 #root > #scanner > #preview {

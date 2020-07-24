@@ -29,7 +29,10 @@ def scan_code(code, operator, point=None):
         raise InvalidCodeException
 
     ScannerAction.objects.create(
-        registration=registration, type=ScannerAction.TYPE_SCAN, person=operator
+        registration=registration,
+        type=ScannerAction.TYPE_SCAN,
+        person=operator,
+        point_id=point,
     )
     scan_counter.labels("success").inc()
     return registration

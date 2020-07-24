@@ -1,8 +1,10 @@
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q, F, Max
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, Http404
 from django.views import View
+from django.views.generic import CreateView
 
-from .models import ScannerAction, ScanPoint
+from .models import ScannerAction, ScanPoint, ScanSeq
 from .actions.scans import scan_code, mark_registration, InvalidCodeException
 
 
@@ -47,7 +49,9 @@ class CodeView(View):
                         "person": event.person,
                         "point": event.point.name if event.point is not None else None,
                     }
-                    for event in registration.events.all()
+                    for event in registration.events.annotate(
+                        last_seq=Max("point__seqs__created")
+                    ).filter(Q(last_seq=None) | Q(last_seq__lt=F("time")))
                 ],
             }
         )
@@ -68,4 +72,13 @@ class CodeView(View):
         except InvalidCodeException:
             return Http404
 
+        return HttpResponse("OK")
+
+
+class CreateSeqView(CreateView):
+    model = ScanSeq
+    fields = ("point",)
+
+    def form_valid(self, form):
+        self.object = form.save()
         return HttpResponse("OK")

@@ -2,11 +2,7 @@ import React, { useState } from "react";
 import config from "./config";
 import useSWR from "swr";
 import { Container } from "./Container";
-
-async function jsonFetch(url) {
-  let response = await fetch(url);
-  return response.json();
-}
+import { jsonFetch } from "./utils";
 
 export function Start(props) {
   const { data: events, error } = useSWR(

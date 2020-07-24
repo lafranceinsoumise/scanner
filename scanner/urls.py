@@ -18,12 +18,13 @@ from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
 
 from registrations.router import router
-from registrations.views import CodeView
+from registrations.views import CodeView, CreateSeqView
 from .metrics import get_metrics
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("code/<code>/", csrf_exempt(CodeView.as_view()), name="view_code"),
+    path("reset/", csrf_exempt(CreateSeqView.as_view()), name="reset_point"),
     path("metrics/", get_metrics),
     path("api/", include(router.urls)),
 ]

@@ -14,10 +14,12 @@ class ScanPointSerializer(serializers.ModelSerializer):
     count = serializers.SerializerMethodField()
 
     def get_count(self, instance):
-        last_seq = instance.seqs.last()
+        if not instance.count:
+            return None
 
         qs = instance.actions.filter(type=ScannerAction.TYPE_ENTRANCE)
-        if last_seq is not None:
+
+        if (last_seq := instance.seqs.last()) is not None:
             qs = qs.filter(time__gt=last_seq.created)
 
         return qs.count()

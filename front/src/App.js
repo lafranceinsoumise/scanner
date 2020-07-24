@@ -4,6 +4,7 @@ import "./App.css";
 import config from "./config";
 import { Start } from "./Start";
 import { Ticket } from "./Ticket";
+import { postForm } from "./utils";
 
 function scanUrl(code, user, point) {
   return `${config.host}/code/${code}/?person=${encodeURIComponent(
@@ -35,24 +36,16 @@ const App = (props) => {
   );
 
   let validateScan = useCallback(async () => {
-    let form = new FormData();
-    form.append("type", "entrance");
-
-    await fetch(scanUrl(lastScan.code, user, point), {
-      method: "POST",
-      body: form,
+    await postForm(scanUrl(lastScan.code, user, point), {
+      type: "entrance",
     });
 
     setLastScan(null);
   }, [lastScan, user, point]);
 
   let cancelScan = useCallback(async () => {
-    let form = new FormData();
-    form.append("type", "cancel");
-
-    await fetch(scanUrl(lastScan.code, user, point), {
-      method: "POST",
-      body: form,
+    await postForm(scanUrl(lastScan.code, user, point), {
+      type: "cancel",
     });
 
     setLastScan(null);
@@ -70,7 +63,7 @@ const App = (props) => {
   }
 
   if (user !== null && point !== null) {
-    return <Scanner scan={scan} />;
+    return <Scanner scan={scan} user={user} point={point} />;
   }
 
   return <Start setName={setUser} setPoint={setPoint} />;

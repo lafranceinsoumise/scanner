@@ -36,7 +36,7 @@ class ScanSeq(models.Model):
     point = models.ForeignKey(
         "ScanPoint", related_name="seqs", on_delete=models.CASCADE
     )
-    created = models.DateTimeField("Début du créneau", auto_created=True)
+    created = models.DateTimeField("Début du créneau", auto_now_add=True)
 
 
 class TicketCategory(models.Model):
