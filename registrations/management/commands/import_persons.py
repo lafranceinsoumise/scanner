@@ -40,6 +40,16 @@ def modify_if_changed(
     update_status,
     limit_fields,
 ):
+    if category is None:
+        nb, _ = Registration.objects.filter(event_id=event_id, numero=properties["numero"]).delete()
+
+        if nb:
+            log_file and log_file.write(
+                f"Deleting {nb} registration{'s' if nb > 1 else ''}: {properties['numero']}\n"
+            )
+
+        return
+
     # do not use get_or_create ==> we do not want to create empty registration in case something goes wrong
     try:
         registration = Registration.objects.prefetch_related("metas").get(
@@ -260,8 +270,8 @@ class Command(BaseCommand):
                     % (line[field_name], field_name, i + 1)
                 )
 
-        categories = {}
-        for category in {line["category"] for line in lines}:
+        categories = {"": None}
+        for category in {line["category"] for line in lines if line["category"]}:
             try:
                 categories[category] = TicketCategory.objects.filter(
                     event_id=event_id
