@@ -1,0 +1,163 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-17 16:39+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: registrations/models.py:14
+msgid "Event name"
+msgstr "Nom de l'événement"
+
+#: registrations/models.py:15
+msgid "Send tickets until date"
+msgstr "Envoyer les tickets jusqu'à la date"
+
+#: registrations/models.py:17
+msgid "Ticket template"
+msgstr "Template du ticket"
+
+#: registrations/models.py:19
+msgid "Email template URL"
+msgstr "URL du mail"
+
+#: registrations/models.py:26
+msgid "Event"
+msgstr "Événement"
+
+#: registrations/models.py:27
+msgid "Events"
+msgstr "Événements"
+
+#: registrations/models.py:34 registrations/models.py:41
+msgid "Scan point"
+msgstr "Point de scan"
+
+#: registrations/models.py:35
+msgid "Display ticket count on scan screen"
+msgstr "Afficher le compteur"
+
+#: registrations/models.py:42
+msgid "Scan points"
+msgstr "Point de scan"
+
+#: registrations/models.py:49
+msgid "Start of scan sequence"
+msgstr "Début du créneau"
+
+#: registrations/models.py:54
+msgid "Id key in import file"
+msgstr "Identifiant dans les fichiers d'import"
+
+#: registrations/models.py:56
+msgid "Category name"
+msgstr "Nom de la catégorie"
+
+#: registrations/models.py:57
+msgid "Color"
+msgstr "Couleur"
+
+#: registrations/models.py:58
+msgid "Background color"
+msgstr "Couleur de fond"
+
+#: registrations/models.py:66
+msgid "Ticket category"
+msgstr "Catégorie de ticket"
+
+#: registrations/models.py:67
+msgid "Ticket categories"
+msgstr "Catégories de tickets"
+
+#: registrations/models.py:75
+msgid "Male"
+msgstr "Homme"
+
+#: registrations/models.py:76
+msgid "Female"
+msgstr "Femme"
+
+#: registrations/models.py:77
+msgid "Other / Don't answer"
+msgstr "Autre / Non défini"
+
+#: registrations/models.py:84
+msgid "Ticket not sent"
+msgstr "Ticket non envoyé"
+
+#: registrations/models.py:85
+msgid "Ticket modified since last sending"
+msgstr "Ticket modifié depuis l'envoi"
+
+#: registrations/models.py:86
+msgid "Updated ticket sent"
+msgstr "Ticket à jour envoyé"
+
+#: registrations/models.py:90
+msgid "Inscription number"
+msgstr "Numéro d'inscription"
+
+#: registrations/models.py:92
+msgid "Contact emails"
+msgstr "Emails de contact"
+
+#: registrations/models.py:93
+msgid "Full name"
+msgstr "Nom complet"
+
+#: registrations/models.py:95
+msgid "Gender"
+msgstr "Genre"
+
+#: registrations/models.py:97
+msgid "External unique ID"
+msgstr "Identifiant externe"
+
+#: registrations/models.py:99
+msgid "Ticket status"
+msgstr "Statut du ticket"
+
+#: registrations/models.py:141
+msgid "Registration"
+msgstr "Inscription"
+
+#: registrations/models.py:142
+msgid "Registrations"
+msgstr "Inscriptions"
+
+#: registrations/models.py:161
+msgid "QR Code scan"
+msgstr "Scan du QR code"
+
+#: registrations/models.py:162
+msgid "Entrance"
+msgstr "Entrée"
+
+#: registrations/models.py:163
+msgid "Canceled after scan"
+msgstr "Annulation après le scan"
+
+#: registrations/models.py:166
+msgid "Type"
+msgstr "Type"
+
+#: registrations/models.py:173
+msgid "Date and time"
+msgstr "Date et heure"
+
+#: registrations/models.py:174
+msgid "Scanning person"
+msgstr "Personne ayant scanné"

@@ -2,6 +2,7 @@ from time import strftime
 
 from django.db import models
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 from .actions.codes import gen_qrcode
 
@@ -10,45 +11,51 @@ class TicketEvent(models.Model):
     def get_template_filename(instance, filename):
         return strftime(f"templates/{slugify(instance.name)}/%Y-%m-%d-%H-%M.svg")
 
-    name = models.CharField("Nom de l'événement", max_length=255)
-    send_tickets_until = models.DateTimeField("Envoyé les tickets jusqu'à la date")
+    name = models.CharField(_("Event name"), max_length=255)
+    send_tickets_until = models.DateTimeField(_("Send tickets until date"))
     ticket_template = models.FileField(
-        "Template du ticket", upload_to=get_template_filename, blank=True
+        _("Ticket template"), upload_to=get_template_filename, blank=True
     )
-    mosaico_url = models.URLField("URL du mail sur Mosaico", blank=True)
+    mosaico_url = models.URLField(_("Email template URL"), blank=True)
 
     def __str__(self):
         return self.name
 
     class Meta:
         ordering = ["-id"]
+        verbose_name = _("Event")
+        verbose_name_plural = _("Events")
 
 
 class ScanPoint(models.Model):
     event = models.ForeignKey(
         "TicketEvent", related_name="scan_points", on_delete=models.CASCADE
     )
-    name = models.CharField("Point de scan", max_length=255)
-    count = models.BooleanField("Afficher le compteur", default=False)
+    name = models.CharField(_("Scan point"), max_length=255)
+    count = models.BooleanField(_("Display ticket count on scan screen"), default=False)
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = _("Scan point")
+        verbose_name_plural = _("Scan points")
 
 
 class ScanSeq(models.Model):
     point = models.ForeignKey(
         "ScanPoint", related_name="seqs", on_delete=models.CASCADE
     )
-    created = models.DateTimeField("Début du créneau", auto_now_add=True)
+    created = models.DateTimeField(_("Start of scan sequence"), auto_now_add=True)
 
 
 class TicketCategory(models.Model):
     import_key = models.CharField(
-        "Identifiant dans les fichiers d'import", blank=True, max_length=255
+        _("Id key in import file"), blank=True, max_length=255
     )
-    name = models.CharField("Nom de la catégorie", max_length=255)
-    color = models.CharField("Couleur", max_length=255)
-    background_color = models.CharField("Couleur de fond", max_length=255)
+    name = models.CharField(_("Category name"), max_length=255)
+    color = models.CharField(_("Color"), max_length=255)
+    background_color = models.CharField(_("Background color"), max_length=255)
     event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -56,6 +63,8 @@ class TicketCategory(models.Model):
 
     class Meta:
         unique_together = (("event", "name"),)
+        verbose_name = _("Ticket category")
+        verbose_name_plural = _("Ticket categories")
 
 
 class Registration(models.Model):
@@ -63,29 +72,31 @@ class Registration(models.Model):
     GENDER_FEMALE = "F"
     GENDER_OTHER = "O"
     GENDER_CHOICES = (
-        (GENDER_MALE, "Homme"),
-        (GENDER_FEMALE, "Femme"),
-        (GENDER_OTHER, "Autre / Non défini"),
+        (GENDER_MALE, _("Male")),
+        (GENDER_FEMALE, _("Female")),
+        (GENDER_OTHER, _("Other / Don't answer")),
     )
 
     TICKET_NOT_SENT = "N"
     TICKET_MODIFIED = "M"
     TICKET_SENT = "S"
     TICKET_CHOICES = (
-        (TICKET_NOT_SENT, "Ticket non envoyé"),
-        (TICKET_MODIFIED, "Ticket modifié depuis l'envoi"),
-        (TICKET_SENT, "Ticket à jour envoyé"),
+        (TICKET_NOT_SENT, _("Ticket not sent")),
+        (TICKET_MODIFIED, _("Ticket modified since last sending")),
+        (TICKET_SENT, _("Updated ticket sent")),
     )
 
     event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
-    numero = models.CharField("Numéro d'inscription", max_length=255, null=True)
+    numero = models.CharField(_("Inscription number"), max_length=255, null=True)
     category = models.ForeignKey(TicketCategory, on_delete=models.CASCADE)
-    _contact_emails = models.TextField("Emails de contact", blank=True)
-    full_name = models.CharField("Nom complet", max_length=255)
-    gender = models.CharField("Genre", max_length=1, choices=GENDER_CHOICES, blank=True)
-    uuid = models.UUIDField("Identifiant sur la plateforme", blank=True, null=True)
+    _contact_emails = models.TextField(_("Contact emails"), blank=True)
+    full_name = models.CharField(_("Full name"), max_length=255)
+    gender = models.CharField(
+        _("Gender"), max_length=1, choices=GENDER_CHOICES, blank=True
+    )
+    uuid = models.UUIDField(_("External unique ID"), blank=True, null=True)
     ticket_status = models.CharField(
-        "Statut du ticket",
+        _("Ticket status"),
         choices=TICKET_CHOICES,
         default=TICKET_NOT_SENT,
         max_length=1,
@@ -127,6 +138,8 @@ class Registration(models.Model):
 
     class Meta:
         unique_together = (("event", "numero"),)
+        verbose_name = _("Registration")
+        verbose_name_plural = _("Registrations")
 
 
 class RegistrationMeta(models.Model):
@@ -145,20 +158,20 @@ class ScannerAction(models.Model):
     TYPE_ENTRANCE = "entrance"
     TYPE_CANCEL = "cancel"
     TYPE_CHOICES = (
-        (TYPE_SCAN, "Scan du code"),
-        (TYPE_ENTRANCE, "Entrée sur le site"),
-        (TYPE_CANCEL, "Annulation après le scan"),
+        (TYPE_SCAN, _("QR Code scan")),
+        (TYPE_ENTRANCE, _("Entrance")),
+        (TYPE_CANCEL, _("Canceled after scan")),
     )
 
-    type = models.CharField("Type", max_length=255, choices=TYPE_CHOICES)
+    type = models.CharField(_("Type"), max_length=255, choices=TYPE_CHOICES)
     registration = models.ForeignKey(
         "Registration", related_name="events", on_delete=models.PROTECT
     )
     point = models.ForeignKey(
         "ScanPoint", related_name="actions", on_delete=models.PROTECT, null=True
     )
-    time = models.DateTimeField("Date et heure", auto_now_add=True)
-    person = models.CharField("Personne ayant scanné", max_length=255)
+    time = models.DateTimeField(_("Date and time"), auto_now_add=True)
+    person = models.CharField(_("Scanning person"), max_length=255)
 
     class Meta:
         ordering = ["-pk"]
