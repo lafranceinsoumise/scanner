@@ -32,6 +32,7 @@ class CodeView(View):
         return JsonResponse(
             {
                 "numero": registration.numero,
+                "canceled": registration.canceled,
                 "full_name": registration.full_name,
                 "gender": registration.gender,
                 "category": {

@@ -9,6 +9,13 @@ export function Ticket({ registration, validateScan, cancelScan }) {
 
   return (
     <div id="registration" className="container registration" style={style}>
+      {registration.canceled ? (
+        <div className="alert alert-danger">
+          Ce billet a été annulé ! Merci de renvoyer la personne à l'accueil.
+        </div>
+      ) : (
+        ""
+      )}
       {registration.meta.unpaid || registration.meta.status === "on-hold" ? (
         <div className="alert alert-danger">
           Cette personne n'a pas encore payé&nbsp;! Merci d'annuler et de la
@@ -33,10 +40,10 @@ export function Ticket({ registration, validateScan, cancelScan }) {
       ) : (
         ""
       )}
-
+      {!registration.canceled &&
       <button className="btn btn-block btn-success" onClick={validateScan}>
         OK
-      </button>
+      </button>}
       <button className="btn btn-block btn-danger" onClick={cancelScan}>
         Annuler
       </button>

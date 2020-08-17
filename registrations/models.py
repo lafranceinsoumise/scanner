@@ -103,6 +103,8 @@ class Registration(models.Model):
         blank=False,
     )
 
+    canceled = models.BooleanField(_("Canceled"), default=False)
+
     @property
     def contact_email(self):
         return self.contact_emails[0]

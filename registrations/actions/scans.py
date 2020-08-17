@@ -48,6 +48,9 @@ def mark_registration(code, type, operator, point=None):
         state_change_counter.labels("missing_code").inc()
         raise InvalidCodeException
 
+    if registration.canceled:
+        raise InvalidCodeException("Billet annulé")
+
     ScannerAction.objects.create(
         registration=registration, type=type, person=operator, point_id=point
     )

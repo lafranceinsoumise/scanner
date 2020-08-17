@@ -62,9 +62,9 @@ class EventInline(admin.TabularInline):
 
 
 class RegistrationAdmin(admin.ModelAdmin):
-    readonly_fields = ("numero", "qrcode_display", "ticket_link", "metas_list")
-    list_filter = ("category__name", "gender", "ticket_status", EventFilter, "event")
-    list_display = ("numero", "full_name", "gender", "ticket_status", "metas_list")
+    readonly_fields = ("numero", "canceled", "qrcode_display", "ticket_link", "metas_list")
+    list_filter = ("category__name", "canceled", "gender", "ticket_status", EventFilter, "event")
+    list_display = ("numero", "full_name", "gender", "canceled", "ticket_status", "metas_list")
     search_fields = ("full_name", "numero", "_contact_emails", "metas__value")
 
     inlines = (MetaInline, EventInline)
@@ -89,6 +89,8 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     def qrcode_display(self, instance):
         if instance.pk is not None:
+            if instance.canceled:
+                "Billet annulé"
             return format_html(
                 '<img src="{}"/>',
                 reverse("admin:registrations_registration_qrcode", args=[instance.pk]),
