@@ -55,7 +55,7 @@ def send_email(registration, connection=None):
             mimetype="application/pdf",
         )
 
-        for attachment in registration.attachments.all():
+        for attachment in registration.event.attachments.all():
             with attachment.file.open("rb") as f:
                 content = f.read()
 
