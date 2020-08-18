@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.core.exceptions import ValidationError, FieldDoesNotExist
 from django.core.validators import validate_email
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, CharField
 
 from registrations.models import (
     Registration,
@@ -192,6 +192,7 @@ class Command(BaseCommand):
 
         # find columns that are model fields
         model_field_names = {
+            "canceled",
             "alt_numero",
             "full_name",
             "gender",
@@ -250,7 +251,7 @@ class Command(BaseCommand):
                             for contact_email in line[field_name]:
                                 validate_email(contact_email)
                     else:
-                        if not line[field_name] and field and not field.blank:
+                        if isinstance(field, CharField) and not field.blank:
                             raise CommandError(
                                 "Empty value in column %s on line %d"
                                 % (field_name, i + 1)
