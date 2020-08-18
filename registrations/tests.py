@@ -112,6 +112,7 @@ class ViewTestCase(TestCase):
             json,
             {
                 "numero": "1",
+                "canceled": False,
                 "gender": "",
                 "full_name": "Full Name",
                 "category": {
