@@ -62,7 +62,7 @@ def send_email(registration, connection=None):
             email.attach(
                 filename=attachment.filename,
                 content=content,
-                mimetype=attachment.mimetype
+                mimetype=attachment.mimetype,
             )
 
         email.send()

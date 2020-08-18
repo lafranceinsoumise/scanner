@@ -7,24 +7,43 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('registrations', '0012_registration_canceled'),
+        ("registrations", "0012_registration_canceled"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='TicketAttachment',
+            name="TicketAttachment",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('filename', models.CharField(max_length=60, verbose_name='File name')),
-                ('mimetype', models.CharField(max_length=100, verbose_name='Mime type')),
-                ('file', models.FileField(upload_to='', verbose_name='Attachment')),
-                ('event', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attachments', related_query_name='attachment', to='registrations.TicketEvent')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("filename", models.CharField(max_length=60, verbose_name="File name")),
+                (
+                    "mimetype",
+                    models.CharField(max_length=100, verbose_name="Mime type"),
+                ),
+                ("file", models.FileField(upload_to="", verbose_name="Attachment")),
+                (
+                    "event",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="attachments",
+                        related_query_name="attachment",
+                        to="registrations.TicketEvent",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Attachment',
-                'verbose_name_plural': 'Attachments',
-                'ordering': ('event', 'filename'),
-                'unique_together': {('event', 'filename')},
+                "verbose_name": "Attachment",
+                "verbose_name_plural": "Attachments",
+                "ordering": ("event", "filename"),
+                "unique_together": {("event", "filename")},
             },
         ),
     ]

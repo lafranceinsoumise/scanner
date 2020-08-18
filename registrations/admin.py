@@ -11,7 +11,8 @@ from .models import (
     RegistrationMeta,
     TicketEvent,
     TicketCategory,
-    ScanPoint, TicketAttachment,
+    ScanPoint,
+    TicketAttachment,
 )
 from .actions import codes, tickets
 
@@ -62,9 +63,29 @@ class EventInline(admin.TabularInline):
 
 
 class RegistrationAdmin(admin.ModelAdmin):
-    readonly_fields = ("numero", "canceled", "qrcode_display", "ticket_link", "metas_list")
-    list_filter = ("category__name", "canceled", "gender", "ticket_status", EventFilter, "event")
-    list_display = ("numero", "full_name", "gender", "canceled", "ticket_status", "metas_list")
+    readonly_fields = (
+        "numero",
+        "canceled",
+        "qrcode_display",
+        "ticket_link",
+        "metas_list",
+    )
+    list_filter = (
+        "category__name",
+        "canceled",
+        "gender",
+        "ticket_status",
+        EventFilter,
+        "event",
+    )
+    list_display = (
+        "numero",
+        "full_name",
+        "gender",
+        "canceled",
+        "ticket_status",
+        "metas_list",
+    )
     search_fields = ("full_name", "numero", "_contact_emails", "metas__value")
 
     inlines = (MetaInline, EventInline)
