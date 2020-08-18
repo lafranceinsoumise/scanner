@@ -11,7 +11,7 @@ from .models import (
     RegistrationMeta,
     TicketEvent,
     TicketCategory,
-    ScanPoint,
+    ScanPoint, TicketAttachment,
 )
 from .actions import codes, tickets
 
@@ -134,6 +134,10 @@ class RegistrationAdmin(admin.ModelAdmin):
         return response
 
 
+class TicketAttachmentInline(admin.TabularInline):
+    model = TicketAttachment
+
+
 class ScanPointInline(admin.TabularInline):
     model = ScanPoint
 
@@ -141,7 +145,7 @@ class ScanPointInline(admin.TabularInline):
 class TicketEventAdmin(admin.ModelAdmin):
     model = TicketEvent
     list_display = ("name",)
-    inlines = [ScanPointInline]
+    inlines = [TicketAttachmentInline, ScanPointInline]
 
 
 class ScanPointAdmin(admin.ModelAdmin):

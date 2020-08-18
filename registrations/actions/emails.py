@@ -55,6 +55,16 @@ def send_email(registration, connection=None):
             mimetype="application/pdf",
         )
 
+        for attachment in registration.attachments.all():
+            with attachment.file.open("rb") as f:
+                content = f.read()
+
+            email.attach(
+                filename=attachment.filename,
+                content=content,
+                mimetype=attachment.mimetype
+            )
+
         email.send()
 
     if registration.ticket_status != registration.TICKET_SENT:

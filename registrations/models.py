@@ -27,6 +27,18 @@ class TicketEvent(models.Model):
         verbose_name_plural = _("Events")
 
 
+class TicketAttachment(models.Model):
+    filename = models.CharField(_("File name"), null=False, blank=False, max_length=60)
+    mimetype = models.CharField(_("Mime type"), null=False, blank=False, max_length=100)
+    file = models.FileField(_("Attachment"), null=False)
+    event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE, related_name="attachments", related_query_name="attachment")
+
+    class Meta:
+        ordering = ("event", "filename")
+        unique_together = ("event", "filename")
+        verbose_name = _("Attachment")
+        verbose_name_plural = _("Attachments")
+
 class ScanPoint(models.Model):
     event = models.ForeignKey(
         "TicketEvent", related_name="scan_points", on_delete=models.CASCADE
