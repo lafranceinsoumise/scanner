@@ -1,17 +1,13 @@
-from django.core.management.base import BaseCommand, CommandError
-import re
-import argparse
-from functools import reduce
-from operator import or_
-import tqdm
 from smtplib import SMTPServerDisconnected, SMTPRecipientsRefused
 
-from django.db.models import Q
+import tqdm
 from django.core.mail import get_connection
+from django.core.management.base import BaseCommand, CommandError
+from django.db.models import Q
 from django.utils import timezone
 
-from registrations.models import Registration, TicketEvent
 from registrations.actions.emails import send_email
+from registrations.models import Registration, TicketEvent
 
 
 class Command(BaseCommand):
@@ -49,7 +45,7 @@ class Command(BaseCommand):
         else:
             query = Q(numero=registrations_range_start)
 
-        query = query & Q(event=ticket_event)
+        query = query & Q(event=ticket_event) & Q(canceled=False)
 
         if check_sent_status:
             query = query & ~Q(ticket_status=Registration.TICKET_SENT)
