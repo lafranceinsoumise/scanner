@@ -40,10 +40,11 @@ export function Ticket({ registration, validateScan, cancelScan }) {
       ) : (
         ""
       )}
-      {!registration.canceled &&
-      <button className="btn btn-block btn-success" onClick={validateScan}>
-        OK
-      </button>}
+      {!registration.canceled && (
+        <button className="btn btn-block btn-success" onClick={validateScan}>
+          OK
+        </button>
+      )}
       <button className="btn btn-block btn-danger" onClick={cancelScan}>
         Annuler
       </button>
