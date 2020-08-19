@@ -52,7 +52,11 @@ function Scanner({ scan, user, point }) {
     }
 
     if (cameras.current.length > 0) {
-      activeCamera.current = localStorage.getItem("preferedCamera");
+      let savedCam = localStorage.getItem("preferedCamera");
+
+      if (Number.isInteger(savedCam)) {
+        activeCamera.current = savedCam;
+      }
       await scanner.current.start(
         cameras.current[activeCamera.current % cameras.current.length]
       );
