@@ -14,6 +14,7 @@ class RegistrationViewSet(viewsets.ModelViewSet):
 
 
 class EventViewSet(viewsets.ReadOnlyModelViewSet):
+    authentication_classes = []
     permission_classes = [AllowAny]
 
     queryset = TicketEvent.objects.all()
