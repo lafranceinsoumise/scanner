@@ -102,7 +102,6 @@ function Scanner({ scan, setPoint, user, point }) {
             </p>
             <p>
               <img src={cursorFill} alt={"Point de contrôle"} /> {eventName}{" "}
-              diff{" "}
               <img
                 onClick={() => setPoint(null)}
                 className="pull-right"
