@@ -2,11 +2,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import cursorFill from "bootstrap-icons/icons/cursor-fill.svg";
 import person from "bootstrap-icons/icons/person.svg";
 import people from "bootstrap-icons/icons/people.svg";
+import X from "bootstrap-icons/icons/x.svg";
 import useSWR, { mutate } from "swr";
 import config from "./config";
 import { jsonFetch, postForm } from "./utils";
 
-function Scanner({ scan, user, point }) {
+function Scanner({ scan, setPoint, user, point }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [pause, setPause] = useState(false);
@@ -100,7 +101,14 @@ function Scanner({ scan, user, point }) {
               <img src={person} alt={"Utilisateur⋅ice"} /> {user}
             </p>
             <p>
-              <img src={cursorFill} alt={"Point de contrôle"} /> {eventName}
+              <img src={cursorFill} alt={"Point de contrôle"} /> {eventName}{" "}
+              diff{" "}
+              <img
+                onClick={() => setPoint(null)}
+                className="pull-right"
+                src={X}
+                alt={"Changer le lieu"}
+              />
             </p>
           </div>
           <div className="col-xs-6">

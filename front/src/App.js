@@ -63,10 +63,12 @@ const App = (props) => {
   }
 
   if (user !== null && point !== null) {
-    return <Scanner scan={scan} user={user} point={point} />;
+    return (
+      <Scanner setPoint={setPoint} scan={scan} user={user} point={point} />
+    );
   }
 
-  return <Start setName={setUser} setPoint={setPoint} />;
+  return <Start user={user} setUser={setUser} setPoint={setPoint} />;
 };
 
 export default App;

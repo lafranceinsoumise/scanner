@@ -4,15 +4,14 @@ import useSWR from "swr";
 import { Container } from "./Container";
 import { jsonFetch } from "./utils";
 
-export function Start(props) {
+export function Start({ user, setUser, setPoint }) {
   const { data: events, error } = useSWR(
     `${config.host}/api/events`,
     jsonFetch
   );
-  const [name, setName] = useState("");
-  const [step, setStep] = useState(0);
+  const [name, setName] = useState(user);
 
-  if (step === 0) {
+  if (!user) {
     return (
       <Container>
         <p>Entrez vos noms et prénoms pour démarrer</p>
@@ -30,10 +29,10 @@ export function Start(props) {
           <button
             className="btn btn-success btn-block"
             onClick={() => {
-              props.setName(name);
-              setStep(1);
+              setUser(name);
+              setName(name);
             }}
-            disabled={name.length < 6}
+            disabled={!name || name.length < 6}
           >
             Démarrer
           </button>
@@ -42,15 +41,15 @@ export function Start(props) {
     );
   }
 
-  if (step === 1 && !events) {
+  if (user && !events) {
     return <Container>Chargement...</Container>;
   }
 
-  if (step === 1 && error) {
+  if (user && error) {
     return <Container>Erreur</Container>;
   }
 
-  if (step === 1 && events) {
+  if (user && events) {
     return (
       <Container>
         <h1>Choisissez le point de contrôle</h1>
@@ -59,7 +58,7 @@ export function Start(props) {
             <button
               key={id}
               className="btn btn-default btn-block"
-              onClick={() => props.setPoint(id)}
+              onClick={() => setPoint(id)}
             >
               {name}
             </button>
