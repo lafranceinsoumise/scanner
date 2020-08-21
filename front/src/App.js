@@ -13,8 +13,8 @@ function scanUrl(code, user, point) {
 }
 
 const App = (props) => {
-  const [user, setUser] = useState(localStorage.getItem("user"));
-  const [point, setPoint] = useState(localStorage.getItem("point"));
+  const [user, setUser] = useState(null);
+  const [point, setPoint] = useState(null);
   const [lastScan, setLastScan] = useState(null);
 
   let scan = useCallback(
@@ -64,13 +64,7 @@ const App = (props) => {
 
   if (user !== null && point !== null) {
     return (
-      <Scanner
-        setPoint={setPoint}
-        setUser={setUser}
-        scan={scan}
-        user={user}
-        point={point}
-      />
+      <Scanner setPoint={setPoint} scan={scan} user={user} point={point} />
     );
   }
 

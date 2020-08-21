@@ -3,12 +3,11 @@ import cursorFill from "bootstrap-icons/icons/cursor-fill.svg";
 import person from "bootstrap-icons/icons/person.svg";
 import people from "bootstrap-icons/icons/people.svg";
 import X from "bootstrap-icons/icons/x.svg";
-import pencil from "bootstrap-icons/icons/pencil.svg";
 import useSWR, { mutate } from "swr";
 import config from "./config";
 import { jsonFetch, postForm } from "./utils";
 
-function Scanner({ scan, setPoint, setUser, user, point }) {
+function Scanner({ scan, setPoint, user, point }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [pause, setPause] = useState(false);
@@ -85,14 +84,10 @@ function Scanner({ scan, setPoint, setUser, user, point }) {
     };
   }, [startCamera, stopCamera]);
 
-  let pointInfo = events && events[0].scan_points.find((e) => e.id === point);
-  console.log(events, pointInfo);
-  if (events && !pointInfo) {
-    console.log("reached");
-    setPoint(null);
-  }
-  let pointName = pointInfo && pointInfo.name;
-  let pointCount = pointInfo && pointInfo.count;
+  let eventName =
+    events && events[0].scan_points.find((e) => e.id === point).name;
+  let eventCount =
+    events && events[0].scan_points.find((e) => e.id === point).count;
 
   return (
     <div id="scanner">
@@ -104,15 +99,9 @@ function Scanner({ scan, setPoint, setUser, user, point }) {
           <div className="col-xs-6">
             <p>
               <img src={person} alt={"Utilisateur⋅ice"} /> {user}
-              <img
-                onClick={() => setUser(null)}
-                className="pull-right"
-                src={pencil}
-                alt={"Changer l'utilisateur"}
-              />
             </p>
             <p>
-              <img src={cursorFill} alt={"Point de contrôle"} /> {pointName}{" "}
+              <img src={cursorFill} alt={"Point de contrôle"} /> {eventName}{" "}
               <img
                 onClick={() => setPoint(null)}
                 className="pull-right"
@@ -122,10 +111,10 @@ function Scanner({ scan, setPoint, setUser, user, point }) {
             </p>
           </div>
           <div className="col-xs-6">
-            {pointCount !== null && (
+            {eventCount !== null && (
               <>
                 <p>
-                  <img src={people} alt={"Compteur"} /> {pointCount}
+                  <img src={people} alt={"Compteur"} /> {eventCount}
                 </p>
                 <button
                   className="btn btn-info btn-sm"

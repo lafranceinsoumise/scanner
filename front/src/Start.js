@@ -29,7 +29,6 @@ export function Start({ user, setUser, setPoint }) {
           <button
             className="btn btn-success btn-block"
             onClick={() => {
-              localStorage.setItem("user", name);
               setUser(name);
               setName(name);
             }}
@@ -59,10 +58,7 @@ export function Start({ user, setUser, setPoint }) {
             <button
               key={id}
               className="btn btn-default btn-block"
-              onClick={() => {
-                localStorage.setItem("point", id);
-                setPoint(id);
-              }}
+              onClick={() => setPoint(id)}
             >
               {name}
             </button>
