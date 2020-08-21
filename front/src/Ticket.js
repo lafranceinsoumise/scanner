@@ -5,6 +5,9 @@ export function Ticket({ registration, validateScan, cancelScan }) {
   let style = {
     color: registration.category.color,
     backgroundColor: registration.category["background-color"],
+    position: "absolute",
+    width: "100%",
+    minHeight: "100%",
   };
 
   return (

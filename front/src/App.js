@@ -55,20 +55,18 @@ const App = (props) => {
     setLastScan(null);
   }, [lastScan, user, point]);
 
-  if (lastScan) {
-    let registration = lastScan.registration;
-    return (
-      <Ticket
-        registration={registration}
-        validateScan={validateScan}
-        cancelScan={cancelScan}
-      />
-    );
-  }
-
   if (user !== null && point !== null) {
     return (
-      <Scanner setPoint={setPoint} scan={scan} user={user} point={point} />
+      <>
+        <Scanner setPoint={setPoint} scan={scan} user={user} point={point} />
+        {lastScan && (
+          <Ticket
+            registration={lastScan.registration}
+            validateScan={validateScan}
+            cancelScan={cancelScan}
+          />
+        )}
+      </>
     );
   }
 
