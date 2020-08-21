@@ -19,6 +19,10 @@ const App = (props) => {
 
   let scan = useCallback(
     async (code) => {
+      if (lastScan) {
+        return;
+      }
+
       navigator.vibrate(200);
       let response;
 
