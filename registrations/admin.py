@@ -33,7 +33,12 @@ class EventFilter(admin.SimpleListFilter):
         human-readable name for the option that will appear
         in the right sidebar.
         """
-        return (("scanned", "Scanné"), ("validated", "Validé"), ("cancelled", "Annulé"))
+        return (
+            ("scanned", "Scanné"),
+            ("validated", "Validé"),
+            ("cancelled", "Annulé"),
+            ("unseen", "Non scanné"),
+        )
 
     def queryset(self, request, queryset):
         """
@@ -49,6 +54,8 @@ class EventFilter(admin.SimpleListFilter):
             return queryset.filter(events__type=ScannerAction.TYPE_ENTRANCE).distinct()
         if self.value() == "cancelled":
             return queryset.filter(events__type=ScannerAction.TYPE_CANCEL).distinct()
+        if self.value() == "unseen":
+            return queryset.filter(events__null=True).distinct()
 
 
 class MetaInline(admin.TabularInline):
