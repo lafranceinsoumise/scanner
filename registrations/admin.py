@@ -55,7 +55,7 @@ class EventFilter(admin.SimpleListFilter):
         if self.value() == "cancelled":
             return queryset.filter(events__type=ScannerAction.TYPE_CANCEL).distinct()
         if self.value() == "unseen":
-            return queryset.filter(events__null=True).distinct()
+            return queryset.filter(events__isnull=True).distinct()
 
 
 class MetaInline(admin.TabularInline):
