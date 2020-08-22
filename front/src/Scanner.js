@@ -69,12 +69,12 @@ function Scanner({ scan, setPoint, user, point }) {
   const changeCamera = useCallback(async () => {
     activeCamera.current++;
     activeCamera.current %= cameras.current.length;
+    localStorage.setItem("preferedCamera", activeCamera.current);
     await scanner.current.start(cameras.current[activeCamera.current]);
   }, [activeCamera, scanner]);
 
-  const stopCamera = useCallback(async () => {
-    localStorage.setItem("preferedCamera", activeCamera.current);
-    await scanner.current.stop();
+  const stopCamera = useCallback(() => {
+    scanner.current.stop();
   }, [scanner]);
 
   useEffect(() => {
