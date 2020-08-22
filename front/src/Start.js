@@ -20,7 +20,7 @@ export function Start({ user, setUser, setPoint }) {
             <input
               className="form-control input-lg"
               type="text"
-              value={name}
+              value={name || ""}
               onChange={(event) => setName(event.target.value)}
             />
           </div>
