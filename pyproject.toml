@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "scanner"
+version = "0.1.0"
+description = ""
+authors = ["Arthur Cheysson <arthur@cheysson.fr>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+dj-email-url = "==1.*"
+django = "==3.*"
+django-cors-headers = "==3.*"
+pillow = "==8.*"
+pytz = "*"
+qrcode = "==7.*"
+tqdm = "*"
+prometheus-client = "*"
+"html2text" = "*"
+requests = "*"
+cysystemd = "*"
+djangorestframework = "*"
+django-filter = "*"
+
+
+[tool.poetry.dev-dependencies]
+black = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

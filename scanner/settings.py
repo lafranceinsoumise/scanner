@@ -33,7 +33,8 @@ SIGNATURE_KEY = os.environb.get(b"SIGNATURE_KEY", b"prout")
 DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
-CORS_ORIGIN_ALLOW_ALL = DEBUG
+
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 # Application definition
 
@@ -51,8 +52,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -81,6 +82,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "scanner.wsgi.application"
 
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
@@ -154,7 +156,7 @@ if not DEBUG:
         "handlers": {
             "journald": {
                 "level": "DEBUG",
-                "class": "systemd.journal.JournaldLogHandler"
+                "class": "cysystemd.journal.JournaldLogHandler"
                 if not LOG_DISABLE_JOURNALD
                 else "logging.StreamHandler",
             }
