@@ -62,6 +62,8 @@ def gen_ticket(registration):
         inkscape.communicate()
         ticket_generation_counter.labels("timeout").inc()
         raise TicketGenerationException("Timeout")
+    else:
+        inkscape.wait(timeout=5)
 
     if inkscape.returncode:
         ticket_generation_counter.labels("inkscape_error").inc()
