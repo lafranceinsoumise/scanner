@@ -125,15 +125,11 @@ class Registration(models.Model):
 
     @property
     def contact_email(self):
-        return self.contact_emails[0]
+        return self.contact_emails[0] if self.contact_emails else None
 
     @contact_email.setter
     def contact_email(self, value):
         contact_emails = self.contact_emails
-
-        if contact_emails == [""]:
-            self.contact_emails = [value]
-            return
 
         if value in contact_emails:
             contact_emails.pop(contact_emails.index(value))
@@ -143,7 +139,7 @@ class Registration(models.Model):
 
     @property
     def contact_emails(self):
-        return self._contact_emails.split(",")
+        return self._contact_emails.split(",") if self._contact_emails else []
 
     @contact_emails.setter
     def contact_emails(self, value):
