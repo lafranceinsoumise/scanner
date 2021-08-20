@@ -32,6 +32,7 @@ def send_email(registration, connection=None):
             params={
                 "FULL_NAME": registration.full_name,
                 "EMAIL": contact_email,
+                "CATEGORY": registration.category.name,
                 **{
                     "META_" + p.property.upper(): p.value
                     for p in registration.metas.all()
