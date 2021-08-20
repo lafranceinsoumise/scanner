@@ -125,7 +125,7 @@ class Registration(models.Model):
 
     @property
     def contact_email(self):
-        return self.contact_emails[0] if self.contact_emails else None
+        return self.contact_emails[0] if self.contact_emails else ""
 
     @contact_email.setter
     def contact_email(self, value):
