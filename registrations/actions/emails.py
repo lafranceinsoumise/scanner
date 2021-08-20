@@ -18,11 +18,11 @@ def send_email(registration, connection=None):
     if registration.ticket_status == registration.TICKET_MODIFIED:
         subject = (
             registration.event.name
-            + " : modification du ticket de "
+            + " : modification du billet de "
             + registration.full_name
         )
     else:
-        subject = registration.event.name + " : ticket de " + registration.full_name
+        subject = registration.event.name + " : billet de " + registration.full_name
 
     ticket = gen_ticket(registration)
 
@@ -51,7 +51,7 @@ def send_email(registration, connection=None):
 
         email.attach_alternative(html_message, "text/html")
         email.attach(
-            filename="ticket_{}.pdf".format(slugify(registration.full_name)),
+            filename="billet_{}.pdf".format(slugify(registration.full_name)),
             content=ticket,
             mimetype="application/pdf",
         )
