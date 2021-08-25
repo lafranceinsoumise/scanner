@@ -1,10 +1,11 @@
 from django.conf.urls import url
 from django.contrib import admin
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.utils.html import format_html
 
+from .actions.scans import mark_registration, state_change_counter
 from .models import (
     Registration,
     ScannerAction,
@@ -106,6 +107,11 @@ class RegistrationAdmin(admin.ModelAdmin):
                 name="registrations_registration_qrcode",
             ),
             url(
+              r"^(.+)/valider/$",
+              self.admin_site.admin_view(self.valider_view),
+              name="registrations_registration_valider",
+            ),
+            url(
                 r"^(.+)/ticket/$",
                 self.admin_site.admin_view(self.ticket_view),
                 name="registrations_registration_ticket",
@@ -120,8 +126,9 @@ class RegistrationAdmin(admin.ModelAdmin):
             if instance.canceled:
                 "Billet annulé"
             return format_html(
-                '<img src="{}"/>',
+                '<img src="{}"/><br><a href="{}" class="btn">Valider le ticket</a>',
                 reverse("admin:registrations_registration_qrcode", args=[instance.pk]),
+                reverse("admin:registrations_registration_valider", args=[instance.pk]),
             )
         else:
             return "-"
@@ -160,6 +167,14 @@ class RegistrationAdmin(admin.ModelAdmin):
         )
 
         return response
+
+    def valider_view(self, request, object_id):
+        registration = get_object_or_404(Registration, pk=object_id)
+        ScannerAction.objects.create(
+            registration=registration, type=ScannerAction.TYPE_ENTRANCE, person=f"{request.user} - admin", point=registration.event.scan_points.first()
+        )
+        state_change_counter.labels(ScannerAction.TYPE_ENTRANCE).inc()
+        return HttpResponseRedirect(reverse("admin:registrations_registration_change", args=(object_id,)))
 
 
 class TicketAttachmentInline(admin.TabularInline):
