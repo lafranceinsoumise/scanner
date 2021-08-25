@@ -9,7 +9,7 @@ export function Start({ user, setUser, setPoint }) {
     `${config.host}/api/events/`,
     jsonFetch
   );
-  const [name, setName] = useState(user);
+  const [name, setName] = useState(user || localStorage.getItem("lastName"));
 
   if (!user) {
     return (
@@ -18,7 +18,10 @@ export function Start({ user, setUser, setPoint }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            name & (name.length >= 6) & setUser(name);
+            if (name && name.length >= 6) {
+              setUser(name);
+              localStorage.setItem("lastName", name);
+            }
           }}
         >
           <div className="form-group">
@@ -51,6 +54,11 @@ export function Start({ user, setUser, setPoint }) {
   }
 
   if (user && events) {
+    if (events[0].scan_points.length === 1) {
+      setPoint(events[0].scan_points[0].id);
+      return <></>;
+    }
+
     return (
       <Container>
         <h1>Choisissez le point de contrôle</h1>
