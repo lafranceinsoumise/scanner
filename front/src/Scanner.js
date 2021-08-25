@@ -10,18 +10,17 @@ import "!file-loader?name=html5-qrcode.js&outputPath=static/js!html5-qrcode";
 import config from "./config";
 import { jsonFetch, postForm } from "./utils";
 
-function Scanner({ scan, setPoint, user, point }) {
-  const [loading, setLoading] = useState(false);
+function Scanner({ scan, setPoint, user, point, loading }) {
   const [error, setError] = useState(false);
   const [pause, setPause] = useState(false);
   const scanner = useRef(null);
   const cameras = useRef(null);
   const activeCameraIndex = useRef(null);
+  const scanRef = useRef(null);
 
   const { data: events } = useSWR(`${config.host}/api/events`, jsonFetch);
 
   const displayError = useCallback((message) => {
-    setLoading(false);
     setError(message || "Impossible de lire le billet.");
 
     setTimeout(() => {
@@ -36,15 +35,14 @@ function Scanner({ scan, setPoint, user, point }) {
 
     if (!cameras.current) {
       cameras.current = await Html5Qrcode.getCameras();
-      console.log(cameras.current);
     }
 
     if (!activeCameraIndex.current) {
       if (cameras.current.length === 0) {
         console.log("Pas de caméra");
-        return;
+        return false;
       }
-      let savedCam = localStorage.getItem("cameraIndex");
+      let savedCam = +localStorage.getItem("cameraIndex");
 
       if (Number.isInteger(savedCam) && savedCam < cameras.current.length) {
         activeCameraIndex.current = savedCam;
@@ -53,13 +51,21 @@ function Scanner({ scan, setPoint, user, point }) {
       }
     }
 
-    scanner.current.start(
+    console.dir(
+      cameras.current,
+      activeCameraIndex.current,
+      cameras.current[activeCameraIndex.current].id
+    );
+    await scanner.current.start(
       cameras.current[activeCameraIndex.current].id,
       {
         fps: 5,
       },
       async (decodedText) => {
-        setLoading(true);
+        const scan = scanRef.current;
+        if (!scan) {
+          return;
+        }
 
         try {
           await scan(decodedText);
@@ -70,19 +76,17 @@ function Scanner({ scan, setPoint, user, point }) {
 
           return displayError();
         }
-
-        setLoading(false);
       }
     );
-  }, [displayError, scan]);
+  }, [displayError]);
 
   const stopCamera = useCallback(async () => {
     await scanner.current.stop();
     scanner.current.clear();
-  }, [scanner]);
+  }, []);
 
   const changeCamera = useCallback(async () => {
-    await stopCamera();
+    await scanner.current.stop();
     activeCameraIndex.current =
       (activeCameraIndex.current + 1) % cameras.current.length;
     localStorage.setItem("cameraIndex", activeCameraIndex.current);
@@ -93,6 +97,10 @@ function Scanner({ scan, setPoint, user, point }) {
     startCamera();
     return stopCamera;
   }, [startCamera, stopCamera]);
+
+  useEffect(() => {
+    scanRef.current = scan;
+  }, [scan]);
 
   let eventName =
     events && events[0].scan_points.find((e) => e.id === point).name;

@@ -15,22 +15,22 @@ function scanUrl(code, user, point) {
 const App = (props) => {
   const [user, setUser] = useState(null);
   const [point, setPoint] = useState(null);
-  const [lastScan, setLastScan] = useState(null);
+  const [currentScan, setCurrentScan] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   let scan = useCallback(
     async (code) => {
-      if (lastScan) {
-        return;
-      }
-
       navigator.vibrate(200);
       let response;
+
+      setLoading(true);
 
       response = await fetch(scanUrl(code, user, point));
 
       if (response.ok) {
-        return setLastScan({ registration: await response.json(), code });
+        setCurrentScan({ registration: await response.json(), code });
       }
+      setLoading(false);
 
       if (response.status === 404) {
         throw new Error("Not Found");
@@ -40,28 +40,34 @@ const App = (props) => {
   );
 
   let validateScan = useCallback(async () => {
-    await postForm(scanUrl(lastScan.code, user, point), {
+    await postForm(scanUrl(currentScan.code, user, point), {
       type: "entrance",
     });
 
-    setLastScan(null);
-  }, [lastScan, user, point]);
+    setCurrentScan(null);
+  }, [currentScan, user, point]);
 
   let cancelScan = useCallback(async () => {
-    await postForm(scanUrl(lastScan.code, user, point), {
+    await postForm(scanUrl(currentScan.code, user, point), {
       type: "cancel",
     });
 
-    setLastScan(null);
-  }, [lastScan, user, point]);
+    setCurrentScan(null);
+  }, [currentScan, user, point]);
 
   if (user !== null && point !== null) {
     return (
       <>
-        <Scanner setPoint={setPoint} scan={scan} user={user} point={point} />
-        {lastScan && (
+        <Scanner
+          setPoint={setPoint}
+          loading={loading}
+          scan={loading || currentScan ? null : scan}
+          user={user}
+          point={point}
+        />
+        {currentScan && (
           <Ticket
-            registration={lastScan.registration}
+            registration={currentScan.registration}
             validateScan={validateScan}
             cancelScan={cancelScan}
           />
