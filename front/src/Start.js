@@ -6,7 +6,7 @@ import { jsonFetch } from "./utils";
 
 export function Start({ user, setUser, setPoint }) {
   const { data: events, error } = useSWR(
-    `${config.host}/api/events`,
+    `${config.host}/api/events/`,
     jsonFetch
   );
   const [name, setName] = useState(user);
@@ -15,7 +15,12 @@ export function Start({ user, setUser, setPoint }) {
     return (
       <Container>
         <p>Entrez vos noms et prénoms pour démarrer</p>
-        <form>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            name & (name.length >= 6) & setUser(name);
+          }}
+        >
           <div className="form-group">
             <input
               className="form-control input-lg"
@@ -24,19 +29,15 @@ export function Start({ user, setUser, setPoint }) {
               onChange={(event) => setName(event.target.value)}
             />
           </div>
+          {
+            <button
+              className="btn btn-success btn-block"
+              disabled={!name || name.length < 6}
+            >
+              Démarrer
+            </button>
+          }
         </form>
-        {
-          <button
-            className="btn btn-success btn-block"
-            onClick={() => {
-              setUser(name);
-              setName(name);
-            }}
-            disabled={!name || name.length < 6}
-          >
-            Démarrer
-          </button>
-        }
       </Container>
     );
   }

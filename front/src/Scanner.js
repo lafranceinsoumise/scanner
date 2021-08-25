@@ -4,6 +4,9 @@ import person from "bootstrap-icons/icons/person.svg";
 import people from "bootstrap-icons/icons/people.svg";
 import X from "bootstrap-icons/icons/x.svg";
 import useSWR, { mutate } from "swr";
+
+import "!file-loader?name=html5-qrcode.js&outputPath=static/js!html5-qrcode";
+
 import config from "./config";
 import { jsonFetch, postForm } from "./utils";
 
@@ -13,7 +16,7 @@ function Scanner({ scan, setPoint, user, point }) {
   const [pause, setPause] = useState(false);
   const scanner = useRef(null);
   const cameras = useRef(null);
-  const activeCamera = useRef(null);
+  const activeCameraIndex = useRef(null);
 
   const { data: events } = useSWR(`${config.host}/api/events`, jsonFetch);
 
@@ -28,18 +31,38 @@ function Scanner({ scan, setPoint, user, point }) {
 
   const startCamera = useCallback(async () => {
     if (!scanner.current) {
-      scanner.current = new window.Instascan.Scanner({
-        video: document.getElementById("preview"),
-        mirror: false,
-      });
+      scanner.current = new Html5Qrcode("preview");
+    }
 
-      cameras.current = await window.Instascan.Camera.getCameras();
+    if (!cameras.current) {
+      cameras.current = await Html5Qrcode.getCameras();
+      console.log(cameras.current);
+    }
 
-      scanner.current.addListener("scan", async (content) => {
+    if (!activeCameraIndex.current) {
+      if (cameras.current.length === 0) {
+        console.log("Pas de caméra");
+        return;
+      }
+      let savedCam = localStorage.getItem("cameraIndex");
+
+      if (Number.isInteger(savedCam) && savedCam < cameras.current.length) {
+        activeCameraIndex.current = savedCam;
+      } else {
+        activeCameraIndex.current = 0;
+      }
+    }
+
+    scanner.current.start(
+      cameras.current[activeCameraIndex.current].id,
+      {
+        fps: 5,
+      },
+      async (decodedText) => {
         setLoading(true);
 
         try {
-          await scan(content);
+          await scan(decodedText);
         } catch (err) {
           if (err.message === "Not Found") {
             return displayError("Billet inconnu.");
@@ -49,39 +72,26 @@ function Scanner({ scan, setPoint, user, point }) {
         }
 
         setLoading(false);
-      });
-    }
-
-    if (cameras.current.length > 0) {
-      let savedCam = localStorage.getItem("preferedCamera");
-
-      if (Number.isInteger(savedCam)) {
-        activeCamera.current = savedCam;
       }
-      await scanner.current.start(
-        cameras.current[activeCamera.current % cameras.current.length]
-      );
-    } else {
-      console.error("No cameras found.");
-    }
+    );
   }, [displayError, scan]);
 
-  const changeCamera = useCallback(async () => {
-    activeCamera.current++;
-    activeCamera.current %= cameras.current.length;
-    localStorage.setItem("preferedCamera", activeCamera.current);
-    await scanner.current.start(cameras.current[activeCamera.current]);
-  }, [activeCamera, scanner]);
-
-  const stopCamera = useCallback(() => {
-    scanner.current.stop();
+  const stopCamera = useCallback(async () => {
+    await scanner.current.stop();
+    scanner.current.clear();
   }, [scanner]);
+
+  const changeCamera = useCallback(async () => {
+    await stopCamera();
+    activeCameraIndex.current =
+      (activeCameraIndex.current + 1) % cameras.current.length;
+    localStorage.setItem("cameraIndex", activeCameraIndex.current);
+    await startCamera();
+  });
 
   useEffect(() => {
     startCamera();
-    return function cleanup() {
-      stopCamera();
-    };
+    return stopCamera;
   }, [startCamera, stopCamera]);
 
   let eventName =
@@ -90,7 +100,7 @@ function Scanner({ scan, setPoint, user, point }) {
     events && events[0].scan_points.find((e) => e.id === point).count;
 
   return (
-    <div id="scanner">
+    <>
       <div
         style={{ backgroundColor: "#fff", width: "100%" }}
         className="container-fluid"
@@ -132,7 +142,9 @@ function Scanner({ scan, setPoint, user, point }) {
           </div>
         </div>
       </div>
-      <video id="preview" />
+      <div id="camera-container">
+        <div id="preview" />
+      </div>
       <div>
         {loading && (
           <div className="container">
@@ -162,7 +174,7 @@ function Scanner({ scan, setPoint, user, point }) {
           {pause ? "Relancer la caméra" : "Mettre en pause la caméra"}
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
