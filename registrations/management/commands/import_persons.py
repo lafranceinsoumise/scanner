@@ -9,6 +9,7 @@ from django.core.exceptions import ValidationError, FieldDoesNotExist
 from django.core.validators import validate_email
 from django.db import transaction
 from django.db.models import Q, CharField
+from django.utils import timezone
 
 from registrations.models import (
     Registration,
@@ -38,6 +39,7 @@ def modify_if_changed(
     log_file,
     update_status,
     limit_fields,
+    entry
 ):
     # do not use get_or_create ==> we do not want to create empty registration in case something goes wrong
     try:
@@ -121,13 +123,15 @@ def modify_if_changed(
                     registration.ticket_status = registration.TICKET_MODIFIED
                 registration.save()
 
-            if properties.get("immediate_entrance"):
-                ScannerAction.objects.get_or_create(
-                    registration=registration,
-                    type=ScannerAction.TYPE_ENTRANCE,
-                    person="immediate_entrance",
-                )
             log_file and log_file.write("Committing\n\n")
+
+    if entry:
+        ScannerAction.objects.get_or_create(
+            registration=registration,
+            type=ScannerAction.TYPE_ENTRANCE,
+            person="création admin",
+            time=timezone.datetime.fromisoformat(entry)
+        )
 
 
 class Command(BaseCommand):
@@ -204,7 +208,7 @@ class Command(BaseCommand):
             "numero",
             "event",
             "category",
-            "immediate_entrance",
+            "entry",
         }
         meta_fields = (
             set(r.fieldnames) - common_fields - {"numero", "event", "category"}
@@ -281,4 +285,5 @@ class Command(BaseCommand):
                 log_file,
                 update_status,
                 limit_fields,
+                line.get("entry", None),
             )
