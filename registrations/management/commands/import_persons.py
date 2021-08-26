@@ -126,12 +126,18 @@ def modify_if_changed(
             log_file and log_file.write("Committing\n\n")
 
     if entry:
-        ScannerAction.objects.get_or_create(
+        s, created = ScannerAction.objects.get_or_create(
             registration=registration,
             type=ScannerAction.TYPE_ENTRANCE,
             person="création admin",
             time=timezone.datetime.fromisoformat(entry)
         )
+        if created:
+            # à cause du auto_add, time est écrasé par la date actuelle
+            ScannerAction.objects.filter(id=s.id).update(
+                time=timezone.datetime.fromisoformat(entry)
+            )
+
 
 
 class Command(BaseCommand):
