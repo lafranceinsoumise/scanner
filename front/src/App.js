@@ -20,7 +20,15 @@ const App = (props) => {
 
   let scan = useCallback(
     async (code) => {
-      navigator.vibrate(200);
+      navigator.vibrate =
+        navigator.vibrate ||
+        navigator.webkitVibrate ||
+        navigator.mozVibrate ||
+        navigator.msVibrate;
+      if (navigator.vibrate) {
+        navigator.vibrate(200);
+      }
+
       let response;
 
       setLoading(true);
