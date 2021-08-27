@@ -74,7 +74,7 @@ function Scanner({ scan, setPoint, user, point, loading }) {
             return displayError("Billet inconnu.");
           }
 
-          return displayError();
+          return displayError(err.message);
         }
       }
     );

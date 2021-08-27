@@ -139,7 +139,6 @@ def modify_if_changed(
             )
 
 
-
 class Command(BaseCommand):
     help = "Import people from a CSV"
 
