@@ -14,7 +14,34 @@ _h.ignore_images = True
 email_sent_counter = Counter("scanner_email_sent", "Number of emails sent")
 
 
-def send_email(registration, connection=None):
+def envoyer_email(
+    recipient, subject, body, html_body=None, connection=None, attachments=None
+):
+    if attachments is None:
+        attachments = []
+
+    msg = mail.EmailMultiAlternatives(
+        subject=subject,
+        from_email=settings.EMAIL_FROM,
+        to=[recipient],
+        body=body,
+        connection=connection,
+    )
+
+    if html_body:
+        msg.attach_alternative(html_body, "text/html")
+
+    for filename, content, mime_type in attachments:
+        msg.attach(
+            filename=filename,
+            content=content,
+            mimetype=mime_type,
+        )
+
+    msg.send()
+
+
+def envoyer_billet(registration, connection=None):
     if registration.ticket_status == registration.TICKET_MODIFIED:
         subject = (
             registration.event.name
@@ -41,32 +68,27 @@ def send_email(registration, connection=None):
         ).content.decode()
         text_message = _h.handle(html_message)
 
-        email = mail.EmailMultiAlternatives(
-            subject=subject,
-            from_email=settings.EMAIL_FROM,
-            to=[contact_email],
-            body=text_message,
-            connection=connection,
-        )
-
-        email.attach_alternative(html_message, "text/html")
-        email.attach(
-            filename="billet_{}.pdf".format(slugify(registration.full_name)),
-            content=ticket,
-            mimetype="application/pdf",
-        )
+        attachments = [
+            (
+                "billet_{}.pdf".format(slugify(registration.full_name)),
+                ticket,
+                "application/pdf",
+            )
+        ]
 
         for attachment in registration.event.attachments.all():
             with attachment.file.open("rb") as f:
                 content = f.read()
+            attachments.append((attachment.filename, content, attachment.mimetype))
 
-            email.attach(
-                filename=attachment.filename,
-                content=content,
-                mimetype=attachment.mimetype,
-            )
-
-        email.send()
+        envoyer_email(
+            subject=subject,
+            recipient=[contact_email],
+            body=text_message,
+            html_body=html_message,
+            attachments=attachments,
+            connection=connection,
+        )
 
     if registration.ticket_status != registration.TICKET_SENT:
         registration.ticket_status = registration.TICKET_SENT

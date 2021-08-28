@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Q
 from django.utils import timezone
 
-from registrations.actions.emails import send_email
+from registrations.actions.emails import envoyer_billet
 from registrations.models import Registration, TicketEvent
 
 
@@ -59,7 +59,7 @@ class Command(BaseCommand):
         ):
             while True:
                 try:
-                    send_email(elem, connection=connection)
+                    envoyer_billet(elem, connection=connection)
                 except SMTPServerDisconnected:
                     connection = get_connection()
                     continue
