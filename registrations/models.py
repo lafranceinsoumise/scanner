@@ -83,6 +83,7 @@ class TicketCategory(models.Model):
         unique_together = (("event", "name"),)
         verbose_name = _("Ticket category")
         verbose_name_plural = _("Ticket categories")
+        ordering = ("event", "name")
 
 
 class Registration(models.Model):
