@@ -1,3 +1,4 @@
+import logging
 import uuid
 import argparse
 import tqdm
@@ -15,9 +16,15 @@ from registrations.models import (
     Registration,
     RegistrationMeta,
     TicketEvent,
-    TicketCategory,
     ScannerAction,
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+
+REQUIRED_FIELDS = {"numero", "category"}
+SPECIAL_FIELDS = {"entry"}
 
 
 def has_attr_changed(obj, attr, value):
@@ -28,115 +35,6 @@ def has_attr_changed(obj, attr, value):
     else:
         setattr(obj, attr, value)
         return True
-
-
-def modify_if_changed(
-    event_id,
-    category,
-    properties,
-    common_fields,
-    meta_fields,
-    log_file,
-    update_status,
-    limit_fields,
-    entry
-):
-    # do not use get_or_create ==> we do not want to create empty registration in case something goes wrong
-    try:
-        registration = Registration.objects.prefetch_related("metas").get(
-            event__id=event_id, numero=properties["numero"]
-        )
-        metas = {m.property: m for m in registration.metas.all()}
-        changed = False
-    except Registration.DoesNotExist:
-        registration = Registration(event_id=event_id, numero=properties["numero"])
-        metas = {}
-        changed = True
-        log_file and log_file.write(
-            "New registration: {}\n".format(registration.numero)
-        )
-
-    if registration.category_id != category.id:
-        registration.category_id = category.id
-        changed = True
-
-    for f in common_fields:
-        if f == "uuid":
-            properties[f] = uuid.UUID(properties[f]) if properties[f] else None
-        elif f == "canceled":
-            properties["canceled"] = bool(properties["canceled"])
-        field_changed = has_attr_changed(registration, f, properties[f])
-        changed = changed or field_changed
-        if field_changed and log_file:
-            log_file.write("Field changed: {} ({})\n".format(f, registration.numero))
-
-    # let's keep only non empty meta properties
-    meta_fields = {f for f in meta_fields if properties[f]}
-    existing_metas = set(metas)
-
-    # new metas: non empty value that are not in metas dict
-    new_metas = meta_fields - existing_metas
-
-    # updated metas: non empty values that are in both meta_fields and metas
-    updated_metas = meta_fields & existing_metas
-
-    if limit_fields != []:
-        new_metas = new_metas & set(limit_fields)
-        updated_metas = updated_metas & set(limit_fields)
-
-    if changed or new_metas or updated_metas:
-        with transaction.atomic():
-            if changed:
-                if (
-                    update_status
-                    and registration.ticket_status == registration.TICKET_SENT
-                ):
-                    registration.ticket_status = registration.TICKET_MODIFIED
-                registration.save()
-
-            if new_metas:
-                for f in new_metas:
-                    RegistrationMeta.objects.create(
-                        registration_id=registration.id, property=f, value=properties[f]
-                    )
-                changed = True
-                log_file and log_file.write(
-                    "New metas: {} ({})\n".format(
-                        ", ".join(new_metas), registration.numero
-                    )
-                )
-
-            for f in updated_metas:
-                field_changed = has_attr_changed(metas[f], "value", properties[f])
-                changed = changed or field_changed
-                if field_changed:
-                    metas[f].save()
-                    log_file and log_file.write(
-                        "Updated meta: {} ({})\n".format(f, registration.numero)
-                    )
-
-            if changed:
-                if (
-                    update_status
-                    and registration.ticket_status == registration.TICKET_SENT
-                ):
-                    registration.ticket_status = registration.TICKET_MODIFIED
-                registration.save()
-
-            log_file and log_file.write("Committing\n\n")
-
-    if entry:
-        s, created = ScannerAction.objects.get_or_create(
-            registration=registration,
-            type=ScannerAction.TYPE_ENTRANCE,
-            person="création admin",
-            time=timezone.datetime.fromisoformat(entry)
-        )
-        if created:
-            # à cause du auto_add, time est écrasé par la date actuelle
-            ScannerAction.objects.filter(id=s.id).update(
-                time=timezone.datetime.fromisoformat(entry)
-            )
 
 
 class Command(BaseCommand):
@@ -171,14 +69,34 @@ class Command(BaseCommand):
         *args,
         input,
         event_id,
-        log_file=None,
+        log_file,
         create_only,
         update_status,
         limit_fields,
-        **options
+        **options,
     ):
+        verbosity = int(options["verbosity"])
+
+        if verbosity:
+            console_handler = logging.StreamHandler()
+            console_formatter = logging.Formatter("{levelname} - {message}", style="{")
+            console_handler.setFormatter(console_formatter)
+            console_handler.setLevel(
+                {1: logging.WARNING, 2: logging.INFO, 3: logging.DEBUG}[verbosity]
+            )
+            logger.addHandler(console_handler)
+
+        if log_file:
+            log_file_formatter = logging.Formatter(
+                "{asctime} - {levelname} - {message}", style="{"
+            )
+            log_file_handler = logging.StreamHandler(log_file)
+            log_file_handler.setFormatter(log_file_formatter)
+            log_file_handler.setLevel(logging.INFO)
+            logger.addHandler(log_file_handler)
+
         try:
-            TicketEvent.objects.get(id=event_id)
+            self.event = TicketEvent.objects.get(id=event_id)
         except TicketEvent.DoesNotExist:
             raise CommandError("Event does not exist")
 
@@ -209,19 +127,14 @@ class Command(BaseCommand):
             "contact_email",
             "contact_emails",
         }
-        common_fields = (model_field_names & set(r.fieldnames)) - {
-            "numero",
-            "event",
-            "category",
-            "entry",
-        }
-        meta_fields = (
-            set(r.fieldnames) - common_fields - {"numero", "event", "category"}
+        common_fields = model_field_names & set(r.fieldnames)
+        self.meta_fields = (
+            set(r.fieldnames) - common_fields - REQUIRED_FIELDS - SPECIAL_FIELDS
         )
 
         if limit_fields != []:
             common_fields = common_fields & set(limit_fields)
-            meta_fields = meta_fields & set(limit_fields)
+            self.meta_fields = self.meta_fields & set(limit_fields)
 
         if create_only:
             lines = list(
@@ -232,63 +145,156 @@ class Command(BaseCommand):
                 ).exists()
             )
 
-        # apply validators from field_names
+        self.db_fields = {}
         for field_name in common_fields:
             try:
-                field = Registration._meta.get_field(field_name)
+                self.db_fields[field_name] = Registration._meta.get_field(field_name)
             except FieldDoesNotExist:
-                field = None
+                pass
 
-            if field and field.null:
-                for line in lines:
-                    if not line[field_name]:
-                        line[field_name] = None
+        self.categories = {c.import_key: c for c in self.event.ticketcategory_set.all()}
 
-            if field_name == "contact_emails":
-                for line in lines:
-                    line["contact_emails"] = line["contact_emails"].split(",")
-
-            try:
-                for i, line in enumerate(lines):
-                    if line[field_name]:
-                        if field:
-                            for validator in field.validators:
-                                validator(line[field_name])
-                        if field_name == "contact_email":
-                            validate_email(line[field_name])
-                        if field_name == "contact_emails":
-                            for contact_email in line[field_name]:
-                                validate_email(contact_email)
-                    else:
-                        if isinstance(field, CharField) and not field.blank:
-                            raise CommandError(
-                                "Empty value in column %s on line %d"
-                                % (field_name, i + 1)
-                            )
-            except ValidationError:
-                raise CommandError(
-                    "Incorrect value %s in column %s on line %d"
-                    % (line[field_name], field_name, i + 1)
+        for i, line in enumerate(tqdm.tqdm(lines, desc="Importing")):
+            if self.validate_line(i, line):
+                self.modify_if_changed(
+                    line,
+                    update_status,
                 )
 
-        categories = {}
-        for category in {line["category"] for line in lines}:
-            try:
-                categories[category] = TicketCategory.objects.filter(
-                    event_id=event_id
-                ).get(Q(name=category) | Q(import_key=category))
-            except TicketCategory.DoesNotExist:
-                raise CommandError("Category %s does not exist on line %d" % category)
+    def validate_line(self, i, line):
+        result = True
 
-        for line in tqdm.tqdm(lines, desc="Importing"):
-            modify_if_changed(
-                event_id,
-                categories[line["category"]],
-                line,
-                common_fields,
-                meta_fields,
-                log_file,
-                update_status,
-                limit_fields,
-                line.get("entry", None),
+        if line["category"] not in self.categories:
+            logger.error(f"L{i}: catégorie `{line['category']}' inconnue")
+            result = False
+        else:
+            line["category"] = self.categories[line["category"]]
+
+        for field_name, field in self.db_fields.items():
+            if field and field.null:
+                if not line[field_name]:
+                    line[field_name] = None
+
+            if field_name == "contact_emails":
+                line["contact_emails"] = line["contact_emails"].split(",")
+
+            if field_name == "uuid":
+                try:
+                    line["uuid"] = uuid.UUID(line["uuid"]) if line["uuid"] else None
+                except ValueError:
+                    logger.error("L{i}: uuid invalide")
+                    result = False
+
+            if field_name == "canceled":
+                line["canceled"] = bool(line["canceled"])
+
+            try:
+                if line[field_name]:
+                    if field:
+                        for validator in field.validators:
+                            validator(line[field_name])
+                    if field_name == "contact_email":
+                        validate_email(line[field_name])
+                    if field_name == "contact_emails":
+                        for contact_email in line[field_name]:
+                            validate_email(contact_email)
+                else:
+                    if isinstance(field, CharField) and not field.blank:
+                        logger.error(f"L{i}: Valeur vide interdite pour {field_name}")
+                        result = False
+            except ValidationError:
+                logger.error(f"L{i}: Valeur incorrecte pour {field_name}")
+                result = False
+
+        return result
+
+    def modify_if_changed(
+        self,
+        properties,
+        update_status,
+    ):
+        # do not use get_or_create ==> we do not want to create empty registration in case something goes wrong
+        try:
+            registration = Registration.objects.prefetch_related("metas").get(
+                event=self.event, numero=properties["numero"]
             )
+            metas = {m.property: m for m in registration.metas.all()}
+            changed = False
+        except Registration.DoesNotExist:
+            registration = Registration(
+                event=self.event,
+                **{
+                    k: v
+                    for k, v in properties.items()
+                    if k in self.db_fields or k in REQUIRED_FIELDS
+                },
+            )
+            metas = {}
+            changed = True
+            logger.info(f"{registration.numero}: nouveau billet")
+        else:
+            category = properties["category"]
+
+            if registration.category_id != category.id:
+                registration.category_id = category.id
+                logger.info(f"")
+                changed = True
+                logger.info(
+                    f"{registration.numero}: categorie => `{registration.category.name}'"
+                )
+
+            for f in self.db_fields:
+                field_changed = has_attr_changed(registration, f, properties[f])
+                changed = changed or field_changed
+                if field_changed:
+                    logger.info(f"{registration.numero}: {f} => {properties[f]}")
+
+        # let's keep only non empty meta properties
+        meta_fields = {f for f in self.meta_fields if properties[f]}
+        existing_metas = set(metas)
+
+        # new metas: non empty value that are not in metas dict
+        new_metas = meta_fields - existing_metas
+
+        # updated metas: non empty values that are in both meta_fields and metas
+        updated_metas = meta_fields & existing_metas
+
+        if changed or new_metas or updated_metas:
+            if update_status and registration.ticket_status == registration.TICKET_SENT:
+                registration.ticket_status = registration.TICKET_MODIFIED
+
+            registration.save()
+
+            with transaction.atomic():
+                if new_metas:
+                    for f in new_metas:
+                        RegistrationMeta.objects.create(
+                            registration_id=registration.id,
+                            property=f,
+                            value=properties[f],
+                        )
+                    logger.info(
+                        f'{registration.numero}: nouveaux champs: {", ".join(new_metas)}'
+                    )
+
+                for f in updated_metas:
+                    field_changed = has_attr_changed(metas[f], "value", properties[f])
+                    changed = changed or field_changed
+                    if field_changed:
+                        metas[f].save()
+                        logger.info(
+                            f"{registration.numero}: champ {f} modifié => `{properties[f]}'"
+                        )
+
+        if entry := properties.get("entry", None):
+            s, created = ScannerAction.objects.get_or_create(
+                registration=registration,
+                type=ScannerAction.TYPE_ENTRANCE,
+                person="création admin",
+                time=timezone.datetime.fromisoformat(entry),
+            )
+            if created:
+                # à cause du auto_add, time est écrasé par la date actuelle
+                ScannerAction.objects.filter(id=s.id).update(
+                    time=timezone.datetime.fromisoformat(entry)
+                )
