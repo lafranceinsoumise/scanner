@@ -1,6 +1,9 @@
 import logging
 import uuid
 import argparse
+from functools import reduce
+from operator import or_
+
 import tqdm
 import csv
 import sys
@@ -237,7 +240,6 @@ class Command(BaseCommand):
 
             if registration.category_id != category.id:
                 registration.category_id = category.id
-                logger.info(f"")
                 changed = True
                 logger.info(
                     f"{registration.numero}: categorie => `{registration.category.name}'"
@@ -257,10 +259,28 @@ class Command(BaseCommand):
         new_metas = meta_fields - existing_metas
 
         # updated metas: non empty values that are in both meta_fields and metas
-        updated_metas = meta_fields & existing_metas
+        if meta_fields & existing_metas:
+            updated_metas_cond = reduce(
+                or_,
+                (
+                    Q(registration=registration, property=f) & ~Q(value=properties[f])
+                    for f in (meta_fields & existing_metas)
+                ),
+            )
+
+            updated_metas = set(
+                RegistrationMeta.objects.filter(updated_metas_cond).values_list(
+                    "property", flat=True
+                )
+            )
+        else:
+            updated_metas = set()
 
         if changed or new_metas or updated_metas:
             if update_status and registration.ticket_status == registration.TICKET_SENT:
+                logger.debug(
+                    f"{registration.numero}: ticket modifié et prêt à repartir (changed {changed} / new_metas {new_metas} / updated_metas {updated_metas})"
+                )
                 registration.ticket_status = registration.TICKET_MODIFIED
 
             registration.save()

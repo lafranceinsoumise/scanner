@@ -83,7 +83,7 @@ def envoyer_billet(registration, connection=None):
 
         envoyer_email(
             subject=subject,
-            recipient=[contact_email],
+            recipient=contact_email,
             body=text_message,
             html_body=html_message,
             attachments=attachments,
