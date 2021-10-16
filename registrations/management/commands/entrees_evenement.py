@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Exists, OuterRef
 from django.utils import timezone
 
-from registrations.actions import envoyer_email
+from registrations.actions.emails import envoyer_email
 from registrations.models import TicketEvent, ScannerAction
 
 
@@ -40,7 +40,7 @@ class Command(BaseCommand):
         entrees = (
             event.registration_set.annotate(
                 avec_entree=Exists(
-                    ScannerAction(
+                    ScannerAction.objects.filter(
                         registration_id=OuterRef("id"), type=ScannerAction.TYPE_ENTRANCE
                     )
                 )
