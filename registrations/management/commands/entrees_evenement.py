@@ -1,9 +1,5 @@
-from email.message import EmailMessage
-import subprocess
-
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Count
 from django.utils import timezone
 
 from registrations.actions.emails import envoyer_email
@@ -14,6 +10,9 @@ TEMPLATE = """
 Bonjour !
 
 A {heure}, il y avait {billets} émis, et {entrees} entrées pour l'événement « {nom}_».
+
+Par catégorie :
+{detail}
 
 Cordialement,
 Le scanner
@@ -46,14 +45,22 @@ class Command(BaseCommand):
                 )
             )
             .filter(avec_entree=True)
-            .count()
+            .values("category__name")
+            .annotate(c=Count("*"))
         )
+
+        total = sum(v["c"] for v in entrees)
+
         heure = (
             timezone.now().astimezone(timezone.get_default_timezone()).strftime("%H:%M")
         )
 
+        detail = "\n".join(
+            "{} : {}".format(v["category__name"], v["c"]) for v in entrees
+        )
+
         stats = TEMPLATE.format(
-            heure=heure, billets=billets, entrees=entrees, nom=event.name
+            heure=heure, billets=billets, entrees=total, nom=event.name, detail=detail
         )
 
         if not quiet:
