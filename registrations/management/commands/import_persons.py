@@ -113,9 +113,6 @@ class Command(BaseCommand):
         if "ticket_status" in r.fieldnames:
             raise CommandError("Ticket status field is not allowed")
 
-        if "contact_email" in r.fieldnames and "contact_emails" in r.fieldnames:
-            raise CommandError("contact_email and contact_emails fields are in conflit")
-
         # read everything so that we import only if full file is valid
         lines = list(r)
         input.close()
@@ -127,8 +124,7 @@ class Command(BaseCommand):
             "full_name",
             "gender",
             "uuid",
-            "contact_email",
-            "contact_emails",
+            "_contact_emails",
         }
         common_fields = model_field_names & set(r.fieldnames)
         self.meta_fields = (
@@ -178,9 +174,6 @@ class Command(BaseCommand):
                 if not line[field_name]:
                     line[field_name] = None
 
-            if field_name == "contact_emails":
-                line["contact_emails"] = line["contact_emails"].split(",")
-
             if field_name == "uuid":
                 try:
                     line["uuid"] = uuid.UUID(line["uuid"]) if line["uuid"] else None
@@ -196,10 +189,8 @@ class Command(BaseCommand):
                     if field:
                         for validator in field.validators:
                             validator(line[field_name])
-                    if field_name == "contact_email":
-                        validate_email(line[field_name])
-                    if field_name == "contact_emails":
-                        for contact_email in line[field_name]:
+                    if field_name == "_contact_emails":
+                        for contact_email in line[field_name].split(","):
                             validate_email(contact_email)
                 else:
                     if isinstance(field, CharField) and not field.blank:
