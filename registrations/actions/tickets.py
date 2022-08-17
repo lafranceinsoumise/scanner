@@ -42,11 +42,8 @@ def gen_ticket(registration):
 
     inkscape = subprocess.Popen(
         [
-            "inkscape",
-            "--pipe",  # from stdin
-            "--export-area-page",  # export the whole page
-            "--export-type=pdf",  # format PDF
-            "--export-filename=-",  # to stdout
+            "rsvg-convert",
+            "--format=pdf",  # format PDF
         ],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
