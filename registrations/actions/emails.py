@@ -54,8 +54,12 @@ def envoyer_billet(registration, connection=None):
     ticket = gen_ticket(registration)
 
     for contact_email in registration.contact_emails:
+        template_url = (
+            registration.category.mosaico_url or registration.event.mosaico_url
+        )
+
         html_message = requests.get(
-            registration.event.mosaico_url,
+            template_url,
             params={
                 "FULL_NAME": registration.full_name,
                 "EMAIL": contact_email,

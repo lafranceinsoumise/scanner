@@ -75,6 +75,7 @@ class TicketCategory(models.Model):
     color = models.CharField(_("Color"), max_length=255)
     background_color = models.CharField(_("Background color"), max_length=255)
     event = models.ForeignKey(TicketEvent, on_delete=models.CASCADE)
+    mosaico_url = models.URLField(_("Email template URL"), blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.event.name})"
