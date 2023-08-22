@@ -26,20 +26,20 @@ export function Start({ user, setUser, setPoint }) {
         >
           <div className="form-group">
             <input
+              autoFocus
               className="form-control input-lg"
               type="text"
               value={name || ""}
               onChange={(event) => setName(event.target.value)}
             />
           </div>
-          {
-            <button
-              className="btn btn-success btn-block"
-              disabled={!name || name.length < 6}
-            >
-              Démarrer
-            </button>
-          }
+          <button
+            type="submit"
+            className="btn btn-success btn-block"
+            disabled={!name || name.length < 6}
+          >
+            Démarrer
+          </button>
         </form>
       </Container>
     );

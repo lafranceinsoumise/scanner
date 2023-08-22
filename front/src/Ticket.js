@@ -1,6 +1,20 @@
 import { EVENT_LABELS, GENDER_LABELS } from "./labels";
 import React from "react";
 
+const ALERT_STYLE = {
+  fontWeight: "600",
+  fontSize: "2.4rem",
+  lineHeight: "1.4",
+  textAlign: "center",
+  fontFamily: "Arial, sans-serif"
+}
+
+const Alert = ({ children }) => (
+  <div style={ALERT_STYLE} className="alert alert-danger">
+    { children }
+  </div>
+);
+
 export function Ticket({ registration, validateScan, cancelScan }) {
   let style = {
     color: registration.category.color,
@@ -13,25 +27,25 @@ export function Ticket({ registration, validateScan, cancelScan }) {
   return (
     <div id="registration" className="container registration" style={style}>
       {registration.canceled ? (
-        <div className="alert alert-danger">
+        <Alert>
           Ce billet a été annulé ! Merci de renvoyer la personne à l'accueil.
-        </div>
+        </Alert>
       ) : (
         ""
       )}
       {registration.meta.unpaid || registration.meta.status === "on-hold" ? (
-        <div className="alert alert-danger">
+        <Alert>
           Cette personne n'a pas encore payé&nbsp;! Merci d'annuler et de la
           renvoyer à l'accueil.
-        </div>
+        </Alert>
       ) : (
         ""
       )}
       {registration.events.find((event) => event.type === "entrance") && (
-        <div className="alert alert-danger">
+        <Alert>
           Ce billet a déjà été scanné&nbsp;! Ne laissez entrer la personne
           qu'après vérification de son identité.
-        </div>
+        </Alert>
       )}
       <h1 className="text-center">{registration.full_name}</h1>
       <h3>Catégorie&nbsp;: {registration.category.name}</h3>
