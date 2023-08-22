@@ -2,7 +2,7 @@
 name = "scanner"
 version = "0.1.0"
 description = ""
-authors = ["Arthur Cheysson <arthur@cheysson.fr>"]
+authors = ["Salomé Cheysson <salome@cheysson.fr>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
