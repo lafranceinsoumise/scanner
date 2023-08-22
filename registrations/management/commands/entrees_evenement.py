@@ -35,7 +35,7 @@ class Command(BaseCommand):
         except TicketEvent.DoesNotExist:
             raise CommandError("Event does not exist")
 
-        billets = event.registration_set.count()
+        billets = event.registration_set.exclude(canceled=True).count()
         entrees = (
             event.registration_set.annotate(
                 avec_entree=Exists(
