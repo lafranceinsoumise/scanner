@@ -18,7 +18,10 @@ class CodeView(View):
         return person
 
     def get_point(self):
-        return self.request.GET.get("point")
+        try:
+            return ScanPoint.objects.get(id=self.request.GET.get("point"))
+        except (ScanPoint.DoesNotExist, ValueError, TypeError):
+            return None
 
     def get(self, request, code):
         person = self.get_person()
@@ -65,7 +68,7 @@ class CodeView(View):
         if type not in [ScannerAction.TYPE_ENTRANCE, ScannerAction.TYPE_CANCEL]:
             return HttpResponseBadRequest()
 
-        if point is not None and not ScanPoint.objects.filter(id=point).exists():
+        if point is None and request.POST:
             return HttpResponseBadRequest()
 
         try:

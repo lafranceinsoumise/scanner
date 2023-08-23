@@ -1,7 +1,9 @@
+from typing import Optional
+
 from prometheus_client import Counter
 
 from .codes import get_id_from_code, InvalidCodeException
-from ..models import Registration, ScannerAction
+from ..models import Registration, ScannerAction, ScanPoint
 
 
 scan_counter = Counter("scanner_code_scan", "Numbers of scans", ["result"])
@@ -18,7 +20,7 @@ def get_registration_from_code(code):
     return registration
 
 
-def scan_code(code, operator, point=None):
+def scan_code(code, operator, point: Optional[ScanPoint] = None):
     try:
         registration = get_registration_from_code(code)
     except InvalidCodeException:
@@ -28,11 +30,14 @@ def scan_code(code, operator, point=None):
         scan_counter.labels("missing_code").inc()
         raise InvalidCodeException
 
+    if point is not None and point.event_id != registration.event_id:
+        raise InvalidCodeException("wrong_event")
+
     ScannerAction.objects.create(
         registration=registration,
         type=ScannerAction.TYPE_SCAN,
         person=operator,
-        point_id=point,
+        point=point,
     )
     scan_counter.labels("success").inc()
     return registration
@@ -51,8 +56,11 @@ def mark_registration(code, type, operator, point=None):
     if registration.canceled:
         raise InvalidCodeException("Billet annulé")
 
+    if point is not None and point.event_id != registration.event_id:
+        raise InvalidCodeException("wrong_event")
+
     ScannerAction.objects.create(
-        registration=registration, type=type, person=operator, point_id=point
+        registration=registration, type=type, person=operator, point=point
     )
     state_change_counter.labels(type).inc()
     return registration
