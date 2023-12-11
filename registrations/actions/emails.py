@@ -1,3 +1,8 @@
+import random
+import string
+from email.mime.image import MIMEImage
+from io import BytesIO
+
 import html2text
 import requests
 from django.core import mail
@@ -58,12 +63,14 @@ def envoyer_billet(registration, connection=None):
             registration.category.mosaico_url or registration.event.mosaico_url
         )
 
+        qr_code_cid = "".join(random.choices(string.ascii_lowercase + string.digits, k=10))
         html_message = requests.get(
             template_url,
             params={
                 "FULL_NAME": registration.full_name,
                 "EMAIL": contact_email,
                 "CATEGORY": registration.category.name,
+                "QR_CODE": f"cid:{qr_code_cid}",
                 **{
                     "META_" + p.property.upper(): p.value
                     for p in registration.metas.all()
@@ -79,6 +86,16 @@ def envoyer_billet(registration, connection=None):
                 "application/pdf",
             )
         ]
+
+        if qr_code_cid in html_message:
+            qr_code = BytesIO()
+            registration.qrcode.save(qr_code, "PNG")
+            attachment = MIMEImage(qr_code.getvalue(), "png")
+            attachment.add_header("Content-ID", qr_code_cid)
+
+            attachments.append((
+                (attachment, None, None)
+            ))
 
         for attachment in registration.event.attachments.all():
             with attachment.file.open("rb") as f:
