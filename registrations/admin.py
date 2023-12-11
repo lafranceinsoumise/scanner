@@ -72,7 +72,6 @@ class EventInline(admin.TabularInline):
 
 class RegistrationAdmin(admin.ModelAdmin):
     readonly_fields = (
-        "numero",
         "canceled",
         "qrcode_display",
         "ticket_link",
