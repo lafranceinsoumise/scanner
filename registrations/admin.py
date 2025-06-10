@@ -1,10 +1,12 @@
+from django.core.mail import get_connection
 from django.urls import path, re_path
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.utils.html import format_html
 
+from .actions.emails import envoyer_billet
 from .actions.scans import mark_registration, state_change_counter
 from .models import (
     Registration,
@@ -115,6 +117,11 @@ class RegistrationAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.ticket_view),
                 name="registrations_registration_ticket",
             ),
+            re_path(
+                r"^(?P<object_id>.+)/envoyer-billet/$",
+                self.admin_site.admin_view(self.send_ticket_view),
+                name="registrations_registration_send_ticket",
+            ),
         ]
         return custom_urls + urls
 
@@ -145,8 +152,10 @@ class RegistrationAdmin(admin.ModelAdmin):
             return "-"
 
         return format_html(
-            '<a href="{}">Voir le ticket</a>',
+            '<a href="{}">Voir le ticket</a><br>'
+            '<a class="button" href="{}">Envoyer le billet</a>',
             reverse("admin:registrations_registration_ticket", args=[instance.pk]),
+            reverse("admin:registrations_registration_send_ticket", args=[instance.pk]),
         )
 
     ticket_link.short_description = "Ticket"
@@ -175,6 +184,29 @@ class RegistrationAdmin(admin.ModelAdmin):
         )
         state_change_counter.labels(ScannerAction.TYPE_ENTRANCE).inc()
         return HttpResponseRedirect(reverse("admin:registrations_registration_change", args=(object_id,)))
+
+    def send_ticket_view(self, request, object_id):
+        registration = get_object_or_404(Registration, pk=object_id)
+        connection = get_connection()
+
+        registration.ticket_status = "M"
+        registration.save()
+
+        try:
+            envoyer_billet(registration, connection=connection)
+            self.message_user(request, "Billet envoyé avec succès.", messages.SUCCESS)
+        except Exception as e:
+            self.message_user(
+                request,
+                f"Erreur lors de l'envoi du billet : {str(e)}",
+                level=messages.ERROR,
+            )
+
+        connection.close()
+
+        return HttpResponseRedirect(
+            reverse("admin:registrations_registration_change", args=[object_id])
+        )
 
 
 class TicketAttachmentInline(admin.TabularInline):
