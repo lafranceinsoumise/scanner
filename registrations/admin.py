@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import path, re_path
 from django.contrib import admin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
@@ -99,23 +99,24 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super().get_urls()
-        return [
-            url(
-                r"^(.+)/qrcode/$",
+        custom_urls = [
+            re_path(
+                r"^(?P<object_id>.+)/qrcode/$",
                 self.admin_site.admin_view(self.qrcode_view),
                 name="registrations_registration_qrcode",
             ),
-            url(
-              r"^(.+)/valider/$",
-              self.admin_site.admin_view(self.valider_view),
-              name="registrations_registration_valider",
+            re_path(
+                r"^(?P<object_id>.+)/valider/$",
+                self.admin_site.admin_view(self.valider_view),
+                name="registrations_registration_valider",
             ),
-            url(
-                r"^(.+)/ticket/$",
+            re_path(
+                r"^(?P<object_id>.+)/ticket/$",
                 self.admin_site.admin_view(self.ticket_view),
                 name="registrations_registration_ticket",
             ),
-        ] + urls
+        ]
+        return custom_urls + urls
 
     def full_name(self, instance):
         return instance.first_name + " " + instance.last_name
