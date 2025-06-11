@@ -6,8 +6,6 @@ import X from "bootstrap-icons/icons/x.svg";
 import useSWR, { mutate } from "swr";
 import {Html5Qrcode} from "html5-qrcode";
 
-import "!file-loader?name=html5-qrcode.js&outputPath=static/js!html5-qrcode";
-
 import config from "./config";
 import { jsonFetch, postForm } from "./utils";
 
@@ -30,21 +28,26 @@ function Scanner({ scan, setPoint, user, point, loading }) {
   }, []);
 
   const startCamera = useCallback(async () => {
+  if (!document.getElementById("preview")) {
+    console.error("Élément #preview introuvable dans le DOM.");
+    return displayError("Erreur interne : aperçu non disponible.");
+  }
+
+  try {
     if (!scanner.current) {
       scanner.current = new Html5Qrcode("preview");
     }
 
     if (!cameras.current) {
       cameras.current = await Html5Qrcode.getCameras();
+      if (!cameras.current || cameras.current.length === 0) {
+        console.error("Aucune caméra détectée.");
+        return displayError("Aucune caméra détectée.");
+      }
     }
 
-    if (!activeCameraIndex.current) {
-      if (cameras.current.length === 0) {
-        console.log("Pas de caméra");
-        return false;
-      }
+    if (activeCameraIndex.current === null) {
       let savedCam = +localStorage.getItem("cameraIndex");
-
       if (Number.isInteger(savedCam) && savedCam < cameras.current.length) {
         activeCameraIndex.current = savedCam;
       } else {
@@ -52,21 +55,15 @@ function Scanner({ scan, setPoint, user, point, loading }) {
       }
     }
 
-    console.dir(
-      cameras.current,
-      activeCameraIndex.current,
-      cameras.current[activeCameraIndex.current].id
-    );
+    const cameraId = cameras.current[activeCameraIndex.current].id;
+    console.log("Démarrage caméra :", cameraId);
+
     await scanner.current.start(
-      cameras.current[activeCameraIndex.current].id,
-      {
-        fps: 5,
-      },
+      cameraId,
+      { fps: 5 },
       async (decodedText) => {
         const scan = scanRef.current;
-        if (!scan) {
-          return;
-        }
+        if (!scan) return;
 
         try {
           await scan(decodedText);
@@ -74,12 +71,19 @@ function Scanner({ scan, setPoint, user, point, loading }) {
           if (err.message === "Not Found") {
             return displayError("Billet inconnu.");
           }
-
+          console.error("Erreur de scan :", err);
           return displayError(err.message);
         }
+      },
+      (errorMessage) => {
+        console.warn("Scan non valide :", errorMessage);
       }
     );
-  }, [displayError]);
+  } catch (err) {
+    console.error("Erreur au démarrage de la caméra :", err);
+    displayError("Impossible d'accéder à la caméra. Vérifie les autorisations.");
+  }
+}, [displayError]);
 
   const stopCamera = useCallback(async () => {
     await scanner.current.stop();
