@@ -189,7 +189,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         registration = get_object_or_404(Registration, pk=object_id)
         connection = get_connection()
 
-        registration.ticket_status = "M"
+        registration.ticket_status = "N"
         registration.save()
 
         try:
