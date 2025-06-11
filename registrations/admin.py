@@ -99,6 +99,8 @@ class RegistrationAdmin(admin.ModelAdmin):
 
     inlines = (MetaInline, EventInline)
 
+    actions = ["send_tickets_action"]
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
@@ -208,6 +210,42 @@ class RegistrationAdmin(admin.ModelAdmin):
             reverse("admin:registrations_registration_change", args=[object_id])
         )
 
+    def send_tickets_action(self, request, queryset):
+        connection = get_connection()
+        success = 0
+        errors = 0
+
+        for registration in queryset:
+            try:
+                registration.ticket_status = "N"
+                registration.save()
+                envoyer_billet(registration, connection=connection)
+                success += 1
+            except Exception as e:
+                self.message_user(
+                    request,
+                    f"Erreur pour {registration.full_name} : {e}",
+                    level=messages.ERROR,
+                )
+                errors += 1
+
+        connection.close()
+
+        if success:
+            self.message_user(
+                request,
+                f"{success} billet(s) envoyé(s) avec succès.",
+                level=messages.SUCCESS,
+            )
+
+        if errors:
+            self.message_user(
+                request,
+                f"{errors} erreur(s) lors de l'envoi de billets.",
+                level=messages.WARNING,
+            )
+
+    send_tickets_action.short_description = "Envoyer les billets sélectionnés"
 
 class TicketAttachmentInline(admin.TabularInline):
     model = TicketAttachment
