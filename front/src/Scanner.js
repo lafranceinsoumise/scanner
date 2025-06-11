@@ -4,6 +4,7 @@ import person from "bootstrap-icons/icons/person.svg";
 import people from "bootstrap-icons/icons/people.svg";
 import X from "bootstrap-icons/icons/x.svg";
 import useSWR, { mutate } from "swr";
+import {Html5Qrcode} from "html5-qrcode";
 
 import "!file-loader?name=html5-qrcode.js&outputPath=static/js!html5-qrcode";
 

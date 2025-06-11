@@ -4,15 +4,15 @@
   "private": true,
   "homepage": "https://scanner.franceinsoumise.org/scan/",
   "dependencies": {
-    "bootstrap-icons": "^1.0.0-alpha5",
-    "html5-qrcode": "^2.0.11",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "swr": "^0.5.6"
+    "bootstrap-icons": "^1.13.1",
+    "html5-qrcode": "^2.3.8",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "swr": "^0.5.7"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
+    "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
@@ -23,7 +23,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "prettier": "^2.0.5",
+    "prettier": "^2.8.8",
     "react-scripts": "^4.0.3"
   }
 }
