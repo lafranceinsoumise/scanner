@@ -1,6 +1,7 @@
 import random
 import string
 from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
 from io import BytesIO
 
 import html2text
@@ -18,6 +19,19 @@ _h.ignore_images = True
 
 email_sent_counter = Counter("scanner_email_sent", "Number of emails sent")
 
+# change email content type to multipart/related to fix img display bugs in some mail clients
+class RelatedEmailMultiAlternatives(mail.EmailMultiAlternatives):
+    def message(self):
+        msg = super().message()
+        if msg.is_multipart():
+            related_msg = MIMEMultipart(_subtype='related')
+            for part in msg.get_payload():
+                related_msg.attach(part)
+            for k, v in msg.items():
+                if k not in related_msg:
+                    related_msg[k] = v
+            return related_msg
+        return msg
 
 def envoyer_email(
     recipient, subject, body, html_body=None, connection=None, attachments=None
@@ -25,7 +39,7 @@ def envoyer_email(
     if attachments is None:
         attachments = []
 
-    msg = mail.EmailMultiAlternatives(
+    msg = RelatedEmailMultiAlternatives(
         subject=subject,
         from_email=settings.EMAIL_FROM,
         to=[recipient],
