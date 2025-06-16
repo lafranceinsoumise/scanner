@@ -24,13 +24,7 @@ class RelatedEmailMultiAlternatives(mail.EmailMultiAlternatives):
     def message(self):
         msg = super().message()
         if msg.is_multipart():
-            related_msg = MIMEMultipart(_subtype='related')
-            for part in msg.get_payload():
-                related_msg.attach(part)
-            for k, v in msg.items():
-                if k not in related_msg:
-                    related_msg[k] = v
-            return related_msg
+            msg.set_type('multipart/related')
         return msg
 
 def envoyer_email(
