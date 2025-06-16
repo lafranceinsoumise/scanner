@@ -4,7 +4,7 @@ import person from "bootstrap-icons/icons/person.svg";
 import people from "bootstrap-icons/icons/people.svg";
 import X from "bootstrap-icons/icons/x.svg";
 import useSWR, { mutate } from "swr";
-import {Html5Qrcode} from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 
 import config from "./config";
 import { jsonFetch, postForm } from "./utils";
@@ -12,6 +12,9 @@ import { jsonFetch, postForm } from "./utils";
 function Scanner({ scan, setPoint, user, point, loading }) {
   const [error, setError] = useState(false);
   const [pause, setPause] = useState(false);
+  const [cameraOptions, setCameraOptions] = useState([]);
+  const [cameraId, setCameraId] = useState(null);
+
   const scanner = useRef(null);
   const cameras = useRef(null);
   const activeCameraIndex = useRef(null);
@@ -21,127 +24,134 @@ function Scanner({ scan, setPoint, user, point, loading }) {
 
   const displayError = useCallback((message) => {
     setError(message || "Impossible de lire le billet.");
-
     setTimeout(() => {
       setError(false);
     }, 3000);
   }, []);
 
-  const startCamera = useCallback(async () => {
-  if (!document.getElementById("preview")) {
-    console.error("Élément #preview introuvable dans le DOM.");
-    return displayError("Erreur interne : aperçu non disponible.");
-  }
-
-  try {
-    if (!scanner.current) {
-      scanner.current = new Html5Qrcode("preview");
-    }
-
-    if (!cameras.current) {
-      cameras.current = await Html5Qrcode.getCameras();
-      if (!cameras.current || cameras.current.length === 0) {
-        console.error("Aucune caméra détectée.");
-        return displayError("Aucune caméra détectée.");
+  const startCamera = useCallback(
+    async (forcedCameraId = null) => {
+      if (!document.getElementById("preview")) {
+        console.error("Élément #preview introuvable dans le DOM.");
+        return displayError("Erreur interne : aperçu non disponible.");
       }
-    }
 
-    if (activeCameraIndex.current === null) {
-      let savedCam = +localStorage.getItem("cameraIndex");
-      if (Number.isInteger(savedCam) && savedCam < cameras.current.length) {
-        activeCameraIndex.current = savedCam;
-      } else {
-        activeCameraIndex.current = 0;
-      }
-    }
-
-    const cameraId = cameras.current[activeCameraIndex.current].id;
-    console.log("Démarrage caméra :", cameraId);
-
-    await scanner.current.start(
-      cameraId,
-      { fps: 5 },
-      async (decodedText) => {
-        const scan = scanRef.current;
-        if (!scan) return;
-
-        try {
-          await scan(decodedText);
-        } catch (err) {
-          if (err.message === "Not Found") {
-            return displayError("Billet inconnu.");
-          }
-          console.error("Erreur de scan :", err);
-          return displayError(err.message);
+      try {
+        if (!scanner.current) {
+          scanner.current = new Html5Qrcode("preview");
         }
-      },
-      (errorMessage) => {
-        console.warn("Scan non valide :", errorMessage);
+
+        if (!cameras.current) {
+          cameras.current = await Html5Qrcode.getCameras();
+          if (!cameras.current.length) {
+            return displayError("Aucune caméra détectée.");
+          }
+          setCameraOptions(cameras.current);
+        }
+
+        if (activeCameraIndex.current === null) {
+          let savedCam = +localStorage.getItem("cameraIndex");
+          if (
+            Number.isInteger(savedCam) &&
+            savedCam >= 0 &&
+            savedCam < cameras.current.length
+          ) {
+            activeCameraIndex.current = savedCam;
+          } else {
+            activeCameraIndex.current = 0;
+          }
+        }
+
+        const selectedCamId =
+          forcedCameraId ||
+          cameras.current[activeCameraIndex.current].id;
+
+        setCameraId(selectedCamId);
+
+        await scanner.current.start(
+          selectedCamId,
+          { fps: 5 },
+          async (decodedText) => {
+            const scan = scanRef.current;
+            if (!scan) return;
+            try {
+              await scan(decodedText);
+            } catch (err) {
+              if (err.message === "Not Found") {
+                return displayError("Billet inconnu.");
+              }
+              return displayError(err.message);
+            }
+          },
+          (errorMessage) => {
+            console.warn("Scan non valide :", errorMessage);
+          }
+        );
+      } catch (err) {
+        console.error("Erreur au démarrage de la caméra :", err);
+        displayError(
+          "Impossible d'accéder à la caméra. Vérifie les autorisations."
+        );
       }
-    );
-  } catch (err) {
-    console.error("Erreur au démarrage de la caméra :", err);
-    displayError("Impossible d'accéder à la caméra. Vérifie les autorisations.");
-  }
-}, [displayError]);
+    },
+    [displayError]
+  );
 
   const stopCamera = useCallback(async () => {
-  if (scanner.current) {
-    try {
-      await scanner.current.stop();
-    } catch (e) {
-      console.warn("Erreur à l'arrêt de la caméra :", e);
+    if (scanner.current) {
+      try {
+        await scanner.current.stop();
+      } catch (err) {
+        console.warn("Erreur à l'arrêt de la caméra :", err);
+      }
+      await scanner.current.clear();
     }
-    scanner.current.clear();
-  }
-}, []);
+  }, []);
 
   const changeCamera = useCallback(async () => {
-    await scanner.current.stop();
+    await stopCamera();
     activeCameraIndex.current =
       (activeCameraIndex.current + 1) % cameras.current.length;
     localStorage.setItem("cameraIndex", activeCameraIndex.current);
     await startCamera();
-  });
+  }, [startCamera, stopCamera]);
 
   useEffect(() => {
-  const delayStart = setTimeout(() => {
-    startCamera();
-  }, 300);
-
-  return () => {
-    stopCamera();
-    clearTimeout(delayStart);
-  };
-}, [startCamera, stopCamera]);
+    const timer = setTimeout(() => {
+      startCamera();
+    }, 300);
+    return () => {
+      clearTimeout(timer);
+      stopCamera();
+    };
+  }, [startCamera, stopCamera]);
 
   useEffect(() => {
     scanRef.current = scan;
   }, [scan]);
 
   let eventName =
-    events && events[0].scan_points.find((e) => e.id === point).name;
+    events && events[0].scan_points.find((e) => e.id === point)?.name;
   let eventCount =
-    events && events[0].scan_points.find((e) => e.id === point).count;
+    events && events[0].scan_points.find((e) => e.id === point)?.count;
 
   return (
     <>
-      <div
-        style={{ backgroundColor: "#fff", width: "100%" }}
-        className="container-fluid"
-      >
+      <div style={{ backgroundColor: "#fff", width: "100%" }} className="container-fluid">
         <div className="row" style={{ marginTop: "20px" }}>
           <div className="col-xs-6">
             <p>
-              <img src={person} alt={"Utilisateur⋅ice"} /> {user}
+              <img src={person} alt="Utilisateur⋅ice" /> {user}
             </p>
             <p>
-              <img src={cursorFill} alt={"Point de contrôle"} /> {eventName}{" "}
+              <img src={cursorFill} alt="Point de contrôle" /> {eventName}{" "}
               <img
                 onClick={() => setPoint(null)}
                 className="pull-right"
                 src={X}
-                alt={"Changer le lieu"}
+                alt="Changer le lieu"
+                role="button"
+                style={{ cursor: "pointer" }}
               />
             </p>
           </div>
@@ -149,14 +159,12 @@ function Scanner({ scan, setPoint, user, point, loading }) {
             {eventCount !== null && (
               <>
                 <p>
-                  <img src={people} alt={"Compteur"} /> {eventCount}
+                  <img src={people} alt="Compteur" /> {eventCount}
                 </p>
                 <button
                   className="btn btn-info btn-sm"
                   onClick={async () => {
-                    await postForm(`${config.host}/reset/`, {
-                      point,
-                    });
+                    await postForm(`${config.host}/reset/`, { point });
                     await mutate(`${config.host}/api/events`);
                   }}
                 >
@@ -167,13 +175,40 @@ function Scanner({ scan, setPoint, user, point, loading }) {
           </div>
         </div>
       </div>
-      <div id="camera-container">
+
+      <div id="camera-container" className="container">
+        {cameraOptions.length > 1 && (
+          <div className="form-group mt-2">
+            <label htmlFor="cameraSelect">Choisir la caméra :</label>
+            <select
+              id="cameraSelect"
+              className="form-control"
+              value={cameraId || ""}
+              onChange={async (e) => {
+                await stopCamera();
+                const newCamId = e.target.value;
+                activeCameraIndex.current = cameras.current.findIndex(
+                  (cam) => cam.id === newCamId
+                );
+                localStorage.setItem("cameraIndex", activeCameraIndex.current);
+                await startCamera(newCamId);
+              }}
+            >
+              {cameraOptions.map((cam) => (
+                <option key={cam.id} value={cam.id}>
+                  {cam.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div id="preview" />
       </div>
+
       <div>
         {loading && (
           <div className="container">
-            <div className="alert alert-info">'Chargement...'</div>
+            <div className="alert alert-info">Chargement…</div>
           </div>
         )}
         {error && (
@@ -182,14 +217,12 @@ function Scanner({ scan, setPoint, user, point, loading }) {
           </div>
         )}
         <button
-          id="changeButton"
           className="btn btn-lg btn-success btn-block"
           onClick={changeCamera}
         >
-          Changer la camera
+          Changer la caméra
         </button>
         <button
-          id="changeButton"
           className="btn btn-lg btn-danger btn-block"
           onClick={() => {
             setPause(!pause);
