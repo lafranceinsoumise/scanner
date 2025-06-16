@@ -12,8 +12,6 @@ import { jsonFetch, postForm } from "./utils";
 function Scanner({ scan, setPoint, user, point, loading }) {
   const [error, setError] = useState(false);
   const [pause, setPause] = useState(false);
-  const [cameraOptions, setCameraOptions] = useState([]);
-  const [cameraId, setCameraId] = useState(null);
 
   const scanner = useRef(null);
   const cameras = useRef(null);
@@ -24,14 +22,13 @@ function Scanner({ scan, setPoint, user, point, loading }) {
 
   const displayError = useCallback((message) => {
     setError(message || "Impossible de lire le billet.");
-    setTimeout(() => {
-      setError(false);
-    }, 3000);
+    setTimeout(() => setError(false), 3000);
   }, []);
 
   const startCamera = useCallback(
     async (forcedCameraId = null) => {
-      if (!document.getElementById("preview")) {
+      const previewElement = document.getElementById("preview");
+      if (!previewElement) {
         console.error("Élément #preview introuvable dans le DOM.");
         return displayError("Erreur interne : aperçu non disponible.");
       }
@@ -46,7 +43,6 @@ function Scanner({ scan, setPoint, user, point, loading }) {
           if (!cameras.current.length) {
             return displayError("Aucune caméra détectée.");
           }
-          setCameraOptions(cameras.current);
         }
 
         if (activeCameraIndex.current === null) {
@@ -63,10 +59,7 @@ function Scanner({ scan, setPoint, user, point, loading }) {
         }
 
         const selectedCamId =
-          forcedCameraId ||
-          cameras.current[activeCameraIndex.current].id;
-
-        setCameraId(selectedCamId);
+          forcedCameraId || cameras.current[activeCameraIndex.current].id;
 
         await scanner.current.start(
           selectedCamId,
@@ -109,6 +102,7 @@ function Scanner({ scan, setPoint, user, point, loading }) {
   }, []);
 
   const changeCamera = useCallback(async () => {
+    if (!cameras.current?.length) return;
     await stopCamera();
     activeCameraIndex.current =
       (activeCameraIndex.current + 1) % cameras.current.length;
@@ -177,31 +171,6 @@ function Scanner({ scan, setPoint, user, point, loading }) {
       </div>
 
       <div id="camera-container" className="container">
-        {cameraOptions.length > 1 && (
-          <div className="form-group mt-2">
-            <label htmlFor="cameraSelect">Choisir la caméra :</label>
-            <select
-              id="cameraSelect"
-              className="form-control"
-              value={cameraId || ""}
-              onChange={async (e) => {
-                await stopCamera();
-                const newCamId = e.target.value;
-                activeCameraIndex.current = cameras.current.findIndex(
-                  (cam) => cam.id === newCamId
-                );
-                localStorage.setItem("cameraIndex", activeCameraIndex.current);
-                await startCamera(newCamId);
-              }}
-            >
-              {cameraOptions.map((cam) => (
-                <option key={cam.id} value={cam.id}>
-                  {cam.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
         <div id="preview" />
       </div>
 
