@@ -86,9 +86,15 @@ function Scanner({ scan, setPoint, user, point, loading }) {
 }, [displayError]);
 
   const stopCamera = useCallback(async () => {
-    await scanner.current.stop();
+  if (scanner.current) {
+    try {
+      await scanner.current.stop();
+    } catch (e) {
+      console.warn("Erreur à l'arrêt de la caméra :", e);
+    }
     scanner.current.clear();
-  }, []);
+  }
+}, []);
 
   const changeCamera = useCallback(async () => {
     await scanner.current.stop();
@@ -99,9 +105,15 @@ function Scanner({ scan, setPoint, user, point, loading }) {
   });
 
   useEffect(() => {
+  const delayStart = setTimeout(() => {
     startCamera();
-    return stopCamera;
-  }, [startCamera, stopCamera]);
+  }, 300);
+
+  return () => {
+    stopCamera();
+    clearTimeout(delayStart);
+  };
+}, [startCamera, stopCamera]);
 
   useEffect(() => {
     scanRef.current = scan;
