@@ -18,6 +18,7 @@ from .models import (
     TicketAttachment,
 )
 from .actions import codes, tickets
+from .views import test_inkscape_conversion
 
 
 class EventFilter(admin.SimpleListFilter):
@@ -123,6 +124,11 @@ class RegistrationAdmin(admin.ModelAdmin):
                 r"^(?P<object_id>.+)/envoyer-billet/$",
                 self.admin_site.admin_view(self.send_ticket_view),
                 name="registrations_registration_send_ticket",
+            ),
+            re_path(
+                r"^(?P<object_id>.+)/test/$",
+                self.admin_site.admin_view(test_inkscape_conversion),
+                name="registrations_test",
             ),
         ]
         return custom_urls + urls
