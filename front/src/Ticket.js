@@ -47,6 +47,14 @@ export function Ticket({ registration, validateScan, cancelScan }) {
           qu'après vérification de son identité.
         </Alert>
       )}
+      {registration.meta.majorite || registration.meta.majorite === "mineur" ? (
+        <Alert>
+          Cette personne est mineure&nbsp;! Merci d'annuler et de la
+          renvoyer à l'accueil.
+        </Alert>
+      ) : (
+        ""
+      )}
       <h1 className="text-center">{registration.full_name}</h1>
       <h3>Catégorie&nbsp;: {registration.category.name}</h3>
       {registration.numero && <h3>#{registration.numero}</h3>}
