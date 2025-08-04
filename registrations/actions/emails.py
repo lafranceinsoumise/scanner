@@ -79,6 +79,7 @@ def envoyer_billet(registration, connection=None):
                 "EMAIL": contact_email,
                 "CATEGORY": registration.category.name,
                 "QR_CODE": f"cid:{qr_code_cid}",
+                "GOOGLE_WALLET_URL": registration.google_wallet_url,
                 **{
                     "META_" + p.property.upper(): p.value
                     for p in registration.metas.all()

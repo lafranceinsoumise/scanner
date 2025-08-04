@@ -180,3 +180,6 @@ REST_FRAMEWORK = {
         "rest_framework.authentication.BasicAuthentication",
     ],
 }
+
+GCE_KEY_FILE = os.environ.get("GCE_KEY_FILE", "gce.json")
+GOOGLE_WALLET_USER_ID = os.environ.get("GOOGLE_WALLET_USER_ID", "3388000000022973968")

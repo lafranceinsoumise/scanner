@@ -1,3 +1,4 @@
+import base64
 import hmac
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 import binascii
@@ -28,6 +29,11 @@ def gen_qrcode(object_id):
 
     return qrcode.make(full_msg, border=0)
 
+def gen_pk_signature_qrcode(object_id: str) -> str:
+    msg = str(object_id).encode("utf-8")
+    signature = gen_signature(msg)
+    b64_signature = urlsafe_b64encode(signature).rstrip(b"=")  # éviter les `=`
+    return f"{object_id}.{b64_signature.decode('utf-8')}"
 
 def check_signature(msg, signature):
     correct_signature = gen_signature(msg)
@@ -35,15 +41,30 @@ def check_signature(msg, signature):
 
 
 def get_id_from_code(code):
-    """Verify code is correct, and return the identifier if it is. Raise InvalidCodeException if it is not
-
-    The argument is the candidate code as a string. It returns an integer identifier in case of success.
+    """
+    Decode and verify code, handling:
+    - Wallet format (base64url encoded full 'id.signature')
+    - Raw format ('id.signature' plain text)
+    Returns the integer identifier if valid.
+    Raises InvalidCodeException if invalid.
     """
 
+    def decode_and_split(s):
+        try:
+            identifier, base64_signature = s.split(".")
+        except ValueError:
+            raise InvalidCodeException("There should be exactly one separator period point")
+        return identifier, base64_signature
+
+    # 1) Essayer de décoder base64url complet (cas Google Wallet)
     try:
-        identifier, base64_signature = code.split(".")
-    except ValueError:
-        raise InvalidCodeException("There should be exactly one separator period point")
+        padding = '=' * (-len(code) % 4)
+        decoded = urlsafe_b64decode(code + padding).decode('utf-8')
+        # Si décodage réussi, on considère que c'est le format Wallet
+        identifier, base64_signature = decode_and_split(decoded)
+    except (binascii.Error, ValueError):
+        # Sinon c'est le format brut
+        identifier, base64_signature = decode_and_split(code)
 
     try:
         object_id = int(identifier)
@@ -51,7 +72,8 @@ def get_id_from_code(code):
         raise InvalidCodeException("The identifier should be an integer")
 
     try:
-        signature = urlsafe_b64decode(base64_signature)
+        sig_padding = '=' * (-len(base64_signature) % 4)
+        signature = urlsafe_b64decode(base64_signature + sig_padding)
     except (binascii.Error, ValueError):
         raise InvalidCodeException("Incorrect base64 signature")
 

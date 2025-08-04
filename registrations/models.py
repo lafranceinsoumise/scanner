@@ -1,10 +1,16 @@
-from time import strftime
+from time import strftime, time
+
+from google.oauth2.service_account import Credentials
+from google.auth import crypt
+import jwt
+import json
 
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
-from .actions.codes import gen_qrcode
+from .actions.codes import gen_pk_signature_qrcode, gen_qrcode, gen_signed_message
 
 
 class TicketEvent(models.Model):
@@ -17,6 +23,10 @@ class TicketEvent(models.Model):
         _("Ticket template"), upload_to=get_template_filename, blank=True
     )
     mosaico_url = models.URLField(_("Email template URL"), blank=True)
+    
+    google_wallet_class_id = models.CharField(
+        _("Google Wallet class ID"), max_length=255, blank=True, null=True
+    )
 
     def __str__(self):
         return self.name
@@ -150,6 +160,53 @@ class Registration(models.Model):
     @property
     def qrcode(self):
         return gen_qrcode(self.pk)
+    
+    @property
+    def google_wallet_url(self):
+        print("QR Code value: ", gen_pk_signature_qrcode(self.pk))
+        object_payload = {
+            "id": f"{settings.GOOGLE_WALLET_USER_ID}.{self.numero}",
+            "classId": self.event.google_wallet_class_id,
+            "state": "active" if not self.canceled else "inactive",
+            "cardTitle": {
+                "defaultValue": {
+                    "language": "fr-FR",
+                    "value": "{} - {}".format(self.full_name, self.category.name)
+                }
+            },
+            "barcode": {
+                "type": "QR_CODE",
+                "value": gen_pk_signature_qrcode(self.pk),  # Use the QR code text representation
+            },
+        }
+        
+        credentials = Credentials.from_service_account_file(
+            settings.GCE_KEY_FILE,
+            scopes=["https://www.googleapis.com/auth/wallet_object.issuer"]
+        )
+
+        signer = crypt.RSASigner.from_service_account_file(settings.GCE_KEY_FILE)
+        
+        
+        with open(settings.GCE_KEY_FILE) as f:
+            service_account_info = json.load(f)
+
+        private_key = service_account_info["private_key"]
+
+        # Structure du JWT
+        payload = {
+            "iss": credentials.service_account_email,
+            "aud": "google",
+            "typ": "savetowallet",
+            "iat": int(time()),
+            "payload": {
+                "genericObjects": [object_payload]
+            }
+        }
+
+        token = jwt.encode(payload, private_key, algorithm="RS256")
+
+        return f"https://pay.google.com/gp/v/save/{token}"
 
     def __str__(self):
         return "{} - {} ({})".format(self.numero, self.full_name, self.category.name)
