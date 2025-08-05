@@ -163,17 +163,10 @@ class Registration(models.Model):
     
     @property
     def google_wallet_url(self):
-        print("QR Code value: ", gen_pk_signature_qrcode(self.pk))
         object_payload = {
             "id": f"{settings.GOOGLE_WALLET_USER_ID}.{self.numero}",
-            "classId": self.event.google_wallet_class_id,
+            "classId": f"{settings.GOOGLE_WALLET_USER_ID}.{self.event.google_wallet_class_id}",
             "state": "active" if not self.canceled else "inactive",
-            "cardTitle": {
-                "defaultValue": {
-                    "language": "fr-FR",
-                    "value": "{} - {}".format(self.full_name, self.category.name)
-                }
-            },
             "barcode": {
                 "type": "QR_CODE",
                 "value": gen_pk_signature_qrcode(self.pk),  # Use the QR code text representation
@@ -184,9 +177,6 @@ class Registration(models.Model):
             settings.GCE_KEY_FILE,
             scopes=["https://www.googleapis.com/auth/wallet_object.issuer"]
         )
-
-        signer = crypt.RSASigner.from_service_account_file(settings.GCE_KEY_FILE)
-        
         
         with open(settings.GCE_KEY_FILE) as f:
             service_account_info = json.load(f)
@@ -200,7 +190,7 @@ class Registration(models.Model):
             "typ": "savetowallet",
             "iat": int(time()),
             "payload": {
-                "genericObjects": [object_payload]
+                "eventTicketObjects": [object_payload]
             }
         }
 
