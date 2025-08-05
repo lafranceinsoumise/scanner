@@ -166,6 +166,9 @@ class Registration(models.Model):
         object_payload = {
             "id": f"{settings.GOOGLE_WALLET_USER_ID}.{self.numero}",
             "classId": f"{settings.GOOGLE_WALLET_USER_ID}.{self.event.google_wallet_class_id}",
+            "ticketHolderName": self.full_name,
+            "ticketNumber": self.numero,
+            "eventName": self.event.name,
             "state": "active" if not self.canceled else "inactive",
             "barcode": {
                 "type": "QR_CODE",
