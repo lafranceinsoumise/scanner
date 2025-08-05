@@ -169,6 +169,13 @@ class Registration(models.Model):
             "ticketHolderName": self.full_name,
             "ticketNumber": self.numero,
             "eventName": self.event.name,
+            "ticketType": {
+                "value": self.category.name,
+                "language": "fr",
+            },
+            "reservationInfo": {
+                "confirmationCode": self.numero,
+            },
             "state": "active" if not self.canceled else "inactive",
             "barcode": {
                 "type": "QR_CODE",
