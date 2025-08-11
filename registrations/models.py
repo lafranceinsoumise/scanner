@@ -6,6 +6,7 @@ from time import strftime, time
 
 from django.urls import reverse
 from django.db import transaction
+from django.core.files.base import ContentFile
 from google.oauth2.service_account import Credentials
 from google.auth import crypt
 import jwt
@@ -298,6 +299,16 @@ class Registration(models.Model):
         
         # 3. Sauvegarder et retourner l'URL
         return self._save_and_get_url(pkpass_buffer)
+    
+    def _save_and_get_url(self, pkpass_data):
+        # Génération nom de fichier unique
+        filename = f"wallet_passes/{self.numero}_{secrets.token_hex(4)}.pkpass"
+        
+        # Sauvegarde physique
+        path = default_storage.save(filename, ContentFile(pkpass_data))
+        
+        # Retourne le nom du fichier seulement (le chemin complet sera géré par la vue)
+        return path
 
     def _generate_pkpass(self, pass_data):
         """Génère le fichier .pkpass signé en mémoire."""
