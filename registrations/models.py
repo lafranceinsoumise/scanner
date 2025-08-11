@@ -1,3 +1,4 @@
+from datetime import timezone
 import hashlib
 import io
 import secrets
@@ -42,6 +43,13 @@ class TicketEvent(models.Model):
     
     google_wallet_class_id = models.CharField(
         _("Google Wallet class ID"), max_length=255, blank=True, null=True
+    )
+    
+    start_date = models.DateTimeField(
+        _("Start date"), blank=True, null=True, help_text=_("Event start date")
+    )
+    end_date = models.DateTimeField(
+        _("End date"), blank=True, null=True, help_text=_("Event end date")
     )
 
     def __str__(self):
@@ -151,7 +159,7 @@ class Registration(models.Model):
 
     canceled = models.BooleanField(_("Canceled"), default=False)
     
-    wallet_token = models.CharField(max_length=32, unique=False, blank=True, null=True)
+    wallet_token = models.CharField(max_length=32, unique=False, blank=False, null=False)
     
     def generate_unique_token(self):
         for _ in range(5):  # 5 tentatives max
@@ -192,21 +200,39 @@ class Registration(models.Model):
         object_payload = {
             "id": f"{settings.GOOGLE_WALLET_USER_ID}.{self.numero}",
             "classId": f"{settings.GOOGLE_WALLET_USER_ID}.{self.event.google_wallet_class_id}",
+            "state": "ACTIVE" if not self.canceled else "INACTIVE",
             "ticketHolderName": self.full_name,
             "ticketNumber": self.numero,
-            "eventName": self.event.name,
-            "ticketType": {
-                "value": self.category.name,
-                "language": "fr",
+            "eventName": { 
+                "defaultValue": {
+                    "language": "fr",
+                    "value": self.event.name
+                }
+            },
+            "ticketType": { 
+                "defaultValue": {
+                    "language": "fr",
+                    "value": self.category.name
+                }
             },
             "reservationInfo": {
-                "confirmationCode": self.numero,
+                "confirmationCode": self.numero
             },
-            "state": "ACTIVE" if not self.canceled else "INACTIVE",
             "barcode": {
                 "type": "QR_CODE",
-                "value": gen_pk_signature_qrcode(self.pk),  # Use the QR code text representation
+                "value": gen_pk_signature_qrcode(self.pk),
+                "alternateText": f"Billet {self.numero}"  # Nouveau: requis pour l'accessibilité
             },
+            # Ajouts recommandés
+            "hexBackgroundColor": "#4285F4",  # Optionnel: couleur Google bleue
+            "validTimeInterval": {  # Optionnel: période de validité
+                "start": {
+                    "date": self.event.start_date.isoformat() + "Z" if self.event.start_date else ""
+                },
+                "end": {
+                    "date": self.event.end_date.isoformat() + "Z" if self.event.end_date else ""
+                }
+            }
         }
         
         credentials = Credentials.from_service_account_file(
@@ -243,6 +269,8 @@ class Registration(models.Model):
             "passTypeIdentifier": settings.APPLE_PASS_TYPE_ID,
             "serialNumber": self.numero,
             "organizationName": "La France insoumise",
+            "relevantDate": self.event.start_date.astimezone(timezone.utc).isoformat(),
+            "expirationDate": self.event.end_date.astimezone(timezone.utc).isoformat(),
             "description": f"Billet pour {self.event.name}",
             "eventTicket": {
                 "primaryFields": [{
