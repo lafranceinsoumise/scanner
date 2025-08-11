@@ -17,6 +17,7 @@ import dj_email_url
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:8000")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -30,7 +31,7 @@ SIGNATURE_KEY = os.environb.get(b"SIGNATURE_KEY", b"prout")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "true").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
@@ -183,3 +184,9 @@ REST_FRAMEWORK = {
 
 GCE_KEY_FILE = os.environ.get("GCE_KEY_FILE", "gce.json")
 GOOGLE_WALLET_USER_ID = os.environ.get("GOOGLE_WALLET_USER_ID", "3388000000022973968")
+
+APPLE_PASS_CERT_PATH = os.environ.get("APPLE_CERT", "Certificate.p12")
+APPLE_CERTIFICATE_PASSWORD = os.environ.get("APPLE_CERT_PW", "")
+APPLE_WWDR_CERT = os.environ.get("APPLE_WWDR_CERT", "pass.pem")
+APPLE_PASS_TYPE_ID = "pass.fr.scanner.franceinsoumise.org"
+APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID", "")

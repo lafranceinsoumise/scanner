@@ -1,11 +1,13 @@
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, F, Max
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest, Http404
+from django.http import FileResponse, JsonResponse, HttpResponse, HttpResponseBadRequest, Http404
+from django.shortcuts import get_object_or_404
+from django.core.files.storage import default_storage
 from django.views import View
 from django.views.generic import CreateView
 import subprocess
 
-from .models import ScannerAction, ScanPoint, ScanSeq
+from .models import Registration, ScannerAction, ScanPoint, ScanSeq
 from .actions.scans import scan_code, mark_registration, InvalidCodeException
 
 
@@ -87,3 +89,20 @@ class CreateSeqView(CreateView):
     def form_valid(self, form):
         self.object = form.save()
         return HttpResponse("OK")
+
+def download_pass(request, registration_id, token):
+    registration = get_object_or_404(
+        Registration,
+        pk=registration_id,
+        wallet_token=token
+    )
+    
+    file_path = f"wallet_passes/{registration.numero}.pkpass"
+    if not default_storage.exists(file_path):
+        raise Http404("Pass non trouvé")
+    
+    return FileResponse(
+        default_storage.open(file_path),
+        content_type='application/vnd.apple.pkpass',
+        filename=f"billet_{registration.numero}.pkpass"
+    )

@@ -18,7 +18,7 @@ from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
 
 from registrations.router import router
-from registrations.views import CodeView, CreateSeqView
+from registrations.views import CodeView, CreateSeqView, download_pass
 from .metrics import get_metrics
 
 urlpatterns = [
@@ -27,4 +27,5 @@ urlpatterns = [
     path("reset/", csrf_exempt(CreateSeqView.as_view()), name="reset_point"),
     path("metrics/", get_metrics),
     path("api/", include(router.urls)),
+    path('pass/<int:registration_id>/<str:token>', download_pass, name='download_pass'),
 ]

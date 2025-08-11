@@ -23,9 +23,9 @@ google-auth = "^2.40.3"
 google-api-python-client = "^2.177.0"
 pyjwt = "^2.10.1"
 cryptography = "^45.0.5"
+pyopenssl = "^25.1.0"
 
-
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 black = "*"
 
 [build-system]
