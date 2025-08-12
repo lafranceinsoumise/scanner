@@ -6,15 +6,21 @@ import { Start } from "./Start";
 import { Ticket } from "./Ticket";
 import { postForm } from "./utils";
 
-function scanUrl(code, user, point) {
-  return `${config.host}/code/${code}/?person=${encodeURIComponent(
+function scanUrl(code, user, point, event) {
+  // Ajoute event dans l'URL si besoin
+  let url = `${config.host}/code/${code}/?person=${encodeURIComponent(
     user
   )}&point=${encodeURIComponent(point)}`;
+  if (event) {
+    url += `&event=${encodeURIComponent(event)}`;
+  }
+  return url;
 }
 
 const App = (props) => {
   const [user, setUser] = useState(null);
   const [point, setPoint] = useState(null);
+  const [event, setEvent] = useState(null);
   const [currentScan, setCurrentScan] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -33,7 +39,7 @@ const App = (props) => {
 
       setLoading(true);
 
-      response = await fetch(scanUrl(code, user, point));
+      response = await fetch(scanUrl(code, user, point, event));
 
       if (response.ok) {
         setCurrentScan({ registration: await response.json(), code });
@@ -44,24 +50,24 @@ const App = (props) => {
         throw new Error("Not Found");
       }
     },
-    [user, point]
+    [user, point, event]
   );
 
   let validateScan = useCallback(async () => {
-    await postForm(scanUrl(currentScan.code, user, point), {
+    await postForm(scanUrl(currentScan.code, user, point, event), {
       type: "entrance",
     });
 
     setCurrentScan(null);
-  }, [currentScan, user, point]);
+  }, [currentScan, user, point, event]);
 
   let cancelScan = useCallback(async () => {
-    await postForm(scanUrl(currentScan.code, user, point), {
+    await postForm(scanUrl(currentScan.code, user, point, event), {
       type: "cancel",
     });
 
     setCurrentScan(null);
-  }, [currentScan, user, point]);
+  }, [currentScan, user, point, event]);
 
   if (user !== null && point !== null) {
     return (
@@ -72,10 +78,12 @@ const App = (props) => {
           scan={loading || currentScan ? null : scan}
           user={user}
           point={point}
+          event={event}
         />
-        {currentScan && (
+        {(currentScan && event) && (
           <Ticket
             registration={currentScan.registration}
+            selectedEvent={event}
             validateScan={validateScan}
             cancelScan={cancelScan}
           />
@@ -84,7 +92,16 @@ const App = (props) => {
     );
   }
 
-  return <Start user={user} setUser={setUser} setPoint={setPoint} />;
+  return (
+    <Start
+      user={user}
+      setUser={setUser}
+      setPoint={setPoint}
+      setEvent={setEvent}
+      event={event}
+      point={point}
+    />
+  );
 };
 
 export default App;

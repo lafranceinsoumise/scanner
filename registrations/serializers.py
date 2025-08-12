@@ -34,7 +34,7 @@ class EventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TicketEvent
-        fields = ("name", "scan_points")
+        fields = ("id", "name", "scan_points")
 
 
 class RegistrationMetasField(serializers.DictField):

@@ -7,7 +7,7 @@ from django.views import View
 from django.views.generic import CreateView
 import subprocess
 
-from .models import Registration, ScannerAction, ScanPoint, ScanSeq
+from .models import Registration, ScannerAction, ScanPoint, ScanSeq, TicketEvent
 from .actions.scans import scan_code, mark_registration, InvalidCodeException
 
 
@@ -20,6 +20,13 @@ class CodeView(View):
 
         return person
 
+    def get_event(self):
+        try:
+            TicketEvent.objects.get(id=self.request.GET.get("event"))
+        except (TicketEvent.DoesNotExist, ValueError, TypeError):
+            return None
+        
+
     def get_point(self):
         try:
             return ScanPoint.objects.get(id=self.request.GET.get("point"))
@@ -29,15 +36,17 @@ class CodeView(View):
     def get(self, request, code):
         person = self.get_person()
         point = self.get_point()
+        event = self.get_event()
 
         try:
-            registration = scan_code(code, person, point)
+            registration = scan_code(code, person, point, event)
         except InvalidCodeException:
             raise Http404
 
         return JsonResponse(
             {
                 "numero": registration.numero,
+                "ticket_event_id": registration.event.id,
                 "canceled": registration.canceled,
                 "full_name": registration.full_name,
                 "gender": registration.gender,
@@ -51,6 +60,7 @@ class CodeView(View):
                 ),
                 "events": [
                     {
+                        "id": event.id,
                         "time": event.time,
                         "type": event.type,
                         "person": event.person,

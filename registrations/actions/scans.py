@@ -20,7 +20,7 @@ def get_registration_from_code(code):
     return registration
 
 
-def scan_code(code, operator, point: Optional[ScanPoint] = None):
+def scan_code(code, operator, event, point: Optional[ScanPoint] = None):
     try:
         registration = get_registration_from_code(code)
     except InvalidCodeException:
