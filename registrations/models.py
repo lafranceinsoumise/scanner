@@ -275,33 +275,40 @@ class Registration(models.Model):
         })
 
     def generate_wallet_pass(self):
-        if not self.wallet_pass:
-            try:
-                # 1. Générer les données du pass
-                pass_data = self._get_pass_data()
-                pkpass_data = self._create_pkpass_file(pass_data)
+        try:
+            # 1. Supprimer l'ancien fichier s'il existe
+            if self.wallet_pass:
+                try:
+                    self.wallet_pass.delete(save=False)
+                except:
+                    pass
+            
+            # 2. Générer le contenu
+            pkpass_data = self._create_pkpass_file(self._get_pass_data())
+            if not pkpass_data:
+                raise ValueError("Erreur de génération du fichier .pkpass")
+            
+            # 3. Chemin absolu de destination
+            filename = f"wallet_passes/{self.numero}_{secrets.token_hex(4)}.pkpass"
+            full_path = os.path.join(settings.MEDIA_ROOT, filename)
+            
+            # 4. Créer le dossier si besoin
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+            
+            # 5. Écrire physiquement le fichier
+            with open(full_path, 'wb') as f:
+                f.write(pkpass_data)
+            
+            # 6. Lier au modèle
+            self.wallet_pass.save(filename, ContentFile(pkpass_data), save=True)
+            
+            # Double vérification
+            if not os.path.exists(full_path):
+                raise RuntimeError("Le fichier n'a pas été créé physiquement")
                 
-                if not pkpass_data:
-                    raise ValueError("Erreur lors de la génération du fichier .pkpass")
-                
-                # 2. Créer le répertoire si besoin
-                os.makedirs(os.path.join(settings.MEDIA_ROOT, 'wallet_passes'), exist_ok=True)
-                
-                # 3. Nom de fichier unique
-                filename = f"wallet_passes/{self.numero}_{secrets.token_hex(4)}.pkpass"
-                full_path = os.path.join(settings.MEDIA_ROOT, filename)
-                
-                # 4. Écrire physiquement le fichier
-                with open(full_path, 'wb') as f:
-                    f.write(pkpass_data)
-                
-                # 5. Lier au FileField
-                self.wallet_pass.save(filename, ContentFile(pkpass_data), save=True)
-                logger.info(f"Fichier Wallet Pass créé : {full_path}")
-                
-            except Exception as e:
-                logger.error(f"Erreur génération Wallet Pass : {str(e)}")
-                raise
+        except Exception as e:
+            logger.error(f"Erreur critique lors de la génération du pass: {str(e)}")
+            raise
 
     def _get_pass_data(self):
         """Construit les données JSON pour le pass"""
