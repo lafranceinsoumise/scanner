@@ -187,8 +187,8 @@ REST_FRAMEWORK = {
 GCE_KEY_FILE = os.environ.get("GCE_KEY_FILE", "/srv/scanner/gce.json")
 GOOGLE_WALLET_USER_ID = os.environ.get("GOOGLE_WALLET_USER_ID", "3388000000022973968")
 
-APPLE_PASS_CERT_PATH = os.environ.get("APPLE_CERT", "/srv/scanner/Certificate.p12")
+APPLE_PASS_CERT_PATH = os.environ.get("APPLE_CERT", "")
 APPLE_CERTIFICATE_PASSWORD = os.environ.get("APPLE_CERT_PW", "")
-APPLE_WWDR_CERT = os.environ.get("APPLE_WWDR_CERT", "/srv/scanner/pass.pem")
+APPLE_WWDR_CERT = os.environ.get("APPLE_WWDR_CERT", "")
 APPLE_PASS_TYPE_ID = "pass.fr.scanner.franceinsoumise.org"
 APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID", "")

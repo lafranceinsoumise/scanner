@@ -50,6 +50,11 @@ class TicketEvent(models.Model):
         _("Google Wallet class ID"), max_length=255, blank=True, null=True
     )
     
+    wallet_logo = models.ImageField(
+        _("Wallet logo"), upload_to="wallet_logos/", blank=True, null=True,
+        help_text=_("Logo used in Google and Apple Wallet passes")
+    )
+    
     start_date = models.DateTimeField(
         _("Start date"), blank=True, null=True, help_text=_("Event start date")
     )
