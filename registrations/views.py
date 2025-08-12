@@ -100,19 +100,21 @@ class CreateSeqView(CreateView):
         self.object = form.save()
         return HttpResponse("OK")
 
-def download_pass(request, registration_id, token):
-    registration = get_object_or_404(
-        Registration,
-        pk=registration_id,
-        wallet_token=token
-    )
-    
-    file_path = f"wallet_passes/{registration.numero}.pkpass"
-    if not default_storage.exists(file_path):
-        raise Http404("Pass non trouvé")
-    
-    return FileResponse(
-        default_storage.open(file_path),
-        content_type='application/vnd.apple.pkpass',
-        filename=f"billet_{registration.numero}.pkpass"
-    )
+class DownloadWalletPassView(View):
+    def get(self, request, registration_id, token):
+        registration = get_object_or_404(
+            Registration,
+            pk=registration_id,
+            wallet_token=token
+        )
+        
+        if not registration.wallet_pass:
+            registration.generate_wallet_pass()
+        
+        if registration.wallet_pass:
+            return FileResponse(
+                registration.wallet_pass.open('rb'),
+                as_attachment=True,
+                filename=f'ticket_{registration.numero}.pkpass'
+            )
+        raise Http404("Fichier Wallet Pass non disponible")

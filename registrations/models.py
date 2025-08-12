@@ -2,6 +2,8 @@ from datetime import timezone
 import hashlib
 import io
 import secrets
+import subprocess
+import logging
 from time import strftime, time
 
 from django.urls import reverse
@@ -16,10 +18,11 @@ import tempfile
 import zipfile
 from OpenSSL import crypto
 from cryptography import x509
-from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.serialization import pkcs7
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.primitives.serialization.pkcs7 import PKCS7SignatureBuilder
+from cryptography.hazmat.primitives.serialization import Encoding
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.serialization import Encoding, pkcs12
 import shutil
 
 from django.db import models
@@ -30,6 +33,7 @@ from django.core.files.storage import default_storage
 
 from .actions.codes import gen_pk_signature_qrcode, gen_qrcode, gen_signed_message
 
+logger = logging.getLogger(__name__)
 
 class TicketEvent(models.Model):
     def get_template_filename(instance, filename):
@@ -201,39 +205,21 @@ class Registration(models.Model):
         object_payload = {
             "id": f"{settings.GOOGLE_WALLET_USER_ID}.{self.numero}",
             "classId": f"{settings.GOOGLE_WALLET_USER_ID}.{self.event.google_wallet_class_id}",
-            "state": "ACTIVE" if not self.canceled else "INACTIVE",
             "ticketHolderName": self.full_name,
             "ticketNumber": self.numero,
-            "eventName": { 
-                "defaultValue": {
-                    "language": "fr",
-                    "value": self.event.name
-                }
-            },
-            "ticketType": { 
-                "defaultValue": {
-                    "language": "fr",
-                    "value": self.category.name
-                }
+            "eventName": self.event.name,
+            "ticketType": {
+                "value": self.category.name,
+                "language": "fr",
             },
             "reservationInfo": {
-                "confirmationCode": self.numero
+                "confirmationCode": self.numero,
             },
+            "state": "active" if not self.canceled else "inactive",
             "barcode": {
                 "type": "QR_CODE",
-                "value": gen_pk_signature_qrcode(self.pk),
-                "alternateText": f"Billet {self.numero}"  # Nouveau: requis pour l'accessibilité
+                "value": gen_pk_signature_qrcode(self.pk),  # Use the QR code text representation
             },
-            # Ajouts recommandés
-            "hexBackgroundColor": "#4285F4",  # Optionnel: couleur Google bleue
-            "validTimeInterval": {  # Optionnel: période de validité
-                "start": {
-                    "date": self.event.start_date.isoformat() + "Z" if self.event.start_date else ""
-                },
-                "end": {
-                    "date": self.event.end_date.isoformat() + "Z" if self.event.end_date else ""
-                }
-            }
         }
         
         credentials = Credentials.from_service_account_file(
@@ -260,11 +246,41 @@ class Registration(models.Model):
         token = jwt.encode(payload, private_key, algorithm="RS256")
 
         return f"https://pay.google.com/gp/v/save/{token}"
-
+    
+    wallet_pass = models.FileField(
+        upload_to='wallet_passes/',
+        null=True,
+        blank=True,
+        verbose_name="Apple Wallet Pass",
+        help_text="Fichier .pkpass généré automatiquement"
+    )
+    
     @property
     def apple_wallet_url(self):
-        # 1. Créer le JSON principal (pass.json)
-        pass_data = {
+        """URL pour télécharger le pass"""
+        if not self.wallet_pass:
+            self.generate_wallet_pass()
+        return reverse('download_pass', kwargs={
+            'registration_id': self.pk,
+            'token': self.wallet_token
+        })
+
+    def generate_wallet_pass(self):
+        """Génère et sauvegarde le fichier .pkpass"""
+        pass_data = self._get_pass_data()
+        pkpass_data = self._create_pkpass_file(pass_data)
+        
+        if pkpass_data:
+            filename = f"{self.numero}_{secrets.token_hex(4)}.pkpass"
+            self.wallet_pass.save(
+                name=filename,
+                content=ContentFile(pkpass_data),
+                save=True
+            )
+
+    def _get_pass_data(self):
+        """Construit les données JSON pour le pass"""
+        return {
             "formatVersion": 1,
             "teamIdentifier": settings.APPLE_TEAM_ID,
             "passTypeIdentifier": settings.APPLE_PASS_TYPE_ID,
@@ -287,107 +303,87 @@ class Registration(models.Model):
             },
             "barcode": {
                 "format": "PKBarcodeFormatQR",
-                "message": gen_pk_signature_qrcode(self.pk),  # Use the QR code text representation
+                "message": gen_pk_signature_qrcode(self.pk),
                 "messageEncoding": "utf-8"
             },
             "backgroundColor": "#faebce",
             "logoText": self.event.name
         }
 
-        # 2. Générer le fichier .pkpass
-        pkpass_buffer = self._generate_pkpass(pass_data)
-        
-        # 3. Sauvegarder et retourner l'URL
-        return self._save_and_get_url(pkpass_buffer)
-    
-    def _save_and_get_url(self, pkpass_data):
-        # Génération nom de fichier unique
-        filename = f"wallet_passes/{self.numero}_{secrets.token_hex(4)}.pkpass"
-        
-        # Sauvegarde physique
-        path = default_storage.save(filename, ContentFile(pkpass_data))
-        
-        # Retourne le nom du fichier seulement (le chemin complet sera géré par la vue)
-        return path
-
-    def _generate_pkpass(self, pass_data):
-        """Génère le fichier .pkpass signé en mémoire."""
+    def _create_pkpass_file(self, pass_data):
+        """Crée le fichier .pkpass en mémoire"""
         with tempfile.TemporaryDirectory() as temp_dir:
-            # Écriture de pass.json
+            # 1. Crée pass.json
             with open(os.path.join(temp_dir, "pass.json"), 'w') as f:
                 json.dump(pass_data, f)
 
-            # Ajout des images
-            for img in [f"logo.png", f"icon.png"]:
-                img_path = os.path.join(settings.BASE_DIR, "static", slugify(self.event.name), img)
-                if os.path.exists(img_path):
-                    shutil.copy(img_path, os.path.join(temp_dir, img))
+            # 2. Copie les images
+            self._copy_pass_images(temp_dir)
 
-            # Génération du manifest.json
-            manifest = {}
-            for filename in os.listdir(temp_dir):
-                with open(os.path.join(temp_dir, filename), 'rb') as f:
-                    manifest[filename] = hashlib.sha1(f.read()).hexdigest()
+            # 3. Crée manifest.json
+            self._create_manifest(temp_dir)
 
-            with open(os.path.join(temp_dir, "manifest.json"), 'w') as f:
-                json.dump(manifest, f)
-
-            # Signature avec le certificat Apple
+            # 4. Signe le manifest
             self._sign_manifest(temp_dir)
 
-            # Création du ZIP
-            pkpass_buffer = io.BytesIO()
-            with zipfile.ZipFile(pkpass_buffer, 'w') as zipf:
-                for filename in os.listdir(temp_dir):
-                    zipf.write(os.path.join(temp_dir, filename), filename)
+            # 5. Crée l'archive ZIP
+            return self._create_zip_archive(temp_dir)
 
-            return pkpass_buffer.getvalue()
+    def _copy_pass_images(self, temp_dir):
+        """Copie les images nécessaires pour le pass"""
+        event_dir = slugify(self.event.name)
+        for img in ["logo.png", "icon.png", "background.png"]:
+            src_path = os.path.join(settings.BASE_DIR, "static", event_dir, img)
+            if os.path.exists(src_path):
+                shutil.copy(src_path, os.path.join(temp_dir, img))
+
+    def _create_manifest(self, temp_dir):
+        """Génère le fichier manifest.json"""
+        manifest = {}
+        for filename in os.listdir(temp_dir):
+            if filename != "manifest.json":
+                with open(os.path.join(temp_dir, filename), 'rb') as f:
+                    manifest[filename] = hashlib.sha1(f.read()).hexdigest()
+        
+        with open(os.path.join(temp_dir, "manifest.json"), 'w') as f:
+            json.dump(manifest, f)
+
+    import subprocess
 
     def _sign_manifest(self, temp_dir):
-        """Signe le manifest.json en forçant SHA-1 pour Apple Wallet"""
-        # 1. Chargez le certificat et la clé
-        with open(settings.APPLE_PASS_CERT_PATH, 'rb') as f:
-            private_key, certificate, _ = pkcs12.load_key_and_certificates(
-                f.read(),
-                settings.APPLE_CERTIFICATE_PASSWORD.encode(),
-                backend=default_backend()
-            )
-        
-        # 2. Lisez le manifest
-        with open(os.path.join(temp_dir, "manifest.json"), 'rb') as f:
-            manifest_data = f.read()
-        
-        # 3. Créez la signature
-        builder = pkcs7.PKCS7SignatureBuilder().set_data(
-            manifest_data
-        ).add_signer(
-            certificate, 
-            private_key,
-            hashes.SHA256()
-        )
-        
-        # 5. Options Apple
-        options = [
-            pkcs7.PKCS7Options.DetachedSignature,
-            pkcs7.PKCS7Options.Binary
-        ]
-        
-        # 6. Générez la signature
-        signature = builder.sign(
-            Encoding.DER,
-            options
-        )
-        
-        # 7. Sauvegardez
-        with open(os.path.join(temp_dir, "signature"), 'wb') as f:
-            f.write(signature)
+        """Signature via OpenSSL (alternative)"""
+        try:
+            # 1. Générer la commande openssl
+            cmd = [
+                'openssl', 'smime',
+                '-sign',
+                '-signer', settings.APPLE_PASS_CERT_PATH,
+                '-inkey', settings.APPLE_PASS_CERT_PATH,
+                '-certfile', settings.APPLE_PASS_CERT_PATH,
+                '-in', os.path.join(temp_dir, "manifest.json"),
+                '-out', os.path.join(temp_dir, "signature"),
+                '-outform', 'DER',
+                '-binary',
+                '-passin', f'pass:{settings.APPLE_CERTIFICATE_PASSWORD}'
+            ]
+            
+            # 2. Exécuter la commande
+            subprocess.run(cmd, check=True)
+            
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Erreur signature OpenSSL: {str(e)}")
+            raise ValueError("Échec de la signature OpenSSL") from e
 
-    @property
-    def apple_wallet_url(self):
-        return reverse('download_pass', kwargs={
-            'registration_id': self.pk,
-            'token': self.wallet_token
-        })
+    def _create_zip_archive(self, temp_dir):
+        """Crée l'archive ZIP en mémoire"""
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, 'w') as zipf:
+            for filename in os.listdir(temp_dir):
+                zipf.write(
+                    os.path.join(temp_dir, filename),
+                    arcname=filename
+                )
+        return buffer.getvalue()
 
     def __str__(self):
         return "{} - {} ({})".format(self.numero, self.full_name, self.category.name)

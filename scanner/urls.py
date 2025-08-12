@@ -18,8 +18,10 @@ from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
 
 from registrations.router import router
-from registrations.views import CodeView, CreateSeqView, download_pass
+from registrations.views import CodeView, CreateSeqView, DownloadWalletPassView
 from .metrics import get_metrics
+from scanner import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -27,5 +29,12 @@ urlpatterns = [
     path("reset/", csrf_exempt(CreateSeqView.as_view()), name="reset_point"),
     path("metrics/", get_metrics),
     path("api/", include(router.urls)),
-    path('pass/<int:registration_id>/<str:token>', download_pass, name='download_pass'),
+    path(
+        'download-pass/<int:registration_id>/<str:token>/',
+        DownloadWalletPassView.as_view(),
+        name='download_pass'
+    ),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

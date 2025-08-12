@@ -129,6 +129,8 @@ STATIC_ROOT = os.environ.get("STATIC_ROOT")
 
 # Private files
 MEDIA_ROOT = os.environ.get("MEDIA_ROOT", "media")
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 email_config = dj_email_url.parse(os.environ.get("SMTP_URL", "smtp://localhost:1025/"))
 
@@ -182,11 +184,11 @@ REST_FRAMEWORK = {
     ],
 }
 
-GCE_KEY_FILE = os.environ.get("GCE_KEY_FILE", "gce.json")
+GCE_KEY_FILE = os.environ.get("GCE_KEY_FILE", "/srv/scanner/gce.json")
 GOOGLE_WALLET_USER_ID = os.environ.get("GOOGLE_WALLET_USER_ID", "3388000000022973968")
 
-APPLE_PASS_CERT_PATH = os.environ.get("APPLE_CERT", "Certificate.p12")
+APPLE_PASS_CERT_PATH = os.environ.get("APPLE_CERT", "/srv/scanner/Certificate.p12")
 APPLE_CERTIFICATE_PASSWORD = os.environ.get("APPLE_CERT_PW", "")
-APPLE_WWDR_CERT = os.environ.get("APPLE_WWDR_CERT", "pass.pem")
+APPLE_WWDR_CERT = os.environ.get("APPLE_WWDR_CERT", "/srv/scanner/pass.pem")
 APPLE_PASS_TYPE_ID = "pass.fr.scanner.franceinsoumise.org"
 APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID", "")
