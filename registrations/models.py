@@ -267,7 +267,6 @@ class Registration(models.Model):
     
     @property
     def apple_wallet_url(self):
-        """URL pour télécharger le pass"""
         if not self.wallet_pass:
             self.generate_wallet_pass()
         return reverse('download_pass', kwargs={
@@ -276,18 +275,17 @@ class Registration(models.Model):
         })
 
     def generate_wallet_pass(self):
-        """Génère et sauvegarde le fichier .pkpass"""
-        pass_data = self._get_pass_data()
-        pkpass_data = self._create_pkpass_file(pass_data)
-        
-        if pkpass_data:
-            filename = f"{self.numero}_{secrets.token_hex(4)}.pkpass"
-            self.wallet_pass.save(
-                name=filename,
-                content=ContentFile(pkpass_data),
-                save=True
-            )
-
+        if not self.wallet_pass:
+            pass_data = self._get_pass_data()
+            pkpass_data = self._create_pkpass_file(pass_data)
+            
+            if pkpass_data:
+                filename = f"{self.numero}_{secrets.token_hex(4)}.pkpass"
+                self.wallet_pass.save(
+                    name=filename,
+                    content=ContentFile(pkpass_data),
+                    save=True
+                )
     def _get_pass_data(self):
         """Construit les données JSON pour le pass"""
         pass_data = {
