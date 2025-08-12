@@ -82,12 +82,12 @@ export function Ticket({ registration, validateScan, cancelScan, selectedEvent})
         </Alert>
       )}
 
-      <h1 className="text-center" style={"color: #00232c;"}>{registration.full_name}</h1>
-      <h3 style={"color: #00232c;"}>Catégorie&nbsp;: {registration.category.name}</h3>
-      {registration.numero && <h3 style={"color: #00232c;"}>#{registration.numero}</h3>}
+      <h1 className="text-center">{registration.full_name}</h1>
+      <h3>Catégorie&nbsp;: {registration.category.name}</h3>
+      {registration.numero && <h3>#{registration.numero}</h3>}
       {["M", "F"].includes(GENDER_LABELS[registration.gender]) ? (
         <p>
-          <b style={"color: #00232c;"}>Genre&nbsp;:</b> {registration.gender}
+          <b>Genre&nbsp;:</b> {registration.gender}
         </p>
       ) : null}
 
