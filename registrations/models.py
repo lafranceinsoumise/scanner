@@ -55,6 +55,11 @@ class TicketEvent(models.Model):
         help_text=_("Logo used in Google and Apple Wallet passes")
     )
     
+    wallet_strip = models.ImageField(
+        _("Wallet strip image"), upload_to="wallet_strips/", blank=True, null=True,
+        help_text=_("Image used in Apple Wallet passes")
+    )
+    
     start_date = models.DateTimeField(
         _("Start date"), blank=True, null=True, help_text=_("Event start date")
     )
@@ -267,8 +272,7 @@ class Registration(models.Model):
     
     @property
     def apple_wallet_url(self):
-        if not self.wallet_pass:
-            self.generate_wallet_pass()
+        self.generate_wallet_pass()
         return reverse('download_pass', kwargs={
             'registration_id': self.pk,
             'token': self.wallet_token
@@ -292,9 +296,6 @@ class Registration(models.Model):
             filename = f"wallet_passes/{self.numero}_{secrets.token_hex(4)}.pkpass"
             full_path = os.path.join(settings.MEDIA_ROOT, filename)
             
-            # 4. Créer le dossier si besoin
-            os.makedirs(os.path.dirname(full_path), exist_ok=True)
-            
             # 5. Écrire physiquement le fichier
             with open(full_path, 'wb') as f:
                 f.write(pkpass_data)
@@ -317,25 +318,25 @@ class Registration(models.Model):
             "teamIdentifier": settings.APPLE_TEAM_ID,
             "passTypeIdentifier": settings.APPLE_PASS_TYPE_ID,
             "serialNumber": self.numero,
-            "organizationName": "La France insoumise",
+            "organizationName": self.event.name,
             "relevantDate": self.event.start_date.astimezone(timezone.utc).isoformat(),
             "expirationDate": self.event.end_date.astimezone(timezone.utc).isoformat(),
             "description": f"Billet pour {self.event.name}",
             "eventTicket": {
                 "primaryFields": [{
-                    "key": "event",
-                    "label": "Événement",
-                    "value": self.event.name
-                }],
-                "secondaryFields": [{
                     "key": "name",
                     "label": "Nom",
                     "value": self.full_name
-                },
-                {
+                }],
+                "secondaryFields": [{
                     "key": "location",
                     "label": "Lieu",
                     "value": self.event.location_name
+                },
+                {
+                    "key": "category",
+                    "label": "Catégorie",
+                    "value": self.category.name
                 },
                 ]
             },
@@ -344,6 +345,9 @@ class Registration(models.Model):
                 "message": gen_pk_signature_qrcode(self.pk),
                 "messageEncoding": "utf-8"
             },
+            "logoImage": "logo.png",
+            "iconImage": "icon.png",
+            "stripImage": self.event.wallet_strip,
             "backgroundColor": "#faebce",
             "logoText": "La France insoumise",
         }
