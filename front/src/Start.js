@@ -4,7 +4,7 @@ import useSWR from "swr";
 import { Container } from "./Container";
 import { jsonFetch } from "./utils";
 
-export function Start({ user, setUser, setPoint }) {
+export function Start({ user, setUser, setPoint, setEvent}) {
   const { data: events, error } = useSWR(
     `${config.host}/api/events/`,
     jsonFetch
@@ -53,27 +53,59 @@ export function Start({ user, setUser, setPoint }) {
     return <Container>Erreur</Container>;
   }
 
-  if (user && events) {
-    if (events[0].scan_points.length === 1) {
-      setPoint(events[0].scan_points[0].id);
-      return <></>;
-    }
+  function clickOnEvent(event) {
+    setPoint(event.scan_points[0].id);
+    setUser(name);
+    setEvent(event);
+  }
 
+  // choix event et selection du point 0 si pas d'autres points
+  if (events && events.length > 1) {
     return (
       <Container>
-        <h1>Choisissez le point de contrôle</h1>
-        <>
-          {events[0].scan_points.map(({ id, name }) => (
+        <p>Choisissez l'événement auquel vous participez</p>
+        <div className="list-group">
+          {events.map((event) => (
             <button
-              key={id}
-              className="btn btn-default btn-block"
-              onClick={() => setPoint(id)}
+              key={event.name}
+              className="list-group-item list-group-item-action"
+              onClick={() => clickOnEvent(event)}
             >
-              {name}
+              {event.name}
             </button>
           ))}
-        </>
+        </div>
       </Container>
     );
   }
+
+  // si un seul event, on le sélectionne automatiquement
+  if (events && events.length === 1 && events[0].scan_points.length > 1) {
+    return (
+      <Container>
+        <p>Choisissez le point de scan</p>
+        <div className="list-group">
+          {events[0].scan_points.map((point) => (
+            <button
+              key={point.id}
+              className="list-group-item list-group-item-action"
+              onClick={() => {
+                setPoint(point.id);
+                setUser(name);
+              }}
+            >
+              {point.name}
+            </button>
+          ))}
+        </div>
+      </Container>
+    );
+  }
+
+  // pas d'event, juste point
+  if (events && events.length === 1) {
+    setPoint(events[0].scan_points[0].id);
+  }
+
+  return null;
 }

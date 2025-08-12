@@ -31,7 +31,7 @@ function isMinor(dateOfBirthStr) {
   return age < 18;
 }
 
-export function Ticket({ registration, validateScan, cancelScan }) {
+export function Ticket({ registration, validateScan, cancelScan, selectedEvent}) {
   let style = {
     color: registration.category.color,
     backgroundColor: registration.category["background-color"],
@@ -39,6 +39,19 @@ export function Ticket({ registration, validateScan, cancelScan }) {
     width: "100%",
     minHeight: "100%",
   };
+
+  if (selectedEvent && registration.ticket_event_id !== selectedEvent.id) {
+    return (
+      <div id="registration" className="container registration" style={style}>
+        <Alert>
+          Ce billet n'est pas pour l'événement sélectionné&nbsp;! Merci de présenter un billet pour l'événement {selectedEvent.name} ou de renvoyer la personne à l'accueil.
+        </Alert>
+        <button className="btn btn-block btn-danger" onClick={() => window.location.reload()}>
+          Retour
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div id="registration" className="container registration" style={style}>
