@@ -210,7 +210,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         if not obj.wallet_pass:
             self.message_user(request, "Le pass n'existe pas encore", level='ERROR')
             return redirect('admin:registrations_registration_change', object_id)
-        return redirect(obj.wallet_pass.url)
+        return redirect(obj.apple_wallet_url)
     
     def regenerate_pass_view(self, request, object_id):
         from django.shortcuts import redirect
