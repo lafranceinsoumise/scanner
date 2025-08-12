@@ -59,15 +59,29 @@ export function Start({ user, setUser, setPoint, setEvent}) {
     setEvent(event);
   }
 
-  // choix event et selection du point 0 si pas d'autres points
-  if (events && events.length > 1) {
+  // choix events de l'année en cours et selection du point 0 si pas d'autres points
+  if (events && events.length > 0) {
+  // Obtenir l'année actuelle
+  const currentYear = new Date().getFullYear();
+  
+  // Filtrer les événements pour ne garder que ceux de l'année en cours
+  const currentYearEvents = events.filter(event => {
+    if (event.start_date) {
+      const eventYear = new Date(event.start_date).getFullYear();
+      return eventYear === currentYear;
+    }
+    return false;
+  });
+
+  // Afficher seulement s'il y a des événements cette année
+  if (currentYearEvents.length > 0) {
     return (
       <Container>
-        <p>Choisissez l'événement auquel vous participez</p>
+        <p>Choisissez l'événement</p>
         <div className="list-group">
-          {events.map((event) => (
+          {currentYearEvents.map((event) => (
             <button
-              key={event.name}
+              key={event.id}
               className="list-group-item list-group-item-action"
               onClick={() => clickOnEvent(event)}
             >
@@ -77,7 +91,10 @@ export function Start({ user, setUser, setPoint, setEvent}) {
         </div>
       </Container>
     );
+  } else {
+    return <Container>Aucun événement prévu cette année.</Container>;
   }
+}
 
   // si un seul event, on le sélectionne automatiquement
   if (events && events.length === 1 && events[0].scan_points.length > 1) {
