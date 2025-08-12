@@ -57,6 +57,11 @@ class TicketEvent(models.Model):
         _("End date"), blank=True, null=True, help_text=_("Event end date")
     )
 
+    location_name = models.CharField(
+        _("Location name"), max_length=255, blank=True, null=True,
+        help_text=_("Name of the event location")
+    )
+
     def __str__(self):
         return self.name
 
@@ -299,7 +304,13 @@ class Registration(models.Model):
                     "key": "name",
                     "label": "Nom",
                     "value": self.full_name
-                }]
+                },
+                {
+                    "key": "location",
+                    "label": "Lieu",
+                    "value": self.event.location_name
+                },
+                ]
             },
             "barcode": {
                 "format": "PKBarcodeFormatQR",
