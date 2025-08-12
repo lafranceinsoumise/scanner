@@ -404,27 +404,37 @@ class Registration(models.Model):
             if not os.path.exists(cert_path):
                 raise FileNotFoundError(f"Certificat introuvable : {cert_path}")
             
-            cmd = [
-                'openssl', 'smime',
-                '-binary',
-                '-sign',
-                '-certfile', cert_path,
-                '-signer', cert_path,
-                '-inkey', cert_path,
-                '-in', os.path.join(temp_dir, "manifest.json"),
-                '-out', os.path.join(temp_dir, "signature"),
-                '-outform', 'DER',
-                '-passin', f'pass:{password}'
-            ]
+            # 1. Extraire la clé privée
+            subprocess.run([
+                "openssl", "pkcs12",
+                "-in", cert_path,
+                "-nocerts", "-nodes",
+                "-passin", f"pass:{password}",
+                "-out", os.path.join(temp_dir, "private.key")
+            ], check=True)
+
+            # 2. Extraire le certificat
+            subprocess.run([
+                "openssl", "pkcs12",
+                "-in", cert_path,
+                "-clcerts", "-nokeys",
+                "-passin", f"pass:{password}",
+                "-out", os.path.join(temp_dir, "cert.pem")
+            ], check=True)
+
+            # 3. Signer le fichier manifest.json
+            result = subprocess.run([
+                "openssl", "smime", "-binary", "-sign",
+                "-certfile", os.path.join(temp_dir, "cert.pem"),
+                "-signer", os.path.join(temp_dir, "cert.pem"),
+                "-inkey", os.path.join(temp_dir, "private.key"),
+                "-in", os.path.join(temp_dir, "manifest.json"),
+                "-out", os.path.join(temp_dir, "signature"),
+                "-outform", "DER"
+            ], check=True)
             
-            # Exécution avec vérification
-            result = subprocess.run(
-                cmd,
-                check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
+            # delete private key and cert files
+            os.remove(os.path.join(temp_dir, "private.key"))
             
             if result.returncode != 0:
                 raise ValueError(f"Erreur OpenSSL : {result.stderr}")
