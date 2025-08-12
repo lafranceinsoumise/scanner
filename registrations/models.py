@@ -318,7 +318,7 @@ class Registration(models.Model):
             "teamIdentifier": settings.APPLE_TEAM_ID,
             "passTypeIdentifier": settings.APPLE_PASS_TYPE_ID,
             "serialNumber": self.numero,
-            "organizationName": self.event.name,
+            "organizationName": "La France insoumise",
             "relevantDate": self.event.start_date.astimezone(timezone.utc).isoformat(),
             "expirationDate": self.event.end_date.astimezone(timezone.utc).isoformat(),
             "description": f"Billet pour {self.event.name}",
@@ -348,7 +348,7 @@ class Registration(models.Model):
             "logoImage": "logo.png",
             "stripImage": "srip.png",
             "backgroundColor": "#faebce",
-            "logoText": "La France insoumise",
+            "logoText": self.event.name,
         }
         
         if self.event.wallet_logo:
