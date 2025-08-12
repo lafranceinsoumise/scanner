@@ -78,6 +78,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         "qrcode_display",
         "ticket_link",
         "metas_list",
+        "wallet_pass_admin",
     )
     list_filter = (
         "category__name",
@@ -100,6 +101,30 @@ class RegistrationAdmin(admin.ModelAdmin):
     inlines = (MetaInline, EventInline)
 
     actions = ["send_tickets_action"]
+    
+    def wallet_pass_admin(self, obj):
+        if obj.wallet_pass:
+            url = reverse('admin:registrations_registration_download_pass', args=[obj.id])
+            return format_html(
+                '<a class="button" href="{}" target="_blank">Télécharger</a>',
+                url
+            )
+        else:
+            generate_url = reverse('admin:registrations_registration_generate_pass', args=[obj.id])
+            return format_html(
+                '<span style="color:gray">Non généré</span>&nbsp;'
+                '<a class="button" href="{}" style="background:#447e9b;color:white;padding:3px 8px;border-radius:3px">Générer</a>',
+                generate_url
+            )
+    wallet_pass_admin.short_description = "Pass Apple Wallet"
+    
+    def regenerate_wallet_pass(self, obj):
+        url = reverse('admin:registrations_registration_regenerate_pass', args=[obj.id])
+        return format_html(
+            '<a class="button" href="{}" style="background:#ff0;color:#000;padding:3px 8px;border-radius:3px">Regénérer</a>',
+            url
+        )
+    regenerate_wallet_pass.short_description = "Actions"
 
     def get_urls(self):
         urls = super().get_urls()
@@ -124,6 +149,15 @@ class RegistrationAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(self.send_ticket_view),
                 name="registrations_registration_send_ticket",
             ),
+            path('<path:object_id>/generate-pass/',
+                 self.admin_site.admin_view(self.generate_pass_view),
+                 name='registrations_registration_generate_pass'),
+            path('<path:object_id>/download-pass/',
+                 self.admin_site.admin_view(self.download_pass_view),
+                 name='registrations_registration_download_pass'),
+            path('<path:object_id>/regenerate-pass/',
+                 self.admin_site.admin_view(self.regenerate_pass_view),
+                 name='registrations_registration_regenerate_pass'),
         ]
         return custom_urls + urls
 
@@ -161,6 +195,32 @@ class RegistrationAdmin(admin.ModelAdmin):
         )
 
     ticket_link.short_description = "Ticket"
+    
+    def generate_pass_view(self, request, object_id):
+        from django.shortcuts import redirect
+        obj = self.get_object(request, object_id)
+        obj.generate_wallet_pass()
+        obj.save()
+        self.message_user(request, "Pass Apple Wallet généré avec succès")
+        return redirect('admin:registrations_registration_change', object_id)
+    
+    def download_pass_view(self, request, object_id):
+        from django.shortcuts import redirect
+        obj = self.get_object(request, object_id)
+        if not obj.wallet_pass:
+            self.message_user(request, "Le pass n'existe pas encore", level='ERROR')
+            return redirect('admin:registrations_registration_change', object_id)
+        return redirect(obj.wallet_pass.url)
+    
+    def regenerate_pass_view(self, request, object_id):
+        from django.shortcuts import redirect
+        obj = self.get_object(request, object_id)
+        if obj.wallet_pass:
+            obj.wallet_pass.delete()
+        obj.generate_wallet_pass()
+        obj.save()
+        self.message_user(request, "Pass Apple Wallet regénéré avec succès")
+        return redirect('admin:registrations_registration_change', object_id)
 
     def qrcode_view(self, request, object_id):
         img = codes.gen_qrcode(object_id)

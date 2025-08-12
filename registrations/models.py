@@ -292,9 +292,9 @@ class Registration(models.Model):
             if not pkpass_data:
                 raise ValueError("Erreur de génération du fichier .pkpass")
             
-            # 3. Chemin absolu de destination
-            filename = f"wallet_passes/{self.numero}_{secrets.token_hex(4)}.pkpass"
-            full_path = os.path.join(settings.MEDIA_ROOT, filename)
+            # 3. Chemin relatif de destination
+            filename = f"ticket_{self.numero}.pkpass"
+            full_path = os.path.join(settings.MEDIA_ROOT, 'wallet_passes', filename)
             
             # 5. Écrire physiquement le fichier
             with open(full_path, 'wb') as f:
@@ -346,8 +346,7 @@ class Registration(models.Model):
                 "messageEncoding": "utf-8"
             },
             "logoImage": "logo.png",
-            "iconImage": "icon.png",
-            "stripImage": self.event.wallet_strip,
+            "stripImage": "srip.png",
             "backgroundColor": "#faebce",
             "logoText": "La France insoumise",
         }
@@ -378,20 +377,11 @@ class Registration(models.Model):
 
     def _copy_pass_images(self, temp_dir):
         """Copie les images nécessaires pour le pass"""
-        # 1. Copiez d'abord les images standards
-        event_dir = slugify(self.event.name)
-        for img in ["logo.png", "icon.png", "background.png"]:
-            src_path = os.path.join(settings.BASE_DIR, "static", event_dir, img)
-            if os.path.exists(src_path):
-                shutil.copy(src_path, os.path.join(temp_dir, img))
-        
-        # 2. Copiez le wallet_logo spécifique s'il existe
         if self.event.wallet_logo:
-            logo_path = self.event.wallet_logo.path
-            if os.path.exists(logo_path):
-                shutil.copy(logo_path, os.path.join(temp_dir, "logo.png"))
-            else:
-                logger.warning(f"Fichier wallet_logo introuvable à {logo_path}")
+            shutil.copy(self.event.wallet_logo.path, os.path.join(temp_dir, "logo.png"))
+        
+        if self.event.wallet_strip:
+            shutil.copy(self.event.wallet_strip.path, os.path.join(temp_dir, "strip.png"))
 
     def _create_manifest(self, temp_dir):
         """Génère le fichier manifest.json"""
