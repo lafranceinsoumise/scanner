@@ -290,7 +290,7 @@ class Registration(models.Model):
 
     def _get_pass_data(self):
         """Construit les données JSON pour le pass"""
-        return {
+        pass_data = {
             "formatVersion": 1,
             "teamIdentifier": settings.APPLE_TEAM_ID,
             "passTypeIdentifier": settings.APPLE_PASS_TYPE_ID,
@@ -323,8 +323,13 @@ class Registration(models.Model):
                 "messageEncoding": "utf-8"
             },
             "backgroundColor": "#faebce",
-            "logoText": self.event.name
+            "logoText": "La France insoumise",
         }
+        
+        if self.event.wallet_logo:
+            pass_data["stripImage"] = "strip.png"
+    
+        return pass_data
 
     def _create_pkpass_file(self, pass_data):
         """Crée le fichier .pkpass en mémoire"""
@@ -347,11 +352,20 @@ class Registration(models.Model):
 
     def _copy_pass_images(self, temp_dir):
         """Copie les images nécessaires pour le pass"""
+        # 1. Copiez d'abord les images standards
         event_dir = slugify(self.event.name)
         for img in ["logo.png", "icon.png", "background.png"]:
             src_path = os.path.join(settings.BASE_DIR, "static", event_dir, img)
             if os.path.exists(src_path):
                 shutil.copy(src_path, os.path.join(temp_dir, img))
+        
+        # 2. Copiez le wallet_logo spécifique s'il existe
+        if self.event.wallet_logo:
+            logo_path = self.event.wallet_logo.path
+            if os.path.exists(logo_path):
+                shutil.copy(logo_path, os.path.join(temp_dir, "logo.png"))
+            else:
+                logger.warning(f"Fichier wallet_logo introuvable à {logo_path}")
 
     def _create_manifest(self, temp_dir):
         """Génère le fichier manifest.json"""
