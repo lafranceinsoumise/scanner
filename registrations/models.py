@@ -397,27 +397,46 @@ class Registration(models.Model):
     import subprocess
 
     def _sign_manifest(self, temp_dir):
-        """Signature via OpenSSL (alternative)"""
         try:
-            # 1. Générer la commande openssl
+            cert_path = settings.APPLE_PASS_CERT_PATH
+            password = settings.APPLE_CERTIFICATE_PASSWORD
+            
+            if not os.path.exists(cert_path):
+                raise FileNotFoundError(f"Certificat introuvable : {cert_path}")
+            
             cmd = [
                 'openssl', 'smime',
+                '-binary',
                 '-sign',
-                '-signer', settings.APPLE_PASS_CERT_PATH,
-                '-inkey', settings.APPLE_PASS_CERT_PATH,
-                '-certfile', settings.APPLE_PASS_CERT_PATH,
+                '-certfile', cert_path,
+                '-signer', cert_path,
+                '-inkey', cert_path,
                 '-in', os.path.join(temp_dir, "manifest.json"),
                 '-out', os.path.join(temp_dir, "signature"),
                 '-outform', 'DER',
-                '-binary',
-                '-passin', f'pass:{settings.APPLE_CERTIFICATE_PASSWORD}'
+                '-passin', f'pass:{password}'
             ]
             
-            # 2. Exécuter la commande
-            subprocess.run(cmd, check=True)
+            # Exécution avec vérification
+            result = subprocess.run(
+                cmd,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
             
+            if result.returncode != 0:
+                raise ValueError(f"Erreur OpenSSL : {result.stderr}")
+                
         except subprocess.CalledProcessError as e:
-            logger.error(f"Erreur signature OpenSSL: {str(e)}")
+            error_msg = f"""
+            Erreur lors de la signature :
+            Commande: {' '.join(e.cmd)}
+            Sortie: {e.stdout}
+            Erreur: {e.stderr}
+            """
+            logger.error(error_msg)
             raise ValueError("Échec de la signature OpenSSL") from e
 
     def _create_zip_archive(self, temp_dir):
