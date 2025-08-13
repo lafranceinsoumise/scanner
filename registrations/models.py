@@ -31,6 +31,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.core.files.storage import default_storage
+import pytz
 
 from .actions.codes import gen_pk_signature_qrcode, gen_qrcode, gen_signed_message
 
@@ -356,8 +357,8 @@ class Registration(models.Model):
             "passTypeIdentifier": settings.APPLE_PASS_TYPE_ID,
             "serialNumber": str(uuid.uuid4()),
             "organizationName": "La France insoumise",
-            "relevantDate": self.event.start_date.astimezone(timezone.utc).isoformat(),
-            "expirationDate": self.event.end_date.astimezone(timezone.utc).isoformat(),
+            "relevantDate": self.event.start_date.astimezone(pytz.timezone('Europe/Paris')).isoformat(),
+            "expirationDate": self.event.end_date.astimezone(pytz.timezone('Europe/Paris')).isoformat(),
             "description": f"Billet pour {self.event.name}",
             "eventTicket": {
                 "primaryFields": [{
