@@ -221,23 +221,59 @@ class Registration(models.Model):
         object_payload = {
             "id": f"{settings.GOOGLE_WALLET_USER_ID}.{self.numero}",
             "classId": f"{settings.GOOGLE_WALLET_USER_ID}.{self.event.google_wallet_class_id}",
-            "ticketHolderName": self.full_name,
-            "ticketNumber": self.numero,
-            "eventName": self.event.name,
+
+            # Nom du participant
+            "ticketHolderName": {
+                "defaultValue": {
+                    "language": "fr",
+                    "value": self.full_name
+                }
+            },
+
+            # Numéro de ticket
+            "ticketNumber": {
+                "defaultValue": {
+                    "language": "fr",
+                    "value": self.numero
+                }
+            },
+
+            # Nom de l'événement
+            "eventName": {
+                "defaultValue": {
+                    "language": "fr",
+                    "value": self.event.name
+                }
+            },
+
+            # Type de ticket
             "ticketType": {
-                "value": self.category.name,
-                "language": "fr",
+                "defaultValue": {
+                    "language": "fr",
+                    "value": self.category.name
+                }
             },
+
+            # Code de confirmation
             "reservationInfo": {
-                "confirmationCode": self.numero,
+                "confirmationCode": {
+                    "defaultValue": {
+                        "language": "fr",
+                        "value": self.numero
+                    }
+                }
             },
-            "state": "active" if self.canceled and not self.canceled else "inactive",
+
+            # État
+            "state": "active" if not self.canceled else "inactive",
+
+            # Code QR
             "barcode": {
                 "type": "QR_CODE",
-                "value": gen_pk_signature_qrcode(self.pk),  # Use the QR code text representation
+                "value": gen_pk_signature_qrcode(self.pk)
             },
         }
-        
+
         credentials = Credentials.from_service_account_file(
             settings.GCE_KEY_FILE,
             scopes=["https://www.googleapis.com/auth/wallet_object.issuer"]
