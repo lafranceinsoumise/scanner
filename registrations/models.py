@@ -357,12 +357,19 @@ class Registration(models.Model):
                 "value": self.metas.get(property="price").value
             }]
             
-        if self.metas.filter(property="status").exists() and self.metas.get(property="status").value == "on-hold":
-            pass_data["eventTicket"]["auxiliaryFields"].append({
-                "key": "status",
-                "label": "Statut du paiement",
-                "value": "En attente de paiement"
-            })
+        if self.metas.filter(property="status").exists():
+            if self.metas.get(property="status").value == "on-hold":
+                pass_data["eventTicket"]["auxiliaryFields"].append({
+                    "key": "status",
+                    "label": "Statut du paiement",
+                    "value": "En attente de paiement"
+                })
+            elif self.metas.get(property="status").value == "completed":
+                pass_data["eventTicket"]["auxiliaryFields"].append({
+                    "key": "status",
+                    "label": "Statut du paiement",
+                    "value": "Paiement terminé"
+                })
             
         if self.metas.filter(property="enfant-compagnie").exists():
             pass_data["eventTicket"]["auxiliaryFields"].append({
