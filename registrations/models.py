@@ -226,11 +226,16 @@ class Registration(models.Model):
             "ticketNumber": self.numero,
             "eventName": self.event.name,
             "ticketType": {
-                "defaultValue": self.category.name,
-                "language": "fr",
-            },
-            "reservationInfo": {
-                "confirmationCode": self.numero,
+                "translatedValues": [
+                    {
+                        "language": "fr",
+                        "value": self.category.name
+                    }
+                ],
+                "defaultValue": {
+                    "language": "fr",
+                    "value": self.category.name
+                }
             },
             "state": "active" if not self.canceled else "inactive",
             "barcode": {
