@@ -79,6 +79,7 @@ class RegistrationAdmin(admin.ModelAdmin):
         "ticket_link",
         "metas_list",
         "wallet_pass_admin",
+        "wallet_token",
     )
     list_filter = (
         "category__name",

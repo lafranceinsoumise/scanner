@@ -231,7 +231,7 @@ class Registration(models.Model):
             "reservationInfo": {
                 "confirmationCode": self.numero,
             },
-            "state": "active" if not self.canceled else "inactive",
+            "state": "active" if self.canceled and not self.canceled else "inactive",
             "barcode": {
                 "type": "QR_CODE",
                 "value": gen_pk_signature_qrcode(self.pk),  # Use the QR code text representation
