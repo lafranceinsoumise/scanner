@@ -5,6 +5,7 @@ import secrets
 import subprocess
 import logging
 from time import strftime, time
+import uuid
 
 from django.urls import reverse
 from django.db import transaction
@@ -317,7 +318,7 @@ class Registration(models.Model):
             "formatVersion": 1,
             "teamIdentifier": settings.APPLE_TEAM_ID,
             "passTypeIdentifier": settings.APPLE_PASS_TYPE_ID,
-            "serialNumber": self.numero,
+            "serialNumber": str(uuid.uuid4()
             "organizationName": "La France insoumise",
             "relevantDate": self.event.start_date.astimezone(timezone.utc).isoformat(),
             "expirationDate": self.event.end_date.astimezone(timezone.utc).isoformat(),
@@ -458,6 +459,7 @@ class Registration(models.Model):
             
             # delete private key and cert files
             os.remove(os.path.join(temp_dir, "private.key"))
+            os.remove(os.path.join(temp_dir, "cert.pem"))
             
             if result.returncode != 0:
                 raise ValueError(f"Erreur OpenSSL : {result.stderr}")
