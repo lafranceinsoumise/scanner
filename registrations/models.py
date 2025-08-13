@@ -338,21 +338,44 @@ class Registration(models.Model):
                     "label": "Catégorie",
                     "value": self.category.name
                 },
-                ]
+                ],
             },
             "barcode": {
                 "format": "PKBarcodeFormatQR",
                 "message": gen_pk_signature_qrcode(self.pk),
                 "messageEncoding": "utf-8"
             },
-            "logoImage": "logo.png",
-            "stripImage": "srip.png",
             "backgroundColor": "#faebce",
             "logoText": self.event.name,
         }
         
-        if self.event.wallet_logo:
-            pass_data["stripImage"] = "strip.png"
+        if self.metas.filter(property="price").exists():
+            pass_data["eventTicket"]["auxiliaryFields"] = [{
+                "key": "price",
+                "label": "Prix",
+                "value": self.metas.get(property="price").value
+            }]
+            
+        if self.metas.filter(property="status").exists() and self.metas.get(property="status").value == "on-hold":
+            pass_data["eventTicket"]["auxiliaryFields"].append({
+                "key": "status",
+                "label": "Statut du paiement",
+                "value": "En attente de paiement"
+            })
+            
+        if self.metas.filter(property="enfant-compagnie").exists():
+            pass_data["eventTicket"]["auxiliaryFields"].append({
+                "key": "enfant-compagnie",
+                "label": "Nombre d'enfants",
+                "value": self.metas.get(property="enfant-compagnie").value
+            })
+            
+        if self.metas.filter(property="isMinor").exists() and self.metas.get(property="isMinor").value.lower() == "true":
+            pass_data["eventTicket"]["auxiliaryFields"].append({
+                "key": "isMinor",
+                "label": "Mineur",
+                "value": "Oui"
+            })
     
         return pass_data
 
@@ -442,7 +465,6 @@ class Registration(models.Model):
         except subprocess.CalledProcessError as e:
             error_msg = f"""
             Erreur lors de la signature :
-            Commande: {' '.join(e.cmd)}
             Sortie: {e.stdout}
             Erreur: {e.stderr}
             """
