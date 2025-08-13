@@ -222,56 +222,20 @@ class Registration(models.Model):
         object_payload = {
             "id": f"{settings.GOOGLE_WALLET_USER_ID}.{self.numero}",
             "classId": f"{settings.GOOGLE_WALLET_USER_ID}.{self.event.google_wallet_class_id}",
-
-            # Nom du participant
-            "ticketHolderName": {
-                "defaultValue": {
-                    "language": "fr",
-                    "value": self.full_name
-                }
-            },
-
-            # Numéro de ticket
-            "ticketNumber": {
-                "defaultValue": {
-                    "language": "fr",
-                    "value": self.numero
-                }
-            },
-
-            # Nom de l'événement
-            "eventName": {
-                "defaultValue": {
-                    "language": "fr",
-                    "value": self.event.name
-                }
-            },
-
-            # Type de ticket
+            "ticketHolderName": self.full_name,
+            "ticketNumber": self.numero,
+            "eventName": self.event.name,
             "ticketType": {
-                "defaultValue": {
-                    "language": "fr",
-                    "value": self.category.name
-                }
+                "defaultValue": self.category.name,
+                "language": "fr",
             },
-
-            # Code de confirmation
             "reservationInfo": {
-                "confirmationCode": {
-                    "defaultValue": {
-                        "language": "fr",
-                        "value": self.numero
-                    }
-                }
+                "confirmationCode": self.numero,
             },
-
-            # État
             "state": "active" if not self.canceled else "inactive",
-
-            # Code QR
             "barcode": {
                 "type": "QR_CODE",
-                "value": gen_pk_signature_qrcode(self.pk)
+                "value": gen_pk_signature_qrcode(self.pk),  # Use the QR code text representation
             },
         }
 
