@@ -318,7 +318,7 @@ class Registration(models.Model):
             "formatVersion": 1,
             "teamIdentifier": settings.APPLE_TEAM_ID,
             "passTypeIdentifier": settings.APPLE_PASS_TYPE_ID,
-            "serialNumber": str(uuid.uuid4()
+            "serialNumber": str(uuid.uuid4()),
             "organizationName": "La France insoumise",
             "relevantDate": self.event.start_date.astimezone(timezone.utc).isoformat(),
             "expirationDate": self.event.end_date.astimezone(timezone.utc).isoformat(),

@@ -112,9 +112,14 @@ class DownloadWalletPassView(View):
             registration.generate_wallet_pass()
         
         if registration.wallet_pass:
-            return FileResponse(
+            response = FileResponse(
                 registration.wallet_pass.open('rb'),
                 as_attachment=True,
                 filename=f'ticket_{registration.numero}.pkpass'
             )
+            
+            response['Content-Type'] = 'application/vnd.apple.pkpass'
+            response['Content-Disposition'] = f'attachment; filename="ticket_{registration.numero}.pkpass"'
+            return response
+            
         raise Http404("Fichier Wallet Pass non disponible")
