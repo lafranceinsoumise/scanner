@@ -403,6 +403,7 @@ class Registration(models.Model):
         """Copie les images nécessaires pour le pass"""
         if self.event.wallet_logo:
             shutil.copy(self.event.wallet_logo.path, os.path.join(temp_dir, "logo.png"))
+            shutil.copy(self.event.wallet_logo.path, os.path.join(temp_dir, "icon.png"))
         
         if self.event.wallet_strip:
             shutil.copy(self.event.wallet_strip.path, os.path.join(temp_dir, "strip.png"))
