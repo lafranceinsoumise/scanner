@@ -184,7 +184,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-GCE_KEY_FILE = os.environ.get("GCE_KEY_FILE", "/srv/scanner/gce.json")
+GCE_KEY_FILE = os.environ.get("GCE_KEY_FILE", "./gce.json")
 GOOGLE_WALLET_USER_ID = os.environ.get("GOOGLE_WALLET_USER_ID", "")
 APPLE_PASS_CERT_PATH = os.environ.get("APPLE_CERT", "./Certificate.p12")
 APPLE_PRIVATE_KEY_PATH = os.environ.get("APPLE_PRIVATE_KEY", "./private.key")

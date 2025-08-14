@@ -37,12 +37,16 @@ def gen_ticket_svg(registration):
     return template.render(context)
 
 
+import subprocess
+
 def gen_ticket(registration):
     svg = gen_ticket_svg(registration)
 
     inkscape = subprocess.Popen(
         [
             "rsvg-convert",
+            "--dpi-x=90",
+            "--dpi-y=90",
             "--format=pdf",  # format PDF
         ],
         stdin=subprocess.PIPE,
@@ -62,5 +66,26 @@ def gen_ticket(registration):
         ticket_generation_counter.labels("inkscape_error").inc()
         raise TicketGenerationException("Return code: %d" % inkscape.returncode)
 
+    gs = subprocess.Popen(
+        [
+            "gs",
+            "-sDEVICE=pdfwrite",
+            "-dCompatibilityLevel=1.4",
+            "-dPDFSETTINGS=/ebook",  # /screen pour + petit, /printer pour meilleure qualité
+            "-dNOPAUSE", "-dQUIET", "-dBATCH",
+            "-sOutputFile=-",
+            "-"
+        ],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    compressed_output, gs_error = gs.communicate(input=output)
+
+    if gs.returncode:
+        ticket_generation_counter.labels("gs_error").inc()
+        raise TicketGenerationException(f"Ghostscript error: {gs_error.decode()}")
+
     ticket_generation_counter.labels("success").inc()
-    return output
+    return compressed_output

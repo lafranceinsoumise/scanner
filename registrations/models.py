@@ -384,9 +384,9 @@ class Registration(models.Model):
                 "value": self.metas.get(property="enfant-compagnie").value
             })
             
-        if self.metas.filter(property="isMinor").exists() and self.metas.get(property="isMinor").value.lower() == "true":
+        if self.metas.filter(property="is_minor").exists() and self.metas.get(property="is_minor").value.lower() == "true":
             pass_data["eventTicket"]["auxiliaryFields"].append({
-                "key": "isMinor",
+                "key": "is_minor",
                 "label": "Mineur",
                 "value": "Oui"
             })
