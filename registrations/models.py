@@ -432,8 +432,6 @@ class Registration(models.Model):
         with open(os.path.join(temp_dir, "manifest.json"), 'w') as f:
             json.dump(manifest, f)
 
-    import subprocess
-
     def _sign_manifest(self, temp_dir):
         try:
             cert_path = settings.APPLE_PASS_CERT_PATH

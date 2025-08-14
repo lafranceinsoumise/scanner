@@ -12,7 +12,7 @@ from django.conf import settings
 
 from prometheus_client import Counter
 
-from .tickets import gen_ticket
+from .tickets import gen_ticket, gen_event_ics
 
 _h = html2text.HTML2Text()
 _h.ignore_images = True
@@ -66,6 +66,9 @@ def envoyer_billet(registration, connection=None):
 
     ticket = gen_ticket(registration)
 
+    # Génération ICS
+    ics_content = gen_event_ics(registration)
+
     for contact_email in registration.contact_emails:
         template_url = (
             registration.category.mosaico_url or registration.event.mosaico_url
@@ -94,6 +97,11 @@ def envoyer_billet(registration, connection=None):
                 "billet_{}.pdf".format(slugify(registration.full_name)),
                 ticket,
                 "application/pdf",
+            ),
+            (
+                "event_{}.ics".format(slugify(registration.event.name)),
+                ics_content,
+                "text/calendar",
             )
         ]
 
@@ -126,3 +134,4 @@ def envoyer_billet(registration, connection=None):
         registration.save()
 
     email_sent_counter.inc()
+

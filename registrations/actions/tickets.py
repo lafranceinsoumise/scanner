@@ -1,8 +1,16 @@
+from datetime import timedelta
 from prometheus_client import Counter
 from django.template import engines
 import base64
 from io import BytesIO
 import subprocess
+from django.utils.timezone import localtime
+from django.conf import settings
+import pytz
+import uuid
+import io
+
+from icalendar import Alarm, Calendar, Event
 
 ticket_generation_counter = Counter(
     "scanner_tickets_generation", "Number of ticket generation", ["result"]
@@ -36,17 +44,14 @@ def gen_ticket_svg(registration):
 
     return template.render(context)
 
-
-import subprocess
-
 def gen_ticket(registration):
     svg = gen_ticket_svg(registration)
 
     inkscape = subprocess.Popen(
         [
             "rsvg-convert",
-            "--dpi-x=90",
-            "--dpi-y=90",
+            "--dpi-x=72",
+            "--dpi-y=72",
             "--format=pdf",  # format PDF
         ],
         stdin=subprocess.PIPE,
@@ -66,26 +71,34 @@ def gen_ticket(registration):
         ticket_generation_counter.labels("inkscape_error").inc()
         raise TicketGenerationException("Return code: %d" % inkscape.returncode)
 
-    gs = subprocess.Popen(
-        [
-            "gs",
-            "-sDEVICE=pdfwrite",
-            "-dCompatibilityLevel=1.4",
-            "-dPDFSETTINGS=/ebook",  # /screen pour + petit, /printer pour meilleure qualité
-            "-dNOPAUSE", "-dQUIET", "-dBATCH",
-            "-sOutputFile=-",
-            "-"
-        ],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-
-    compressed_output, gs_error = gs.communicate(input=output)
-
-    if gs.returncode:
-        ticket_generation_counter.labels("gs_error").inc()
-        raise TicketGenerationException(f"Ghostscript error: {gs_error.decode()}")
-
     ticket_generation_counter.labels("success").inc()
-    return compressed_output
+    return output
+
+def gen_event_ics(registration):
+    """
+    Génère un fichier ICS pour l'événement lié à une registration.
+    Retourne le contenu binaire prêt à être envoyé ou sauvegardé.
+    """
+    event = registration.event
+
+    cal = Calendar()
+    cal.add('prodid', '-//LaFranceinsoumise//FR')
+    cal.add('version', '2.0')
+
+    ics_event = Event()
+    ics_event.add('uid', f"{registration.numero}")
+    ics_event.add('summary', event.name)
+    ics_event.add('dtstart', localtime(event.start_date))
+    ics_event.add('dtend', localtime(event.end_date))
+    ics_event.add('dtstamp', localtime(event.start_date))
+    ics_event.add('location', event.location_name or "")
+    
+    alarm = Alarm()
+    alarm.add('action', 'DISPLAY')
+    alarm.add('description', f"Rappel : {event.name}")
+    alarm.add('trigger', timedelta(days=-1))  # 1 jour avant
+    ics_event.add_component(alarm)
+
+    cal.add_component(ics_event)
+
+    return cal.to_ical()
