@@ -84,6 +84,7 @@ def gen_event_ics(registration):
     cal = Calendar()
     cal.add('prodid', '-//LaFranceinsoumise//FR')
     cal.add('version', '2.0')
+    cal.add('method', 'REQUEST')
 
     ics_event = Event()
     ics_event.add('uid', f"{registration.numero}")
