@@ -377,11 +377,11 @@ class Registration(models.Model):
                     "value": "Paiement terminé"
                 })
             
-        if self.metas.filter(property="enfant-compagnie").exists():
+        if self.metas.filter(property="enfants").exists():
             pass_data["eventTicket"]["auxiliaryFields"].append({
-                "key": "enfant-compagnie",
+                "key": "enfants",
                 "label": "Nombre d'enfants",
-                "value": self.metas.get(property="enfant-compagnie").value
+                "value": self.metas.get(property="enfants").value
             })
             
         if self.metas.filter(property="is_minor").exists() and self.metas.get(property="is_minor").value.lower() == "true":

@@ -85,7 +85,10 @@ export function Ticket({ registration, validateScan, cancelScan, selectedEvent})
       <h1 className="text-center">{registration.full_name}</h1>
       <h3>Catégorie&nbsp;: {registration.category.name}</h3>
       {registration.numero && <h3>#{registration.numero}</h3>}
-      <h4>Nombre d'enfants inscrits : {registration.meta["enfant-compagnie"]}</h4>
+
+      {registration.meta && registration.meta["enfants"] !== "" && (
+        <h4>Nombre d'enfants inscrits : {registration.meta["enfants"]}</h4>
+      )}
       {["M", "F"].includes(GENDER_LABELS[registration.gender]) ? (
         <p>
           <b>Genre&nbsp;:</b> {registration.gender}
