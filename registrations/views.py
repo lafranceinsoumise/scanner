@@ -31,6 +31,9 @@ class CodeView(View):
         try:
             return ScanPoint.objects.get(id=self.request.GET.get("point"))
         except (ScanPoint.DoesNotExist, ValueError, TypeError):
+            points = ScanPoint.objects.get(event__id=self.request.GET.get("event"))
+            if points:
+                return points.first()
             return None
 
     def get(self, request, code):
