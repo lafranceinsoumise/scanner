@@ -26,7 +26,7 @@ class Command(BaseCommand):
             "-i", "--ignore-sent-status", action="store_false", dest="check_sent_status"
         )
         parser.add_argument(
-            "-d", "--dry-run", action="store_false", dest="dry_run"
+            "-d", "--dry-run", action="store_true", dest="dry_run"
         )
 
     def handle(
