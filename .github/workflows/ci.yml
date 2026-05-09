@@ -1,0 +1,37 @@
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm
+
+      - name: Install apt packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libsystemd-dev
+
+      - run: pip install -U pipenv
+
+      - run: pipenv install --dev --deploy
+
+      - run: black --check .
+
+      - run: python manage.py test -v 2
