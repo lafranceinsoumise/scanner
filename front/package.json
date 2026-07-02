@@ -23,7 +23,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "prettier": "^2.8.8",
+    "prettier": "^3.9.4",
     "react-scripts": "^4.0.3"
   }
 }
