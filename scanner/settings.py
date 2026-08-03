@@ -185,10 +185,10 @@ REST_FRAMEWORK = {
 }
 
 GCE_KEY_FILE = os.environ.get("GCE_KEY_FILE", "./gce.json")
-GOOGLE_WALLET_USER_ID = os.environ.get("GOOGLE_WALLET_USER_ID", "")
-APPLE_PASS_CERT_PATH = os.environ.get("APPLE_CERT", "./Certificate.p12")
-APPLE_PRIVATE_KEY_PATH = os.environ.get("APPLE_PRIVATE_KEY", "./private.key")
-APPLE_CERTIFICATE_PASSWORD = os.environ.get("APPLE_CERT_PW", "")
-APPLE_WWDR_CERT = os.environ.get("APPLE_WWDR_CERT", "./pass.pem")
-APPLE_PASS_TYPE_ID = "pass.fr.scanner.franceinsoumise.org"
+GOOGLE_WALLET_ISSUER_ID = os.environ.get("GOOGLE_WALLET_ISSUER_ID", "")
+APPLE_PASS_CERT_PATH = os.environ.get("APPLE_PASS_CERT_PATH", "./Certificate.p12")
+APPLE_PRIVATE_KEY_PATH = os.environ.get("APPLE_PRIVATE_KEY_PATH", "./private.key")
+APPLE_CERTIFICATE_PASSWORD = os.environ.get("APPLE_CERTIFICATE_PASSWORD", "")
+APPLE_WWDR_CERT_PATH = os.environ.get("APPLE_WWDR_CERT_PATH", "./pass.pem")
+APPLE_PASS_TYPE_ID = os.environ.get("APPLE_PASS_TYPE_ID", "")
 APPLE_TEAM_ID = os.environ.get("APPLE_TEAM_ID", "")
