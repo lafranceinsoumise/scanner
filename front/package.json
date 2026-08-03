@@ -6,13 +6,13 @@
   "dependencies": {
     "bootstrap-icons": "^1.13.1",
     "html5-qrcode": "^2.3.8",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
-    "swr": "^0.5.7"
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "swr": "^2.2.5"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "NODE_OPTIONS=--openssl-legacy-provider react-scripts build",
+    "start": "GENERATE_SOURCEMAP=false react-scripts start",
+    "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
@@ -23,7 +23,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "prettier": "^2.8.8",
-    "react-scripts": "^4.0.3"
+    "prettier": "^3.9.4",
+    "react-scripts": "^5.0.1"
   }
 }
