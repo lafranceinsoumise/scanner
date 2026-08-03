@@ -50,9 +50,10 @@ def gen_ticket(registration):
     inkscape = subprocess.Popen(
         [
             "rsvg-convert",
+            "--unlimited",
             "--dpi-x=72",
             "--dpi-y=72",
-            "--format=pdf",  # format PDF
+            "--format=pdf",
         ],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
