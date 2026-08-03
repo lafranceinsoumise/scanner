@@ -216,67 +216,49 @@ class Registration(models.Model):
     @property
     def qrcode(self):
         return gen_qrcode(self.pk)
-    
+
     @property
     def google_wallet_url(self):
         object_payload = {
-            "id": f"{settings.GOOGLE_WALLET_USER_ID}.{self.numero}",
-            "classId": f"{settings.GOOGLE_WALLET_USER_ID}.{self.event.google_wallet_class_id}",
+            "id": f"{settings.GOOGLE_WALLET_ISSUER_ID}.{self.numero}",
+            "classId": (
+                f"{settings.GOOGLE_WALLET_ISSUER_ID}.{self.event.google_wallet_class_id}"
+            ),
             "ticketHolderName": self.full_name,
-            "ticketNumber": self.numero,
+            "ticketNumber": str(self.numero),
             "eventName": self.event.name,
             "ticketType": {
                 "translatedValues": [
-                    {
-                        "language": "fr",
-                        "value": self.category.name
-                    }
+                    {"language": "fr", "value": self.category.name}
                 ],
                 "defaultValue": {
                     "language": "fr",
-                    "value": self.category.name
-                }
+                    "value": self.category.name,
+                },
             },
             "state": "active" if not self.canceled else "inactive",
             "barcode": {
                 "type": "QR_CODE",
-                "value": gen_pk_signature_qrcode(self.pk),  # Use the QR code text representation
+                "value": gen_pk_signature_qrcode(self.pk),
             },
         }
 
-        credentials = Credentials.from_service_account_file(
-            settings.GCE_KEY_FILE,
-            scopes=["https://www.googleapis.com/auth/wallet_object.issuer"]
-        )
-        
+        # Signature
         with open(settings.GCE_KEY_FILE) as f:
-            service_account_info = json.load(f)
+            sa_info = json.load(f)
 
-        private_key = service_account_info["private_key"]
-
-        # Structure du JWT
         payload = {
-            "iss": credentials.service_account_email,
+            "iss": sa_info["client_email"],
             "aud": "google",
             "typ": "savetowallet",
             "iat": int(time()),
-            "payload": {
-                "eventTicketObjects": [object_payload]
-            }
+            "payload": {"eventTicketObjects": [object_payload]},
         }
 
-        token = jwt.encode(payload, private_key, algorithm="RS256")
+        token = jwt.encode(payload, sa_info["private_key"], algorithm="RS256")
 
         return f"https://pay.google.com/gp/v/save/{token}"
-    
-    wallet_pass = models.FileField(
-        upload_to='wallet_passes/',
-        null=True,
-        blank=True,
-        verbose_name="Apple Wallet Pass",
-        help_text="Fichier .pkpass généré automatiquement"
-    )
-    
+
     @property
     def apple_wallet_url(self):
         self.generate_wallet_pass()
