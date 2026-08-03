@@ -61,7 +61,7 @@ def gen_ticket(registration):
     )
 
     try:
-        output, error = inkscape.communicate(input=svg.encode("utf8"), timeout=5)
+        output, error = inkscape.communicate(input=svg.encode("utf8"), timeout=15)
     except subprocess.TimeoutExpired:
         inkscape.kill()
         inkscape.communicate()
