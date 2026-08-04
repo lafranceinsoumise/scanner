@@ -21,8 +21,8 @@ email_sent_counter = Counter("scanner_email_sent", "Number of emails sent")
 
 # change email content type to multipart/related to fix img display bugs in some mail clients
 class RelatedEmailMultiAlternatives(mail.EmailMultiAlternatives):
-    def message(self):
-        msg = super().message()
+    def message(self, *args, **kwargs):
+        msg = super().message(*args, **kwargs)
         if msg.is_multipart():
             msg.set_type('multipart/related')
         return msg

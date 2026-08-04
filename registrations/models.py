@@ -180,9 +180,15 @@ class Registration(models.Model):
     )
 
     canceled = models.BooleanField(_("Canceled"), default=False)
-    
-    wallet_token = models.CharField(max_length=32, unique=False, blank=False, null=False)
-    
+
+    wallet_pass = models.FileField(
+        _("Apple Wallet Pass"),
+        upload_to="wallet_passes/",
+        blank=True,
+        null=True,
+        help_text=_("Fichier .pkpass généré automatiquement"),
+    )
+    wallet_token = models.CharField(max_length=32, unique=False, blank=False, null=False)    
     def generate_unique_token(self):
         for _ in range(5):  # 5 tentatives max
             token = secrets.token_urlsafe(16)
@@ -261,7 +267,11 @@ class Registration(models.Model):
 
     @property
     def apple_wallet_url(self):
-        self.generate_wallet_pass()
+        if not self.wallet_pass:
+            try:
+                self.generate_wallet_pass()
+            except Exception as e:
+                logger.error(f"Impossible de générer le wallet_pass : {e}")
         return reverse('download_pass', kwargs={
             'registration_id': self.pk,
             'token': self.wallet_token
