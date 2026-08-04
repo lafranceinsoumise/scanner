@@ -107,6 +107,11 @@ def gen_event_ics(registration):
     ics_event = Event()
     ics_event.add('uid', f"{registration.numero}")
     ics_event.add('summary', event.name)
+    ics_event.add(
+        'organizer',
+        'mailto:contact@amfis.fr',
+        parameters={'CN': 'La France insoumise'}
+    )
     ics_event.add('dtstart', localtime(event.start_date))
     ics_event.add('dtend', localtime(event.end_date))
     ics_event.add('dtstamp', localtime(event.start_date))
