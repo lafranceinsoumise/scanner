@@ -5,10 +5,6 @@ import base64
 from io import BytesIO
 import subprocess
 from django.utils.timezone import localtime
-from django.conf import settings
-import pytz
-import uuid
-import io
 
 from icalendar import Alarm, Calendar, Event
 

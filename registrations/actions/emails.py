@@ -1,7 +1,6 @@
 import random
 import string
 from email.mime.image import MIMEImage
-from email.mime.multipart import MIMEMultipart
 from io import BytesIO
 
 import html2text

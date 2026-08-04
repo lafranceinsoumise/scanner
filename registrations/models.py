@@ -17,13 +17,6 @@ import json
 import os
 import tempfile
 import zipfile
-from OpenSSL import crypto
-from cryptography import x509
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.serialization import pkcs12
-from cryptography.hazmat.primitives.serialization.pkcs7 import PKCS7SignatureBuilder
-from cryptography.hazmat.primitives.serialization import Encoding
-from cryptography.hazmat.backends import default_backend
 import shutil
 
 from django.db import models

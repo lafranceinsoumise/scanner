@@ -22,10 +22,7 @@ django-filter = "*"
 google-auth = "^2.55.1"
 google-api-python-client = "^2.198.0"
 pyjwt = "^2.13.0"
-cryptography = "^49.0.0"
-pyopenssl = "^26.3.0"
 icalendar = "^7.2.0"
-cairosvg = "^2.9.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "*"
