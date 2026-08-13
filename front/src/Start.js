@@ -54,47 +54,51 @@ export function Start({ user, setUser, setPoint, setEvent}) {
   }
 
   function clickOnEvent(event) {
-    setPoint(event.scan_points[0].id);
+    // vérifie que scan_points existe et contient au moins un élément
+    if (event.scan_points && event.scan_points.length > 0) {
+      setPoint(event.scan_points[0].id);
+    } else {
+      setPoint(null);
+    }
     setUser(name);
     setEvent(event);
   }
 
-  // choix events de l'année en cours et selection du point 0 si pas d'autres points
+  // Sélection des événements futurs ou en cours (incluant aujourd'hui)
   if (events && events.length > 0) {
-  // Obtenir l'année actuelle
-  const currentYear = new Date().getFullYear();
-  
-  // Filtrer les événements pour ne garder que ceux de l'année en cours
-  const currentYearEvents = events.filter(event => {
-    if (event.start_date) {
-      const eventYear = new Date(event.start_date).getFullYear();
-      return eventYear === currentYear;
-    }
-    return false;
-  });
+    const today = new Date().toISOString().split('T')[0];
 
-  // Afficher seulement s'il y a des événements cette année
-  if (currentYearEvents.length > 0) {
-    return (
-      <Container>
-        <p>Choisissez l'événement</p>
-        <div className="list-group">
-          {currentYearEvents.map((event) => (
-            <button
-              key={event.id}
-              className="list-group-item list-group-item-action"
-              onClick={() => clickOnEvent(event)}
-            >
-              {event.name}
-            </button>
-          ))}
-        </div>
-      </Container>
-    );
-  } else {
-    return <Container>Aucun événement prévu cette année.</Container>;
+    const activeAndUpcomingEvents = events.filter((event) => {
+      if (!event.start_date) return false;
+
+      // Si pas de end_date, l'événement ne dure que la journée de start_date
+      const endDate = event.end_date || event.start_date;
+
+      // Prend les événements dont la fin est aujourd'hui ou plus tard
+      return endDate >= today;
+    });
+
+    if (activeAndUpcomingEvents.length > 0) {
+      return (
+        <Container>
+          <p>Choisissez l'événement</p>
+          <div className="list-group">
+            {activeAndUpcomingEvents.map((event) => (
+              <button
+                key={event.id}
+                className="list-group-item list-group-item-action"
+                onClick={() => clickOnEvent(event)}
+              >
+                {event.name}
+              </button>
+            ))}
+          </div>
+        </Container>
+      );
+    } else {
+      return <Container>Aucun événement à venir ou en cours.</Container>;
+    }
   }
-}
 
   // si un seul event, on le sélectionne automatiquement
   if (events && events.length === 1 && events[0].scan_points.length > 1) {
