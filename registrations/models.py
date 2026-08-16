@@ -518,7 +518,7 @@ class ScannerAction(models.Model):
 
     type = models.CharField(_("Type"), max_length=255, choices=TYPE_CHOICES)
     registration = models.ForeignKey(
-        "Registration", related_name="events", on_delete=models.PROTECT
+        "Registration", related_name="events", on_delete=models.CASCADE
     )
     point = models.ForeignKey(
         "ScanPoint", related_name="actions", on_delete=models.PROTECT, null=True
