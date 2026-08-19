@@ -1,0 +1,59 @@
+name: scanner
+
+excludes:
+  - node_modules
+
+env_file:
+  - .lando.env
+
+services:
+  django:
+    type: python:3.12
+    port: 8000
+    # cysystemd (dépendance Poetry) nécessite les en-têtes systemd pour compiler
+    build_as_root:
+      - apt-get update -y
+      - apt-get install -y libsystemd-dev pkg-config build-essential python3-dev
+    build:
+      - pip install pipx
+      - pipx install poetry --force
+      - pipx install python-dotenv[cli]
+    command: poetry run dotenv run ./manage.py runserver 0.0.0.0:8000
+  front:
+    type: node:20
+    # Create React App, lancé depuis le dossier front/
+    command: cd front && npm start
+    port: 3000
+    build:
+      - cd front && npm install
+    overrides:
+      environment:
+        # URL du backend, appelée depuis le navigateur via le proxy Lando
+        REACT_APP_API_HOST: "http://scanner-api.lndo.site"
+        HOST: "0.0.0.0"
+        PORT: "3000"
+        # Évite les erreurs de websocket du live-reload derrière le proxy
+        WDS_SOCKET_PORT: "0"
+
+events:
+  pre-start:
+    - django: poetry sync
+
+# Raccourcis : `lando python manage.py ...`, `lando poetry ...`, `lando npm ...`
+tooling:
+  manage:
+    service: django
+    cmd: poetry run dotenv run ./manage.py
+  poetry:
+    service: django
+  npm:
+    service: front
+    # Les commandes npm s'exécutent dans le dossier du front
+    dir: /app/front
+
+# Rend les services accessibles depuis le navigateur via des URLs lisibles
+proxy:
+  django:
+    - scanner-api.lndo.site:8000
+  front:
+    - scanner.lndo.site:3000
