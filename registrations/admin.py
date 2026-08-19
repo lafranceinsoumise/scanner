@@ -16,6 +16,7 @@ from .models import (
     TicketCategory,
     ScanPoint,
     TicketAttachment,
+    Sync,
 )
 from .actions import codes, tickets
 
@@ -332,6 +333,13 @@ class TicketCategoryAdmin(admin.ModelAdmin):
     list_display = ("name", "event", "color", "background_color")
 
 
+class SyncAdmin(admin.ModelAdmin):
+    model = Sync
+    list_display = ("name", "category", "google_sheet_url")
+    list_filter = ("category__event", "category")
+
+
 admin.site.register(Registration, RegistrationAdmin)
 admin.site.register(TicketCategory, TicketCategoryAdmin)
 admin.site.register(TicketEvent, TicketEventAdmin)
+admin.site.register(Sync, SyncAdmin)

@@ -495,6 +495,24 @@ class Registration(models.Model):
         verbose_name_plural = _("Registrations")
 
 
+class Sync(models.Model):
+    name = models.CharField(_("Name"), max_length=255)
+    google_sheet_url = models.URLField(_("Google Sheet URL"))
+    category = models.ForeignKey(
+        TicketCategory,
+        on_delete=models.CASCADE,
+        verbose_name=_("Category"),
+        related_name="syncs",
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = _("Sync")
+        verbose_name_plural = _("Syncs")
+
+
 class RegistrationMeta(models.Model):
     property = models.CharField(max_length=255)
     value = models.TextField()
