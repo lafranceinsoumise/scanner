@@ -21,7 +21,7 @@ djangorestframework = "*"
 django-filter = "*"
 google-auth = "^2.55.1"
 google-api-python-client = "^2.198.0"
-pyjwt = "^2.13.0"
+pyjwt = "^2.15.0"
 icalendar = "^7.2.0"
 django-otp = {extras = ["qrcode"], version = "^1.7.3"}
 
