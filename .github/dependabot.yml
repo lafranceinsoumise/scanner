@@ -1,4 +1,11 @@
 # Configuration Dependabot pour Python (Poetry) et Node.js (npm)
+#
+# Regroupement des PR :
+#   - sécurité : une PR groupée par écosystème
+#   - dev      : patch + minor regroupés
+#   - prod     : patch regroupés d'un côté, minor de l'autre
+#   - major    : jamais groupées, une PR par dépendance (à relire)
+# Une dépendance va dans le premier groupe qui correspond.
 version: 2
 updates:
   # 1. Configuration pour Node.js / npm
@@ -6,9 +13,41 @@ updates:
     directory: "/front"
     schedule:
       interval: "weekly"
+    labels: ["dependencies", "front"]
+    commit-message:
+      prefix: "chore(front)"
+    groups:
+      npm-security:
+        applies-to: security-updates
+        patterns: ["*"]
+      npm-dev:
+        dependency-type: "development"
+        update-types: ["minor", "patch"]
+      npm-prod-patch:
+        dependency-type: "production"
+        update-types: ["patch"]
+      npm-prod-minor:
+        dependency-type: "production"
+        update-types: ["minor"]
 
   # 2. Configuration pour Python / Poetry
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
+    labels: ["dependencies", "back"]
+    commit-message:
+      prefix: "chore(back)"
+    groups:
+      pip-security:
+        applies-to: security-updates
+        patterns: ["*"]
+      pip-dev:
+        dependency-type: "development"
+        update-types: ["minor", "patch"]
+      pip-prod-patch:
+        dependency-type: "production"
+        update-types: ["patch"]
+      pip-prod-minor:
+        dependency-type: "production"
+        update-types: ["minor"]
