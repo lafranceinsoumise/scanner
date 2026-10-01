@@ -1,0 +1,6 @@
+{% extends "admin/base_site.html" %}
+
+{% block userlinks %}
+<a href="{% url 'admin:two_factor' %}">Double authentification</a> /
+{{ block.super }}
+{% endblock %}

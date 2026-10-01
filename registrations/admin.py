@@ -18,6 +18,7 @@ from .models import (
     TicketAttachment,
 )
 from .actions import codes, tickets
+from .two_factor import OptionalOTPAdminAuthenticationForm, two_factor_view
 
 
 class EventFilter(admin.SimpleListFilter):
@@ -335,3 +336,12 @@ class TicketCategoryAdmin(admin.ModelAdmin):
 admin.site.register(Registration, RegistrationAdmin)
 admin.site.register(TicketCategory, TicketCategoryAdmin)
 admin.site.register(TicketEvent, TicketEventAdmin)
+
+
+# Double authentification optionnelle
+admin.site.login_form = OptionalOTPAdminAuthenticationForm
+admin.site.login_template = "admin/login_otp.html"
+_admin_get_urls = admin.site.get_urls
+admin.site.get_urls = lambda: [
+    path("2fa/", admin.site.admin_view(two_factor_view), name="two_factor"),
+] + _admin_get_urls()

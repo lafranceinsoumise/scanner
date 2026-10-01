@@ -456,6 +456,26 @@ files = [
 Django = ">=4.2"
 
 [[package]]
+name = "django-otp"
+version = "1.7.3"
+description = "A pluggable framework for adding two-factor authentication to Django using one-time passwords."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "django_otp-1.7.3-py3-none-any.whl", hash = "sha256:7d52fb0f76c4c1c86cbc71c196d3f79941b0b84aff980e45193bef89a70a7a12"},
+    {file = "django_otp-1.7.3.tar.gz", hash = "sha256:3ce501173bf1b936146ffe5ff0cfdae1a0c7eb46cce1e9e3fdddd984d993c74f"},
+]
+
+[package.dependencies]
+django = ">=4.2"
+qrcode = {version = "*", optional = true, markers = "extra == \"qrcode\""}
+
+[package.extras]
+qrcode = ["qrcode"]
+segno = ["segno"]
+
+[[package]]
 name = "djangorestframework"
 version = "3.16.0"
 description = "Web APIs for Django, made easy."
@@ -1157,4 +1177,4 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "861ac3db08fb133a406e2267d4b4816f56f8a57619d1add1e89e4f13d46c9220"
+content-hash = "24bbcf3131010e6f88be2050017cba01a27126123ad0c8961f3fcd9a7c93badf"

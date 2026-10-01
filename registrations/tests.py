@@ -165,3 +165,76 @@ class SignatureTestCase(TestCase):
     @override_settings(SIGNATURE_KEY=b"prout")
     def test_get_id(self):
         self.assertEqual(codes.get_id_from_code("1.Hhv2SqmQwO8UBEwp50X8ZWPbIvk="), 1)
+
+
+class TwoFactorTestCase(TestCase):
+    def setUp(self):
+        from django.contrib.auth.models import User
+
+        self.user = User.objects.create_superuser("admin", "a@example.com", "password")
+        self.login_url = reverse("admin:login") + "?next=" + reverse("admin:index")
+
+    def totp(self, device):
+        from django_otp.oath import totp
+
+        return f"{totp(device.bin_key, step=device.step, digits=device.digits):06d}"
+
+    def test_login_without_2fa(self):
+        res = self.client.post(
+            self.login_url, {"username": "admin", "password": "password"}
+        )
+        self.assertRedirects(res, reverse("admin:index"))
+
+    def test_enable_then_login_requires_token(self):
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        self.client.force_login(self.user)
+        res = self.client.get(reverse("admin:two_factor"))
+        self.assertContains(res, "<svg")
+        device = TOTPDevice.objects.get(user=self.user, confirmed=False)
+
+        res = self.client.post(reverse("admin:two_factor"), {"otp_token": "000000"})
+        self.assertContains(res, "Code invalide")
+        device.refresh_from_db()
+        device.throttle_reset()
+
+        res = self.client.post(
+            reverse("admin:two_factor"), {"otp_token": self.totp(device)}
+        )
+        self.assertRedirects(res, reverse("admin:two_factor"))
+        device.refresh_from_db()
+        self.assertTrue(device.confirmed)
+        self.client.logout()
+
+        res = self.client.post(
+            self.login_url, {"username": "admin", "password": "password"}
+        )
+        self.assertContains(res, "double authentification est activée")
+
+        device.refresh_from_db()
+        device.last_t = -1
+        device.save()
+        res = self.client.post(
+            self.login_url,
+            {
+                "username": "admin",
+                "password": "password",
+                "otp_token": self.totp(device),
+            },
+        )
+        self.assertRedirects(res, reverse("admin:index"))
+        self.assertEqual(self.client.session["otp_device_id"], device.persistent_id)
+
+    def test_disable(self):
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        device = TOTPDevice.objects.create(user=self.user, confirmed=True)
+        self.client.force_login(self.user)
+        self.assertContains(self.client.get(reverse("admin:two_factor")), "activée")
+        res = self.client.post(
+            reverse("admin:two_factor"), {"otp_token": self.totp(device)}
+        )
+        self.assertRedirects(res, reverse("admin:two_factor"))
+        self.assertFalse(
+            TOTPDevice.objects.filter(user=self.user, confirmed=True).exists()
+        )

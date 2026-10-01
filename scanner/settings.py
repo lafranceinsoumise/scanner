@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "django_filters",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
     "registrations",
 ]
 
@@ -57,6 +59,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -66,7 +69,7 @@ ROOT_URLCONF = "scanner.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "scanner", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -174,6 +177,9 @@ if not DEBUG:
 
 PROMETHEUS_USER = os.environ.get("PROMETHEUS_USER", "prometheus")
 PROMETHEUS_PASSWORD = os.environ.get("PROMETHEUS_PASSWORD", "password")
+
+# Double authentification (TOTP), optionnelle par compte
+OTP_TOTP_ISSUER = os.environ.get("OTP_TOTP_ISSUER", "Scanner FI")
 
 # DRF
 REST_FRAMEWORK = {
