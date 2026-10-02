@@ -7,7 +7,7 @@ authors = ["Salomé Cheysson <salome@cheysson.fr>"]
 [tool.poetry.dependencies]
 python = "^3.12"
 dj-email-url = "^1.0.6"
-django = "^6.0"
+django = "^6.1"
 django-cors-headers = "^4.9.0"
 pillow = "^12.3.0"
 pytz = "*"
@@ -19,10 +19,10 @@ requests = "*"
 cysystemd = "*"
 djangorestframework = "*"
 django-filter = "*"
-google-auth = "^2.55.1"
-google-api-python-client = "^2.198.0"
+google-auth = "^2.59.0"
+google-api-python-client = "^2.200.0"
 pyjwt = "^2.15.0"
-icalendar = "^7.2.0"
+icalendar = "^7.3.0"
 django-otp = {extras = ["qrcode"], version = "^1.7.3"}
 
 [tool.poetry.group.dev.dependencies]
