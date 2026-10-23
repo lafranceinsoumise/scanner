@@ -21,9 +21,9 @@ djangorestframework = "*"
 django-filter = "*"
 google-auth = "^2.59.0"
 google-api-python-client = "^2.200.0"
-pyjwt = "^2.15.0"
+pyjwt = "^2.15.1"
 icalendar = "^7.3.0"
-django-otp = {extras = ["qrcode"], version = "^1.7.3"}
+django-otp = {extras = ["qrcode"], version = "^1.7.5"}
 
 [tool.poetry.group.dev.dependencies]
 black = "*"

@@ -370,25 +370,27 @@ ssh = ["bcrypt (>=3.1.5)"]
 
 [[package]]
 name = "cysystemd"
-version = "2.0.1"
+version = "2.0.5"
 description = "systemd wrapper in Cython"
 optional = false
-python-versions = "<4,>3.6"
+python-versions = "<4,>=3.8"
 groups = ["main"]
 files = [
-    {file = "cysystemd-2.0.1-cp310-cp310-manylinux_2_34_aarch64.whl", hash = "sha256:19a0b380622a11b42e7823e95a1f12312142d5a13d1b6e3cb400272e5aa3d07f"},
-    {file = "cysystemd-2.0.1-cp310-cp310-manylinux_2_34_x86_64.whl", hash = "sha256:d0aaaa11ca96e706b1a2fbe2e9ec1c3739583e00ed88dcd1d987663b7b519870"},
-    {file = "cysystemd-2.0.1-cp311-cp311-manylinux_2_34_aarch64.whl", hash = "sha256:8f50d7d4057406c4b30ae5604f061687fcaa7c5e541935c7b4817166c870fc11"},
-    {file = "cysystemd-2.0.1-cp311-cp311-manylinux_2_34_x86_64.whl", hash = "sha256:78dc5187193b2b959987e38c29d66e9fb625de5f93f2aec58eb7553aa504ed1d"},
-    {file = "cysystemd-2.0.1-cp312-cp312-manylinux_2_34_aarch64.whl", hash = "sha256:cd5543e1b1d96c5f327203506a46df96235e8b984cf0cfb4b85f0348975b7957"},
-    {file = "cysystemd-2.0.1-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:39b03dcfced76957ede5f3f21956b5687a0511bdd1d0d41f2d3dffc9df32320d"},
-    {file = "cysystemd-2.0.1-cp313-cp313-manylinux_2_34_aarch64.whl", hash = "sha256:017b924d42ee92f6736714b78d51f81aded6b5f34e44dc7e2e92cbe2598e3611"},
-    {file = "cysystemd-2.0.1-cp313-cp313-manylinux_2_34_x86_64.whl", hash = "sha256:d9d89125cafee3cc0a898faf9fe53f9166ea6625393b75d606eef2901a8c3023"},
-    {file = "cysystemd-2.0.1-cp38-cp38-manylinux_2_34_aarch64.whl", hash = "sha256:b2dcd4f5788955787d08e43de1276cb5a6720e13e7fc6765aed4fe6fa3355144"},
-    {file = "cysystemd-2.0.1-cp38-cp38-manylinux_2_34_x86_64.whl", hash = "sha256:292f3f38b6fc6dc01a44c1053d8e2907ef857c09282fa904ed4742113eb36fdc"},
-    {file = "cysystemd-2.0.1-cp39-cp39-manylinux_2_34_aarch64.whl", hash = "sha256:ed55acd18bcc576a5b1af81ae59fb86042ee019b642f6cfed9221b963f05aeea"},
-    {file = "cysystemd-2.0.1-cp39-cp39-manylinux_2_34_x86_64.whl", hash = "sha256:0bb9b4380cb82202aeb5aedb5a6e63f257eac5d6192c24d054656e8329ab6cf0"},
-    {file = "cysystemd-2.0.1.tar.gz", hash = "sha256:632fe56264a18b7af3d1efd09125d6d5c1ec97d29ad6192c412ee43105821d61"},
+    {file = "cysystemd-2.0.5-cp310-cp310-manylinux_2_34_aarch64.whl", hash = "sha256:c9a34f408e06d1dc0f527ec0793c781357411489ad2d6b53406d966a77e52dc0"},
+    {file = "cysystemd-2.0.5-cp310-cp310-manylinux_2_34_x86_64.whl", hash = "sha256:515755c45bf605d9942c696afedc050a46468b2ea3d940394a64af462db1c87b"},
+    {file = "cysystemd-2.0.5-cp311-cp311-manylinux_2_34_aarch64.whl", hash = "sha256:f2e9479bd471a38ab8dfc6c52c9ba33462e7c37b64e50975ef0eaaf242d684c0"},
+    {file = "cysystemd-2.0.5-cp311-cp311-manylinux_2_34_x86_64.whl", hash = "sha256:95f692ebdeb219ab770c7f638434acd76504e97beef6054c7ee37ad8847cb656"},
+    {file = "cysystemd-2.0.5-cp312-cp312-manylinux_2_34_aarch64.whl", hash = "sha256:693426351795a82d0ce6b3c6667434c25eb671bc1652dd374bbf1144d4af7aa9"},
+    {file = "cysystemd-2.0.5-cp312-cp312-manylinux_2_34_x86_64.whl", hash = "sha256:764568f622392a8cbc6c692ec83ce63baca559434f850ff3e90712d9275a3a8b"},
+    {file = "cysystemd-2.0.5-cp313-cp313-manylinux_2_34_aarch64.whl", hash = "sha256:9ec006a3549f1eef13f34e87bf62eb744cd0d588171c936e90d93cf3e3ac4ec3"},
+    {file = "cysystemd-2.0.5-cp313-cp313-manylinux_2_34_x86_64.whl", hash = "sha256:a8c573e6ec970b3643dfae675a904ef81aa59d78e8e9ff331896c293a4057279"},
+    {file = "cysystemd-2.0.5-cp314-cp314-manylinux_2_34_aarch64.whl", hash = "sha256:87b474cb6a3a4c6fea5e822c4c61a3dcdd913b5255bbd1d887677db68279ed91"},
+    {file = "cysystemd-2.0.5-cp314-cp314-manylinux_2_34_x86_64.whl", hash = "sha256:4597b258d7ea55ef6ff2471fbf6ac674b47432ed7b3009e061532bd2e73251d7"},
+    {file = "cysystemd-2.0.5-cp38-cp38-manylinux_2_34_aarch64.whl", hash = "sha256:aca22edef17468341bb38eea6ca0f543d20aed2aaa8147cf1565ad5a2de2020f"},
+    {file = "cysystemd-2.0.5-cp38-cp38-manylinux_2_34_x86_64.whl", hash = "sha256:2dec07a4c86b45102c05569383d4eb47a5d80bf6318c1965236960f856cd7fa8"},
+    {file = "cysystemd-2.0.5-cp39-cp39-manylinux_2_34_aarch64.whl", hash = "sha256:d8ab460465654a668c2cb648b96b47be5f38f132299c69a8ea0eb471d0ba9e1f"},
+    {file = "cysystemd-2.0.5-cp39-cp39-manylinux_2_34_x86_64.whl", hash = "sha256:9024e53c3ca04d6c17fca0861e776b55c939f5efa7f9b0e573a2230a16345f5c"},
+    {file = "cysystemd-2.0.5.tar.gz", hash = "sha256:faac7506b6a709e96c0b0028bc5b3b62c3f5457b31e13e7d82b7a5f1c1889d96"},
 ]
 
 [[package]]
@@ -405,14 +407,14 @@ files = [
 
 [[package]]
 name = "django"
-version = "6.1.1"
+version = "6.1.2"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.12"
 groups = ["main"]
 files = [
-    {file = "django-6.1.1-py3-none-any.whl", hash = "sha256:585fb82bf15053c42cf52e67c2f1b54a032dca384759315fd6678ab1870d1d72"},
-    {file = "django-6.1.1.tar.gz", hash = "sha256:7ab93536d8e677aa14554c56426290c69480bf2ee68d7513d4a22f57d6bfeb84"},
+    {file = "django-6.1.2-py3-none-any.whl", hash = "sha256:141efee6ec64d1db6db90683bf734c550102450f444fb099063b0be1bd27d991"},
+    {file = "django-6.1.2.tar.gz", hash = "sha256:a1e92451ccb8b514e91bbb3b6d186d20b4030558f116b5d9de6535455ff210b7"},
 ]
 
 [package.dependencies]
@@ -457,14 +459,14 @@ Django = ">=4.2"
 
 [[package]]
 name = "django-otp"
-version = "1.7.3"
+version = "1.7.5"
 description = "A pluggable framework for adding two-factor authentication to Django using one-time passwords."
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "django_otp-1.7.3-py3-none-any.whl", hash = "sha256:7d52fb0f76c4c1c86cbc71c196d3f79941b0b84aff980e45193bef89a70a7a12"},
-    {file = "django_otp-1.7.3.tar.gz", hash = "sha256:3ce501173bf1b936146ffe5ff0cfdae1a0c7eb46cce1e9e3fdddd984d993c74f"},
+    {file = "django_otp-1.7.5-py3-none-any.whl", hash = "sha256:475d4111e07d61616996f098d08d29884da6397273a11f53c1b8e8c75d27e1dc"},
+    {file = "django_otp-1.7.5.tar.gz", hash = "sha256:7f554d21dcd035550c3b8e3f154b1f422fee71fdc75c8a3bf96e42a2ea6dafcc"},
 ]
 
 [package.dependencies]
@@ -477,14 +479,14 @@ segno = ["segno"]
 
 [[package]]
 name = "djangorestframework"
-version = "3.18.1"
+version = "3.18.3"
 description = "Web APIs for Django, made easy."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "djangorestframework-3.18.1-py3-none-any.whl", hash = "sha256:f1409d698967aaf82d5d98d76b549c8fba8bd92ebd0d83d24454508f72168dc2"},
-    {file = "djangorestframework-3.18.1.tar.gz", hash = "sha256:605d79fa2ec2f02905492e5ea13d903c2d842d0b4c915a57f7bf02ab9f3c91dd"},
+    {file = "djangorestframework-3.18.3-py3-none-any.whl", hash = "sha256:8544bb674846731b1e3c9b309236ee1dc412905a0aa725be2ec193ca950a7d12"},
+    {file = "djangorestframework-3.18.3.tar.gz", hash = "sha256:446a9b352e7eff630421ab3f2328bd2401b109a9470afa4a31189994911ed030"},
 ]
 
 [package.dependencies]
@@ -922,14 +924,14 @@ files = [
 
 [[package]]
 name = "pyjwt"
-version = "2.15.0"
+version = "2.15.1"
 description = "JSON Web Token implementation in Python"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "pyjwt-2.15.0-py3-none-any.whl", hash = "sha256:7a3742debf6b879e912dbb9819ceec1594be812452b78c5f2e2dfc56564954f8"},
-    {file = "pyjwt-2.15.0.tar.gz", hash = "sha256:b11c5f9791d7bf51c2b39a81ed669f6b2dbbd669df2942f6c60167e9e3d1abe4"},
+    {file = "pyjwt-2.15.1-py3-none-any.whl", hash = "sha256:42d59d631f7768a1028a64c7ff581a9bf7519804daf91fc5b6c56e30eec5e193"},
+    {file = "pyjwt-2.15.1.tar.gz", hash = "sha256:4f259e80cdfb6b3fc18a7de51fd1ef9ec79652f25019bae68975ca2468a34df8"},
 ]
 
 [package.extras]
@@ -1181,4 +1183,4 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.12"
-content-hash = "62a1111cb7a03543a1656d8f6f4b58612afbe2a5737522f0d890fb66bb664d91"
+content-hash = "da8287f77b12f4ce7e554260826458fd9df6e19597b85c37769f6a3d3c1339e2"
